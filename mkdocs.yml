@@ -1,0 +1,49 @@
+site_name: YatSenOS v2 Tutorial
+site_url: https://v2.ysos.tech
+repo_url: https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
+repo_name: YatSenOS-Tutorial-Volume-2
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+  font:
+    code: JetBrains Mono
+
+nav:
+  - 实验说明: index.md
+  - 实验指南:
+      - Lab 0: labs/0.md
+  - 常见问题及解答: faq.md
+
+markdown_extensions:
+  - attr_list:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences:
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - scripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra_css:
+  - css/fonts.css
+  - css/extra.css
