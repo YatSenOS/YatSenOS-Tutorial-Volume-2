@@ -29,10 +29,10 @@ nav:
       - 实验零：环境搭建与实验准备: labs/0x00-env.md
       - 实验一：操作系统的启动: labs/0x01-boot.md
       - 实验二：中断处理: labs/0x02-interrupt.md
-      - 实验三：内核线程: labs/0x03-kernel-threads.md
-      - 实验四：硬盘驱动与文件系统: labs/0x04-filesystem.md
-      - 实验五：用户程序与系统调用: labs/0x05-userspace.md
-      - 实验六：缺页异常、fork 的实现、并发与锁机制: labs/0x06-page-fault-fork-and-lock.md
+      - 实验三：内核线程与缺页异常: labs/0x03-kernel-threads-and-page-fault.md
+      - 实验四：用户程序与系统调用: labs/0x04-userspace.md
+      - 实验五：fork 的实现、并发与锁机制: labs/0x05-fork-and-lock.md
+      - 实验六：硬盘驱动与文件系统: labs/0x06-filesystem.md
       - 实验七：更好的内存管理: labs/0x07-memory-management.md
       - 实验八：扩展实验: labs/0x08-further.md
   - 常见问题及解答: faq.md
