@@ -124,7 +124,7 @@ $ qemu-system-x86_64 -bios ./ovmf.fd -net none \
 
 其中 `-bios` 指定了 UEFI 的固件，`-net none` 指定了网络设备，`-m` 指定了内存大小，`-drive` 指定了硬盘，`-nographic` 指定了不使用图形界面，转而将串口 IO 重定向到标准输入输出。
 
-为了退出 QEMU，可以使用 `Ctrl + A` 再输入 `A`。
+为了退出 QEMU，可以使用 `Ctrl + A` 再输入 `X`。
 
 在调试时，可以使用 `-s` 参数来启动 GDB 调试服务，是 `-gdb tcp:1234` 的简写，并使用 `-S` 参数来暂停 CPU 的执行，等待 GDB 连接。
 
