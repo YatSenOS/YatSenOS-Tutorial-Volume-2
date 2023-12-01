@@ -20,8 +20,10 @@ theme:
     - navigation.top
     - navigation.footer
     - navigation.tracking
+    - content.code.copy
+    - content.code.select
   font:
-    code: JetBrains Mono
+    code: JetBrains Mono Medium
 
 nav:
   - 实验说明: index.md
@@ -43,9 +45,12 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.highlight:
       linenums: true
-  - pymdownx.superfences:
+      use_pygments: true
+      pygments_lang_class: true
+  - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
+  - admonition:
 
 extra_javascript:
   - scripts/mathjax.js
