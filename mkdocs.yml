@@ -18,39 +18,49 @@ theme:
         name: Switch to light mode
   features:
     - navigation.top
+    - navigation.tabs
     - navigation.footer
     - navigation.tracking
     - content.code.copy
     - content.code.select
   font:
-    code: JetBrains Mono Medium
+    code: JetBrains Mono
 
 nav:
-  - 实验说明: index.md
+  - 主页:
+    - 实验说明: index.md
+    - 常见问题及解答: faq.md
   - 实验指南:
-      - 实验零：环境搭建与实验准备: labs/0x00-env.md
-      - 实验一：操作系统的启动: labs/0x01-boot.md
-      - 实验二：中断处理: labs/0x02-interrupt.md
-      - 实验三：内核线程与缺页异常: labs/0x03-kernel-threads-and-page-fault.md
-      - 实验四：用户程序与系统调用: labs/0x04-userspace.md
-      - 实验五：fork 的实现、并发与锁机制: labs/0x05-fork-and-lock.md
-      - 实验六：硬盘驱动与文件系统: labs/0x06-filesystem.md
-      - 实验七：更好的内存管理: labs/0x07-memory-management.md
-      - 实验八：扩展实验: labs/0x08-further.md
-  - 常见问题及解答: faq.md
+    - 实验零：实验准备:
+      - 概览: labs/0x00/index.md
+      - 任务: labs/0x00/tasks.md
+    - 实验一：操作系统的启动: labs/0x01-boot.md
+    - 实验二：中断处理: labs/0x02-interrupt.md
+    - 实验三：内核线程与缺页异常: labs/0x03-kernel-threads-and-page-fault.md
+    - 实验四：用户程序与系统调用: labs/0x04-userspace.md
+    - 实验五：fork 与并发: labs/0x05-fork-and-lock.md
+    - 实验六：硬盘驱动与文件系统: labs/0x06-filesystem.md
+    - 实验七：更好的内存管理: labs/0x07-memory-management.md
+    - 实验八：扩展实验: labs/0x08-further.md
+  - 实验资料:
+    - Linux 使用指导: wiki/linux.md
+    - Rust 语言基础: wiki/rust.md
+    - UEFI 启动过程: wiki/uefi.md
+    - QEMU 使用参考: wiki/qemu.md
 
 markdown_extensions:
   - attr_list:
-  - pymdownx.tasklist:
-      custom_checkbox: true
   - pymdownx.highlight:
       linenums: true
       use_pygments: true
       pygments_lang_class: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
   - pymdownx.arithmatex:
       generic: true
   - admonition:
+  - toc:
+      permalink: true
+      slugify: !!python/name:pymdownx.slugs.uslugify
 
 extra_javascript:
   - scripts/mathjax.js
