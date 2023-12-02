@@ -105,15 +105,16 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
     选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
 
-    !!! warning "不要直接运行如下代码"
+    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
 
     ```bash
-    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00/* .
+    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
     ```
 
 5. 初始化你的仓库：
 
     ```bash
+    $ cd /path/to/your/workdir
     $ git init
     $ git add .
     $ git commit -m "init"
