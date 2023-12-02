@@ -148,6 +148,8 @@ UEFI Shell 是一个基于 UEFI 的命令行工具，它可以让我们在 UEFI 
 qemu-system-x86_64 -bios ./assets/OVMF.fd -net none -nographic
 ```
 
+!!! note "QEMU 的相关参数含义，参考 [QEMU 使用参考](../../wiki/qemu.md)"
+
 你将会看到如下输出：
 
 ```log
@@ -160,6 +162,9 @@ Mapping table
 Press ESC in 4 seconds to skip startup.nsh or any other key to continue.
 Shell>
 ```
+
+!!! tip "使用 <kbd>Ctrl</kbd> + <kbd>A</kbd> 后输入 <kbd>X</kbd> 可以退出 QEMU"
+
 
 ## YSOS 启动！
 
