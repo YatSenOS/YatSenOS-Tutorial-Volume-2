@@ -30,7 +30,7 @@ wsl --install -d Ubuntu
 
 关于其他的配置，可以在网上找到大量的参考资料，请自行搜索阅读，或寻求 LLM 的帮助。
 
-### 使用 Vmware Workstation 安装 Linux
+### 使用 Vmware Workstation
 
 参考 [Vmware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
 
@@ -48,24 +48,24 @@ wsl --install -d Ubuntu
 
 1. 使用以下命令更新 apt 源：
 
-   ```bash
-   sudo apt update && sudo apt upgrade
-   ```
+    ```bash
+    sudo apt update && sudo apt upgrade
+    ```
 
 2. 安装 qemu 等工具：
 
-   ```bash
-   sudo apt install qemu-system-x86 build-essential gdb
-   ```
+    ```bash
+    sudo apt install qemu-system-x86 build-essential gdb
+    ```
 
 3. 安装 rustup：
 
-   !!! note "rustup 安装过程中存在一些可配置选项，请按照默认选项进行安装。"
+    !!! note "rustup 安装过程中存在一些可配置选项，请按照默认选项进行安装。"
 
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   source "$HOME/.cargo/env"
-   ```
+    ```bash
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    source "$HOME/.cargo/env"
+    ```
 
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
@@ -95,17 +95,59 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
     2. 读取并输出 `/etc/hosts`，如果此文件不存在，则程序主动 panic。
     3. 接收一个字符串，并尝试打开字符串所指出的文件，如果文件不存在，输出 `File not found!`。
 
+2. 实现一个进行字节数转换的函数，并格式化输出：
 
-2. 尝试**自行搜索学习如何利用现有的 crate** 在终端中输出彩色的文字，输出一些带有颜色的字符串，并尝试直接使用 `print!` 宏输出一到两个相同的效果。
+    1. 实现函数 `humanized_size(size: u64) -> (f64, &'static str)` 将字节数转换为人类可读的大小和单位
+
+        使用 1024 进制，并使用二进制前缀（B, KiB, MiB, GiB）作为单位
+
+    2. 补全格式化代码，使得你的实现能够通过如下测试：
+
+        ```rust
+        #[test]
+        fn test_humanized_size() {
+            let byte_size = 1554056;
+            let (size, unit) = humanized_size(byte_size);
+            assert_eq!("Size :  1.4821 MiB", format!(/* FIXME */));
+        }
+        ```
+
+3. **自行搜索学习如何利用现有的 crate** 在终端中输出彩色的文字
+
+    输出一些带有颜色的字符串，并尝试直接使用 `print!` 宏输出一到两个相同的效果。
 
     !!! tip "如果你想进一步了解，可以尝试搜索 **ANSI 转义序列**"
 
 
-3. 尝试实现一个元组结构体 `UniqueId(u16)`，并使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
+4. 使用 `enum` 对类型实现同一化
+
+    实现一个 `enum Shape` 并实现一个函数 `fn area(shape: Shape) -> f64`，使得 `area` 函数能够计算 `Shape` 的面积。
+
+    - 你可能需要使用模式匹配来达到相应的功能
+    - 请实现 `Rectangle` 和 `Circle` 两种 `Shape`，并使得 `area` 函数能够正确计算它们的面积
+    - 使得你的实现能够通过如下测试：
+
+        ```rust
+        #[test]
+        fn test_area() {
+            let rectangle = Shape::Rectangle {
+                width: 10.0,
+                height: 20.0,
+            };
+            let circle = Shape::Circle { radius: 10.0 };
+
+            assert_eq!(area(rectangle), 200.0);
+            assert_eq!(area(circle), 314.1592653589793);
+        }
+        ```
+
+5. 实现一个元组结构体 `UniqueId(u16)`
+
+    使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
 
     - 你可以在函数体中定义 `static` 变量来存储一些全局状态
     - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证）
-    - 使得你的结构体能够通过如下测试：
+    - 使得你的实现能够通过如下测试：
 
         ```rust
         #[test]
@@ -130,44 +172,44 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
 1. 克隆本仓库到本地：
 
-   ```bash
-   $ git clone https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
-   ```
+    ```bash
+    $ git clone https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
+    ```
 
 2. 参考[实验 0x00 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)的文件结构，初始化你的仓库。
 
-   选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
+    选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
 
-   !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
+    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
 
-   ```bash
-   $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
-   ```
+    ```bash
+    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
+    ```
 
-   !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
+    !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
 
 3. 初始化你的仓库：
 
-   ```bash
-   $ cd /path/to/your/workdir
-   $ git init
-   $ git add .
-   $ git commit -m "init"
-   ```
+    ```bash
+    $ cd /path/to/your/workdir
+    $ git init
+    $ git add .
+    $ git commit -m "init"
+    ```
 
 4. 通过如下方式校验文件是否完整：
 
-   ```bash
-   $ git ls-tree --full-tree -r --name-only HEAD
-   .gitignore
-   Cargo.toml
-   Makefile
-   assets/OVMF.fd
-   pkg/boot/.cargo/config
-   pkg/boot/Cargo.toml
-   pkg/boot/src/main.rs
-   rust-toolchain.toml
-   ```
+    ```bash
+    $ git ls-tree --full-tree -r --name-only HEAD
+    .gitignore
+    Cargo.toml
+    Makefile
+    assets/OVMF.fd
+    pkg/boot/.cargo/config
+    pkg/boot/Cargo.toml
+    pkg/boot/src/main.rs
+    rust-toolchain.toml
+    ```
 
 ### 使用 QEMU 启动 UEFI Shell
 
