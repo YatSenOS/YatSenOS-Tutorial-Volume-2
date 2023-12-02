@@ -60,7 +60,7 @@ markdown_extensions:
   - admonition:
   - toc:
       permalink: true
-      slugify: !!python/name:pymdownx.slugs.uslugify
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
 
 extra_javascript:
   - scripts/mathjax.js
