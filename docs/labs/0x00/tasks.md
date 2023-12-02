@@ -218,9 +218,7 @@ targets = [ "x86_64-unknown-uefi" ]
 
 !!! note "获取详细信息，参考 [Rust 语言基础](../../wiki/rust.md#善用-docsrs)"
 
-`efi_main` 通过 `#[entry]` 被指定为 UEFI 程序的入口函数，`efi_main` 函数的参数 `system_table` 是一个 `SystemTable<Boot>` 类型的变量，它包含了 UEFI 程序运行时所需要的各种信息，如内存映射、文件系统、图形界面等。
-
-在 `efi_main` 函数中，首先对 `system_table` 和 `log` 进行初始化，然后进入一个死循环，每次循环输出一条日志后等待一段时间。
+在 `pkg/boot/src/main.rs` 中，完善如下的代码，修改注释部分，使用你的学号进行输出：
 
 ```rust
 #![no_std]
@@ -238,8 +236,10 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
     uefi_services::init(&mut system_table).expect("Failed to initialize utilities");
     log::set_max_level(log::LevelFilter::Info);
 
+    let std_num = /* FIXME */;
+
     loop {
-        info!("Hello World from UEFI bootloader!");
+        info!("Hello World from UEFI bootloader! @ {}", std_num);
 
         for _ in 0..0x10000000 {
             unsafe {
@@ -249,6 +249,10 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
     }
 }
 ```
+
+`efi_main` 通过 `#[entry]` 被指定为 UEFI 程序的入口函数，`efi_main` 函数的参数 `system_table` 是一个 `SystemTable<Boot>` 类型的变量，它包含了 UEFI 程序运行时所需要的各种信息，如内存映射、文件系统、图形界面等。
+
+在 `efi_main` 函数中，首先对 `system_table` 和 `log` 进行初始化，然后进入一个死循环，每次循环输出一条日志后等待一段时间。
 
 在项目根目录下运行 `make run`，预期得到如下输出：
 
