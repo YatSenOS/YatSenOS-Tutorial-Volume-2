@@ -23,13 +23,16 @@ theme:
     - navigation.tracking
     - content.code.copy
     - content.code.select
+    - content.tabs.link
+    - toc.follow
   font:
     code: JetBrains Mono
 
 nav:
   - 主页:
     - 实验说明: index.md
-    - 常见问题及解答: faq.md
+    - 代码规范要求: general/coding_convention.md
+    - 常见问题及解答: general/faq.md
   - 实验指南:
     - 实验零：实验准备:
       - 概览: labs/0x00/index.md
@@ -55,12 +58,16 @@ markdown_extensions:
       use_pygments: true
       pygments_lang_class: true
   - pymdownx.superfences:
+  - pymdownx.tabbed:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+      alternate_style: true
   - pymdownx.arithmatex:
       generic: true
   - admonition:
   - toc:
       permalink: true
       slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+
 
 extra_javascript:
   - scripts/mathjax.js

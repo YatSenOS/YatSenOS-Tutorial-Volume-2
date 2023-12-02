@@ -10,7 +10,7 @@
 
     **3. 不要直接复制粘贴命令执行**
 
-## 安装 Linux 系统
+## 安装 Linux 系统和项目开发环境
 
 Linux 有许多发行版，这里出于环境一致性考虑，推荐使用 Ubuntu 22.04。
 
@@ -34,7 +34,7 @@ wsl --install -d Ubuntu
 
 参考 [Vmware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
 
-### 安装 OS 运行环境
+### 安装项目开发环境
 
 在正确安装 Linux 系统后，我们需要安装和配置开发环境，包括 gcc, make, qemu 等。
 
@@ -48,24 +48,24 @@ wsl --install -d Ubuntu
 
 1. 使用以下命令更新 apt 源：
 
-    ```bash
-    sudo apt update && sudo apt upgrade
-    ```
+   ```bash
+   sudo apt update && sudo apt upgrade
+   ```
 
 2. 安装 qemu 等工具：
 
-    ```bash
-    sudo apt install qemu-system-x86 build-essential gdb
-    ```
+   ```bash
+   sudo apt install qemu-system-x86 build-essential gdb
+   ```
 
 3. 安装 rustup：
 
-    !!! note "rustup 安装过程中存在一些可配置选项，请按照默认选项进行安装。"
+   !!! note "rustup 安装过程中存在一些可配置选项，请按照默认选项进行安装。"
 
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    source "$HOME/.cargo/env"
-    ```
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   source "$HOME/.cargo/env"
+   ```
 
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
@@ -85,9 +85,42 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
 ## 尝试使用 Rust 进行编程
 
+我们预留了一些 Rust 编程任务，请你学习 Rust 并尝试在 Linux 环境下实现他们。
+
+!!! tip "在你不熟悉新语言的时候，我们非常推荐你借助 LLM 进行学习。"
+
+1. 写一个控制行程序，完成下列任务：
+
+    1. 进行一个 5s 的倒计时，过程中输出剩余秒数，并在最后输出 `Hello World!`。
+    2. 读取并输出 `/etc/hosts`，如果此文件不存在，则程序主动 panic。
+    3. 接收一个字符串，并尝试打开字符串所指出的文件，如果文件不存在，输出 `File not found!`。
+
+
+2. 尝试**自行搜索学习如何利用现有的 crate** 在终端中输出彩色的文字，输出一些带有颜色的字符串，并尝试直接使用 `print!` 宏输出一到两个相同的效果。
+
+    !!! tip "如果你想进一步了解，可以尝试搜索 **ANSI 转义序列**"
+
+
+3. 尝试实现一个元组结构体 `UniqueId(u16)`，并使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
+
+    - 你可以在函数体中定义 `static` 变量来存储一些全局状态
+    - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证）
+    - 使得你的结构体能够通过如下测试：
+
+        ```rust
+        #[test]
+        fn test_unique_id() {
+            let id1 = UniqueId::new();
+            let id2 = UniqueId::new();
+            assert_ne!(id1, id2);
+        }
+        ```
+
 <!-- DOC TODO -->
 
-## 初始化你的仓库
+## 运行 UEFI Shell
+
+### 初始化你的仓库
 
 本实验设计存在一定的**前后依赖关系**，你可能需要在实验过程中自己逐步构建自己的操作系统。
 
@@ -97,46 +130,46 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
 1. 克隆本仓库到本地：
 
-    ```bash
-    $ git clone https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
-    ```
+   ```bash
+   $ git clone https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
+   ```
 
-4. 参考[实验 0x00 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)的文件结构，初始化你的仓库。
+2. 参考[实验 0x00 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)的文件结构，初始化你的仓库。
 
-    选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
+   选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
 
-    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
+   !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
 
-    ```bash
-    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
-    ```
+   ```bash
+   $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
+   ```
 
-    !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
+   !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
 
-5. 初始化你的仓库：
+3. 初始化你的仓库：
 
-    ```bash
-    $ cd /path/to/your/workdir
-    $ git init
-    $ git add .
-    $ git commit -m "init"
-    ```
+   ```bash
+   $ cd /path/to/your/workdir
+   $ git init
+   $ git add .
+   $ git commit -m "init"
+   ```
 
 4. 通过如下方式校验文件是否完整：
 
-    ```bash
-    $ git ls-tree --full-tree -r --name-only HEAD
-    .gitignore
-    Cargo.toml
-    Makefile
-    assets/OVMF.fd
-    pkg/boot/.cargo/config
-    pkg/boot/Cargo.toml
-    pkg/boot/src/main.rs
-    rust-toolchain.toml
-    ```
+   ```bash
+   $ git ls-tree --full-tree -r --name-only HEAD
+   .gitignore
+   Cargo.toml
+   Makefile
+   assets/OVMF.fd
+   pkg/boot/.cargo/config
+   pkg/boot/Cargo.toml
+   pkg/boot/src/main.rs
+   rust-toolchain.toml
+   ```
 
-## 使用 QEMU 启动 UEFI Shell
+### 使用 QEMU 启动 UEFI Shell
 
 UEFI Shell 是一个基于 UEFI 的命令行工具，它可以让我们在 UEFI 环境下进行一些简单的操作。
 
@@ -165,7 +198,6 @@ Shell>
 
 !!! tip "使用 <kbd>Ctrl</kbd> + <kbd>A</kbd> 后输入 <kbd>X</kbd> 可以退出 QEMU"
 
-
 ## YSOS 启动！
 
 ### 配置 Rust Toolchain
@@ -188,7 +220,7 @@ targets = [ "x86_64-unknown-uefi" ]
 
 在配置好的工作区中执行编译时，Rust 会自动下载并安装对应的工具链。
 
-### 编写 UEFI 程序
+### 运行第一个 UEFI 程序
 
 编译一个 UEFI 程序时，我们没有操作系统所提供的标准库，也没有操作系统提供的 Interpreter，因此我们需要使用 `#![no_std]` 来声明我们的程序不依赖标准库，使用 `#![no_main]` 来声明我们的程序不依赖操作系统的入口函数。
 
@@ -201,7 +233,6 @@ targets = [ "x86_64-unknown-uefi" ]
 > The Rust Core Library is the **dependency-free** foundation of The **Rust Standard Library**. It is the portable glue between the language and its libraries, **defining the intrinsic and primitive building blocks of all Rust code**. It links to no upstream libraries, no system libraries, and no libc.
 >
 > The core library is minimal: **it isn’t even aware of heap allocation**, nor does it provide concurrency or I/O. These things require platform integration, and this library is **platform-agnostic**.
-
 
 有关 [alloc](https://docs.rs/alloc/) crate 的介绍：
 
@@ -267,5 +298,5 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 
 1. 了解现代操作系统（Windows）的启动过程，`legacy BIOS` 和 `UEFI` 的区别是什么？
 2. 尝试解释 Makefile 中的命令做了哪些事情？
-2. 利用 `cargo` 的包管理和 `docs.rs` 的文档，我们可以很方便的使用第三方库。这些库的源代码在哪里？它们是什么时候被编译的？
-3. 为什么我们需要使用 `#[entry]` 而不是直接使用 `main` 函数作为程序的入口？
+3. 利用 `cargo` 的包管理和 `docs.rs` 的文档，我们可以很方便的使用第三方库。这些库的源代码在哪里？它们是什么时候被编译的？
+4. 为什么我们需要使用 `#[entry]` 而不是直接使用 `main` 函数作为程序的入口？

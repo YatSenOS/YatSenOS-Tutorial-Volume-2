@@ -10,6 +10,7 @@ Rust 语言的基础语法可以参考 [Rust圣经](https://course.rs/) 或者 [
 
 其他可参考的学习资料：
 
+- [Rust 之旅（交互式课程）](https://tourofrust.com/00_zh-cn.html)
 - [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
 - [Rust Cookbook](https://rust-lang-nursery.github.io/rust-cookbook/)
 - [清华的 Rust 课程](https://lab.cs.tsinghua.edu.cn/rust/)
