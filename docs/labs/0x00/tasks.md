@@ -55,7 +55,7 @@ wsl --install -d Ubuntu
 2. 安装 qemu 等工具：
 
     ```bash
-    sudo apt install qemu-system-x86 build-essential
+    sudo apt install qemu-system-x86 build-essential gdb
     ```
 
 3. 安装 rustup：
