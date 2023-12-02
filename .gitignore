@@ -13,3 +13,6 @@
 
 ### macOS ###
 **/.DS_Store
+
+### MKDocs ##
+/site

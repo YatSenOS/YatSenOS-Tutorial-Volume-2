@@ -83,6 +83,14 @@ markdown_extensions:
       permalink: true
       slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
 
+plugins:
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+      cache_safe: true
 
 extra_javascript:
   - scripts/mathjax.js
