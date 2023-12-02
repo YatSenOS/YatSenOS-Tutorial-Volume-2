@@ -111,6 +111,8 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
     $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
     ```
 
+    !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
+
 5. 初始化你的仓库：
 
     ```bash
