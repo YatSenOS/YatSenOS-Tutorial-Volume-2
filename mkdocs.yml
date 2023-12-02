@@ -37,14 +37,29 @@ nav:
     - 实验零：实验准备:
       - 概览: labs/0x00/index.md
       - 任务: labs/0x00/tasks.md
-    - 实验一：操作系统的启动: labs/0x01-boot.md
-    - 实验二：中断处理: labs/0x02-interrupt.md
-    - 实验三：内核线程与缺页异常: labs/0x03-kernel-threads-and-page-fault.md
-    - 实验四：用户程序与系统调用: labs/0x04-userspace.md
-    - 实验五：fork 与并发: labs/0x05-fork-and-lock.md
-    - 实验六：硬盘驱动与文件系统: labs/0x06-filesystem.md
-    - 实验七：更好的内存管理: labs/0x07-memory-management.md
-    - 实验八：扩展实验: labs/0x08-further.md
+    - 实验一：操作系统的启动:
+      - 概览: labs/0x01/index.md
+      - 任务: labs/0x01/tasks.md
+    - 实验二：中断处理:
+      - 概览: labs/0x02/index.md
+      - 任务: labs/0x02/tasks.md
+    - 实验三：内核线程与缺页异常:
+      - 概览: labs/0x03/index.md
+      - 任务: labs/0x03/tasks.md
+    - 实验四：用户程序与系统调用:
+      - 概览: labs/0x04/index.md
+      - 任务: labs/0x04/tasks.md
+    - 实验五：fork 与并发:
+      - 概览: labs/0x05/index.md
+      - 任务: labs/0x05/tasks.md
+    - 实验六：硬盘驱动与文件系统:
+      - 概览: labs/0x06/index.md
+      - 任务: labs/0x06/tasks.md
+    - 实验七：更好的内存管理:
+      - 概览: labs/0x07/index.md
+      - 任务: labs/0x07/tasks.md
+    - 实验八：扩展实验:
+      - 概览: labs/0x08/index.md
   - 实验资料:
     - Linux 使用指导: wiki/linux.md
     - Rust 语言基础: wiki/rust.md
