@@ -15,5 +15,5 @@ jobs:
         with:
           python-version: 3.x
 
-      - run: pip --trusted-host pypi.org --trusted-host files.pythonhosted.org install mkdocs-material
+      - run: pip install mkdocs-material
       - run: mkdocs gh-deploy --force
