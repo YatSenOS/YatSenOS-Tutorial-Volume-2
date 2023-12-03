@@ -89,11 +89,33 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
 !!! tip "在你不熟悉新语言的时候，我们非常推荐你借助 LLM 进行学习。"
 
-1. 写一个控制行程序，完成下列任务：
+1. 使用 Rust 编写一个程序，完成以下任务：
 
-    1. 进行一个 5s 的倒计时，过程中输出剩余秒数，并在最后输出 `Hello World!`。
-    2. 读取并输出 `/etc/hosts`，如果此文件不存在，则程序主动 panic。
-    3. 接收一个字符串，并尝试打开字符串所指出的文件，如果文件不存在，输出 `File not found!`。
+    1. 创建一个函数 `count_down(seconds: u64)`
+
+        该函数接收一个 u64 类型的参数，表示倒计时的秒数。
+
+        函数应该每秒输出剩余的秒数，直到倒计时结束，然后输出 `Countdown finished!`。
+
+    2. 创建一个函数 `read_and_print(file_path: &str)`
+
+        该函数接收一个字符串参数，表示文件的路径。
+
+        函数应该尝试读取并输出文件的内容。如果文件不存在，函数应该使用 `expect` 方法主动 panic，并输出 `File not found!`。
+
+    3. 创建一个函数 `file_size(file_path: &str) -> Result<u64, &str>`
+
+        该函数接收一个字符串参数，表示文件的路径，并返回一个 `Result`。
+
+        函数应该尝试打开文件，并在 `Result` 中返回文件大小。如果文件不存在，函数应该返回一个包含 `File not found!` 字符串的 Err。
+
+    4. 在 `main` 函数中，按照如下顺序调用上述函数：
+
+        - 首先调用 `count_down(5)` 函数进行倒计时
+        - 然后调用 `read_and_print("/etc/hosts")` 函数尝试读取并输出文件内容
+        - 最后使用 `std::io` 获取几个用户输入的路径，并调用 `file_size` 函数尝试获取文件大小，并处理可能的错误。
+
+    注意：在处理文件操作时，需要使用到 Rust 的文件处理相关库，如 `std::fs` 和 `std::io`。在处理错误时，需要使用到 Rust 的错误处理机制，如 `expect` 和 `unwrap` 等。
 
 2. 实现一个进行字节数转换的函数，并格式化输出：
 
@@ -157,8 +179,6 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
             assert_ne!(id1, id2);
         }
         ```
-
-<!-- DOC TODO -->
 
 ## 运行 UEFI Shell
 
