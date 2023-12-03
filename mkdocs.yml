@@ -5,22 +5,29 @@ repo_name: YatSenOS-Tutorial-Volume-2
 
 theme:
   name: material
+  custom_dir: overrides
+  language: zh
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/brightness-7
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       toggle:
-        icon: material/toggle-switch
+        icon: material/brightness-4
         name: Switch to light mode
   features:
     - navigation.top
     - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.prune
+    - navigation.indexes
     - navigation.footer
     - navigation.tracking
+    - navigation.instant
+    - navigation.instant.progress
     - content.code.copy
     - content.code.select
     - content.tabs.link
@@ -30,36 +37,36 @@ theme:
 
 nav:
   - 主页:
-    - 实验说明: index.md
+    - index.md
     - 代码规范要求: general/coding_convention.md
     - 常见问题及解答: general/faq.md
   - 实验指南:
     - 实验零：实验准备:
-      - 概览: labs/0x00/index.md
-      - 任务: labs/0x00/tasks.md
+      - labs/0x00/index.md
+      - 实验任务: labs/0x00/tasks.md
     - 实验一：操作系统的启动:
-      - 概览: labs/0x01/index.md
-      - 任务: labs/0x01/tasks.md
+      - labs/0x01/index.md
+      - 实验任务: labs/0x01/tasks.md
     - 实验二：中断处理:
-      - 概览: labs/0x02/index.md
-      - 任务: labs/0x02/tasks.md
+      - labs/0x02/index.md
+      - 实验任务: labs/0x02/tasks.md
     - 实验三：内核线程与缺页异常:
-      - 概览: labs/0x03/index.md
-      - 任务: labs/0x03/tasks.md
+      - labs/0x03/index.md
+      - 实验任务: labs/0x03/tasks.md
     - 实验四：用户程序与系统调用:
-      - 概览: labs/0x04/index.md
-      - 任务: labs/0x04/tasks.md
+      - labs/0x04/index.md
+      - 实验任务: labs/0x04/tasks.md
     - 实验五：fork 与并发:
-      - 概览: labs/0x05/index.md
-      - 任务: labs/0x05/tasks.md
+      - labs/0x05/index.md
+      - 实验任务: labs/0x05/tasks.md
     - 实验六：硬盘驱动与文件系统:
-      - 概览: labs/0x06/index.md
-      - 任务: labs/0x06/tasks.md
+      - labs/0x06/index.md
+      - 实验任务: labs/0x06/tasks.md
     - 实验七：更好的内存管理:
-      - 概览: labs/0x07/index.md
-      - 任务: labs/0x07/tasks.md
+      - labs/0x07/index.md
+      - 实验任务: labs/0x07/tasks.md
     - 实验八：扩展实验:
-      - 概览: labs/0x08/index.md
+      - labs/0x08/index.md
   - 实验资料:
     - Linux 使用指导: wiki/linux.md
     - Rust 语言基础: wiki/rust.md
@@ -91,6 +98,9 @@ plugins:
       htmlmin_opts:
         remove_comments: true
       cache_safe: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: iso_datetime
 
 extra_javascript:
   - scripts/mathjax.js
