@@ -1,7 +1,3 @@
----
-no_comments: true
----
-
 # 中山大学 YatSenOS v2 操作系统实验教程
 
 ## 实验说明

@@ -5,7 +5,7 @@ repo_name: YatSenOS-Tutorial-Volume-2
 
 theme:
   name: material
-  custom_dir: overrides
+  custom_dir: docs/overrides
   language: zh
   palette:
     - media: "(prefers-color-scheme: light)"
