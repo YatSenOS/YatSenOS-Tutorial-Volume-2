@@ -22,8 +22,10 @@
 需要安装的基本软件环境，括号中提供在 Ubuntu 中对应的包名：
 
 - QEMU x86_64 (qemu-system-x86)
-- Rust nightly toolchain (rustup)
+- Rust nightly toolchain
 - make, gcc, gdb 等基本编译工具 (build-essential)
+
+在实验任务中，将会给出安装配置的相关指导。
 
 ## 实验基础知识
 

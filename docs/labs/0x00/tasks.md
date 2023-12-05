@@ -134,16 +134,47 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
         }
         ```
 
+        !!! note "Cargo 提供了良好的单元测试、集成测试支持，你可以参考 [编写测试](https://course.rs/test/write-tests.html) 进行使用"
+
+            作为一个使用实例，可以在 `main.rs` 最后添加如下代码：
+
+            ```rust
+            #[cfg(test)]
+            mod tests {
+                use super::*;
+
+                #[test]
+                fn some_test() {
+                    // do something
+                    // then assert the result
+                }
+            }
+            ```
+
+            上述测试代码将会在你执行 `cargo test` 时被执行。
+
+            - `#[cfg(test)]` 表示该模块仅在测试时被编译
+            - `use super::*;` 表示引入当前模块的所有内容（tests 模块是当前模块的子模块）
+            - `#[test]` 表示该函数是一个测试函数，会被 `cargo test` 执行
+
+
 3. **自行搜索学习如何利用现有的 crate** 在终端中输出彩色的文字
 
     输出一些带有颜色的字符串，并尝试直接使用 `print!` 宏输出一到两个相同的效果。
+
+    尝试输出如下格式和内容：
+
+    - `INFO: Hello, world!`，其中 `INFO:` 为绿色，后续内容为白色
+    - `WARNING: I'm a teapot!`，颜色为黄色，加粗，并为 `WARNING` 添加下划线
+    - `ERROR: KERNEL PANIC!!!`，颜色为红色，加粗，并尝试让这一行在控制行窗口居中
+    - 一些你想尝试的其他效果和内容……
 
     !!! tip "如果你想进一步了解，可以尝试搜索 **ANSI 转义序列**"
 
 
 4. 使用 `enum` 对类型实现同一化
 
-    实现一个 `enum Shape` 并实现一个函数 `fn area(shape: Shape) -> f64`，使得 `area` 函数能够计算 `Shape` 的面积。
+    实现一个名为 `Shape` 的枚举，并为它实现 `pub fn area(&self) -> f64` 方法，用于计算不同形状的面积。
 
     - 你可能需要使用模式匹配来达到相应的功能
     - 请实现 `Rectangle` 和 `Circle` 两种 `Shape`，并使得 `area` 函数能够正确计算它们的面积
@@ -158,10 +189,12 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
             };
             let circle = Shape::Circle { radius: 10.0 };
 
-            assert_eq!(area(rectangle), 200.0);
-            assert_eq!(area(circle), 314.1592653589793);
+            assert_eq!(rectangle.area(), 200.0);
+            assert_eq!(circle.area(), 314.1592653589793);
         }
         ```
+
+        !!! note "可以使用标准库提供的 `std::f64::consts::PI`"
 
 5. 实现一个元组结构体 `UniqueId(u16)`
 
@@ -362,3 +395,22 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 2. 尝试解释 Makefile 中的命令做了哪些事情？
 3. 利用 `cargo` 的包管理和 `docs.rs` 的文档，我们可以很方便的使用第三方库。这些库的源代码在哪里？它们是什么时候被编译的？
 4. 为什么我们需要使用 `#[entry]` 而不是直接使用 `main` 函数作为程序的入口？
+
+## 加分项
+
+1. 😋 基于控制行颜色的 Rust 编程题目，参考 `log` crate 的文档，为不同的日志级别输出不同的颜色效果，并进行测试输出。
+
+2. 🤔 基于第一个 Rust 编程题目，实现一个简单的 shell 程序：
+
+    - 实现 `cd` 命令，可以切换当前工作目录（可以不用检查路径是否存在）
+    - 实现 `ls` 命令，尝试列出当前工作目录下的文件和文件夹，以及他们的一些信息
+    - 实现 `cat` 命令，输出某个文件的内容
+
+    !!! tip "路径的切换是很容易出现问题的操作，你的程序能正常处理 `cd ../../././../a/b/c/../.././d/` 吗？"
+
+3. 🤔 尝试使用线程模型，基于 `UniqueId` 的任务：
+
+    - 尝试证明 `static mut` 变量在多线程下的不安全（可能获得相同的 `UniqueId`）
+    - 尝试验证 `AtomicU16` 来实现 `UniqueId` 时的正确性
+
+    !!! tip "你对 Rust 的 `unsafe` 有什么看法？"
