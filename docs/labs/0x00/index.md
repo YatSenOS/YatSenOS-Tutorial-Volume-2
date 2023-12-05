@@ -10,23 +10,6 @@
 2. QEMU 与 Rust 环境搭建，尝试使用 QEMU 启动 UEFI Shell。
 3. 了解 x86 汇编、计算机的启动过程，UEFI 的启动过程，实现 UEFI 下的 `Hello, world!`。
 
-## 实验环境
-
-我们支持并推荐如下平台进行实验：
-
-- Ubuntu 22.04 LTS
-- Ubuntu 22.04 LTS with WSL 2
-- macOS with Apple Silicon（请自行安装相关依赖）
-- 其他可行的平台，但我们不提供技术支持
-
-需要安装的基本软件环境，括号中提供在 Ubuntu 中对应的包名：
-
-- QEMU x86_64 (qemu-system-x86)
-- Rust nightly toolchain
-- make, gcc, gdb 等基本编译工具 (build-essential)
-
-在实验任务中，将会给出安装配置的相关指导。
-
 ## 实验基础知识
 
 !!! note "善用 LLM 进行学习"
@@ -34,6 +17,8 @@
     对于现代计算机专业的学生，我们建议并要求大家学习借助 LLM（Large Language Model）进行学习，这是一种非常有效的学习方法，可以帮助你更快的学习到知识。
 
     对于不理解的知识点和概念，我们建议优先参考文档、借助 LLM 进行实践，在仍然无法解决的情况下再向他人提问。
+
+    确保你阅读了 [寻求帮助](../../general/help.md) 一节，这将帮助你更快的解决问题。
 
 对于本次实验内容，你需要参考学习如下实验资料：
 

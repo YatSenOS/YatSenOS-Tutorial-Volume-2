@@ -1,6 +1,6 @@
 # 实验零：环境搭建与实验准备
 
-!!! warning "在执行每一条命令前，请你对将要进行的操作进行思考"
+!!! danger "在执行每一条命令前，请你对将要进行的操作进行思考"
 
     **为了你的数据安全和不必要的麻烦，请谨慎使用 `sudo`，并确保你了解每一条指令的含义。**
 
@@ -10,13 +10,22 @@
 
     **3. 不要直接复制粘贴命令执行**
 
-## 安装 Linux 系统和项目开发环境
+## 配置实验环境
+
+我们支持并推荐如下平台进行实验：
+
+- Ubuntu 22.04 LTS
+- Ubuntu 22.04 LTS with WSL 2
+- macOS with Apple Silicon（请自行安装相关依赖）
+- 其他可行的平台，但我们不提供技术支持
+
+### 安装 Linux 系统和项目开发环境
 
 Linux 有许多发行版，这里出于环境一致性考虑，推荐使用 Ubuntu 22.04。
 
 其他发行版（如 Debian，Arch，Kali）也可以满足实验需求，但**请注意内核版本、QEMU 版本都不应低于本次实验的参考标准**。
 
-### 使用 WSL2
+#### 使用 WSL2
 
 对于 Windows 10/11 的用户来说，可以使用 WSL（Windows Subsystem Linux）来安装 Linux 系统，WSL 意为面向 Windows 的 Linux 子系统，微软为其提供了很多特性方便我们使用，我们可以在 Windows 上运行 Linux 程序。
 
@@ -30,9 +39,9 @@ wsl --install -d Ubuntu
 
 关于其他的配置，可以在网上找到大量的参考资料，请自行搜索阅读，或寻求 LLM 的帮助。
 
-### 使用 Vmware Workstation
+#### 使用 VMware Workstation
 
-参考 [Vmware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
+参考 [VMware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
 
 ### 安装项目开发环境
 
@@ -82,6 +91,8 @@ gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
 $ gdb --version
 GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 ```
+
+!!! tip "如果上述内容不足以让你完全配置好开发环境，可以参考 THU Rust 课程的 [环境配置](https://lab.cs.tsinghua.edu.cn/rust/environment/)"
 
 ## 尝试使用 Rust 进行编程
 
@@ -406,11 +417,11 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
     - 实现 `ls` 命令，尝试列出当前工作目录下的文件和文件夹，以及他们的一些信息
     - 实现 `cat` 命令，输出某个文件的内容
 
-    !!! tip "路径的切换是很容易出现问题的操作，你的程序能正常处理 `cd ../../././../a/b/c/../.././d/` 吗？"
+    !!! question "路径的切换是很容易出现问题的操作，你的程序能正常处理 `cd ../../././../a/b/c/../.././d/` 吗？"
 
 3. 🤔 尝试使用线程模型，基于 `UniqueId` 的任务：
 
     - 尝试证明 `static mut` 变量在多线程下的不安全（可能获得相同的 `UniqueId`）
     - 尝试验证 `AtomicU16` 来实现 `UniqueId` 时的正确性
 
-    !!! tip "你对 Rust 的 `unsafe` 有什么看法？"
+    !!! question "你对 Rust 的 `unsafe` 有什么看法？"

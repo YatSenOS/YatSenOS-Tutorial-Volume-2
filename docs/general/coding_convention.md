@@ -4,6 +4,8 @@ no_comments: true
 
 # 代码规范
 
+!!! tip "部分内容引用修改自 [代码规范](https://lab.cs.tsinghua.edu.cn/rust/projects/coding_convention/)"
+
 本页面列举了一些常见的代码规范要求。
 
 部分要求并不强制，但是建议尽量遵守和学习。

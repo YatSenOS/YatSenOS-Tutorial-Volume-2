@@ -39,6 +39,7 @@ nav:
   - 主页:
     - index.md
     - 代码规范要求: general/coding_convention.md
+    - 寻求帮助: general/help.md
     - 常见问题及解答: general/faq.md
   - 实验指南:
     - 实验零：实验准备:
