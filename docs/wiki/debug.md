@@ -4,7 +4,7 @@
 
 在写代码时我们很难一蹴而就，往往需要反复观察、不断调试。最简单的调试方法即“ `printf` 大法”：在代码中插入 `printf` 语句，然后打印程序中间状态，观察输出结果。尽管便利，但手动插入输出不仅需要调整源码、反复编译，而且不适合本课程的场景。课程要求我们结合 QEMU 开发操作系统内核，简单的输出无法完全支持我们观察内核的运行状态如寄存器、内存乃至函数调用栈等需求。
 
-因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（PWNDBG）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
+因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（pwndbg）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
 
 !!! note "读前提示"
     本章内容仅提供了一个快速上手的必备方法以及简略的参考资料。我们鼓励大家主动查找、翻阅应用文档，以解锁高阶调试技巧。
@@ -34,7 +34,7 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
     调试符号文件是编译器在编译时生成的一种特殊文件，其中包含了：
     - **源代码中的符号**（变量名、函数名等）；
     - 编译后的二进制文件中的**地址的对应关系**。
-    
+
     调试符号文件可以帮助调试器在调试时将二进制文件中的地址转换为源代码中的符号，从而方便我们调试。
 
     如果感兴趣的话，你可以使用反编译工具（如 `readelf -S` 或者 `objdump -g` 等）来查看调试符号的内容。
@@ -69,7 +69,7 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
     - 若要查看内存中对应的 20 条汇编指令，可以使用 `x/20i <addr>`：
 
 <div style="text-align: center;">
-    <img src="./assets/debug-gdb-commandxi-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
+    <img src="./assets/debug/gdb-commandxi-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
 </div>
 
 11. `info registers`：查看寄存器的值。
@@ -84,24 +84,24 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 - [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
 - [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
 
-## 命令行调试进阶：PWNDBG
+## 命令行调试进阶：pwndbg
 
-[PWNDBG](https://github.com/pwndbg/pwndbg#portable-installation) 是 Pwntools 库中的一个子模块，它提供了一个更详细的调试器界面，用于调试和分析二进制程序。PWNDBG 基于 GDB（GNU Debugger）并提供了一系列功能来简化二进制程序的调试过程。在我们的实验场景下，其主要的帮助有：
+[pwndbg](https://github.com/pwndbg/pwndbg#portable-installation) 是 Pwntools 库中的一个子模块，它提供了一个更详细的调试器界面，用于调试和分析二进制程序。pwndbg 基于 GDB（GNU Debugger）并提供了一系列功能来简化二进制程序的调试过程。在我们的实验场景下，其主要的帮助有：
 
-1. 进阶调试指令：在原生 GDB 的基础上，PWNDBG 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。例如：
+1. 进阶调试指令：在原生 GDB 的基础上，pwndbg 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。例如：
     - `telescope address [count]`：telescope 是 pwndbg 提供的一个自定义命令，用于显示内存中一系列连续的数据。若我们想查看当前堆栈，可以借助指令`telescope $rsp`：
 
 <div style="text-align: center;">
-    <img src="./assets/debug-pwndbg-tele-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
+    <img src="./assets/debug/pwndbg-tele-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
 </div>
 
 
-2. 调试信息展示：PWNDBG 可以显示二进制程序的调试信息，如符号表、函数名、堆栈跟踪等。相较于 GDB，其**默认常驻**显示以上信息，简化操作。
+2. 调试信息展示：pwndbg 可以显示二进制程序的调试信息，如符号表、函数名、堆栈跟踪等。相较于 GDB，其**默认常驻**显示以上信息，简化操作。
 
-3. 脚本和扩展支持：PWNDBG 允许用户编写脚本和扩展，以满足特定的调试需求。用户可以编写自定义命令、自动化调试任务，并与 Pwntools 库的其他组件进行集成。
+3. 脚本和扩展支持：pwndbg 允许用户编写脚本和扩展，以满足特定的调试需求。用户可以编写自定义命令、自动化调试任务，并与 Pwntools 库的其他组件进行集成。
 
-!!! tip " PWNDBG 用法提示"
-    PWNDBG 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
+!!! tip " pwndbg 用法提示"
+    pwndbg 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
     如果感兴趣的话，你可以查看[官方文档](https://github.com/pwndbg/pwndbg/blob/dev/FEATURES.md)
 
 
@@ -122,7 +122,7 @@ source <path-to-pwndbg>/gdbinit.py
 完整调试效果如下：
 
 <div style="text-align: center;">
-    <img src="./assets/debug-pwndbg-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
+    <img src="./assets/debug/pwndbg-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
 </div>
 
 ## IDE 调试进阶：VSCode + GDB
@@ -182,7 +182,7 @@ make DBG_INFO=true run
 在VSCode中设置任何你想要的断点，按下 `F5` 即可开始调试。例如，我们想调试内核入口函数：
 
 <div style="text-align: center;">
-    <img src="./assets/debug-vscode-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
+    <img src="./assets/debug/vscode-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
 </div>
 
 以上即是 VSCode + LLDB 的调试效果。我们可以看到，VSCode 提供了一个非常方便的调试界面，同时也提供了丰富的调试功能：
