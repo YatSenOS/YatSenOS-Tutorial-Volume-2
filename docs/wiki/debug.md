@@ -2,11 +2,16 @@
 
 ## 概述
 
-在写代码时我们很难一蹴而就，往往需要反复观察、不断调试。最简单的调试方法即“ `printf` 大法”：在代码中插入 `printf` 语句，然后打印程序中间状态，观察输出结果。尽管便利，但手动插入输出不仅需要调整源码、反复编译，而且不适合本课程的场景。课程要求我们结合 QEMU 开发操作系统内核，简单的输出无法完全支持我们观察内核的运行状态如寄存器、内存乃至函数调用栈等需求。
+在写代码时我们很难一蹴而就，往往需要反复观察、不断调试。
+
+最简单的调试方法即“ `printf` 大法”：在代码中插入 `printf` 语句，然后打印程序中间状态，观察输出结果。
+
+尽管便利，但手动插入输出不仅需要调整源码、反复编译，而且不适合本课程的场景。课程要求我们结合 QEMU 开发操作系统内核，简单的输出无法完全支持我们观察内核的运行状态如寄存器、内存乃至函数调用栈等需求。
 
 因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（pwndbg）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
 
 !!! note "读前提示"
+
     本章内容仅提供了一个快速上手的必备方法以及简略的参考资料。我们鼓励大家主动查找、翻阅应用文档，以解锁高阶调试技巧。
 
 ## 基本方法：GDB
@@ -19,19 +24,24 @@ GDB（GNU Debugger）是一个功能强大的开源调试器，用于调试各�
 sudo apt install gdb
 ```
 
-其次，为了能够在 GDB 中调试内核，我们需要在编译时开启调试符号的生成。贴心的 TA 已经在 `Makefile` 中为大家准备好了相关指令，只需要在编译时加上 `DBG_INFO=true` 即可，指令示例如下：
+其次，为了能够在 GDB 中调试内核，我们需要在编译时开启调试符号的生成。
+
+贴心的 TA 已经在 `Makefile` 中为大家准备好了相关指令，只需要在编译时加上 `DBG_INFO=true` 即可，指令示例如下：
 
 ```bash
-make DBG_INFO=true build
+make build DBG_INFO=true
 ```
 
 当观察到终端输出如下信息时，说明带调试符号已经生成成功：
-```bash
+
+```log
 Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 ```
 
 !!! tip "调试符号"
+
     调试符号文件是编译器在编译时生成的一种特殊文件，其中包含了：
+
     - **源代码中的符号**（变量名、函数名等）；
     - 编译后的二进制文件中的**地址的对应关系**。
 
@@ -58,7 +68,7 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
 7. `list`：查看源代码和可用断点，简写为 `l`。
 
-8. `break <function>`：在指定函数处设置断点，如在`main`函数处设置断点：`break ysos::<todo>`。简写为 `b`。
+8. `break <function>`：在指定函数处设置断点，如在`main`函数处设置断点：`break ysos_kernel::<todo>`。简写为 `b`。
 
 9. `bt`：查看函数调用栈。
 
@@ -68,15 +78,18 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
     - 若要查看 $rdi$ 寄存器指向的内存中的前 16 个字节，可以使用 `x/16x $rdi`。
     - 若要查看内存中对应的 20 条汇编指令，可以使用 `x/20i <addr>`：
 
-<div style="text-align: center;">
-    <img src="./assets/debug/gdb-commandxi-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
-</div>
+11. `telescope address [count]`：telescope 是 pwndbg 提供的一个自定义命令，用于显示内存中一系列连续的数据。它会递归地从指定地址开始对一系列指针进行解引用尝试，以展现内存的细节。
 
-11. `info registers`：查看寄存器的值。
+12. `info registers`：查看寄存器的值。
 
 13. `.gdbinit`：**这不是一条 GDB 指令**，而是 GDB 的配置文件。GDB 在启动时会默认调用该脚本，我们可以在其中设置GDB的默认行为，减少重复操作。
 
-!!! tip " GDB 用法提示"
+一些简单的命令使用示例如下图展示：
+
+![GDB Commands](./assets/debug/pwndbg-commands-example.png)
+
+!!! tip "GDB 用法提示"
+
     万丈高楼平地起，GDB 的使用也是如此。下文介绍的所有高级功能都基于 GDB / LLDB，我们建议大家尽能理解并掌握上述基本指令。
 
 以上是 GDB 的基本使用方法，更多的 GDB 使用方法请参考：
@@ -88,13 +101,7 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
 [pwndbg](https://github.com/pwndbg/pwndbg#portable-installation) 是 Pwntools 库中的一个子模块，它提供了一个更详细的调试器界面，用于调试和分析二进制程序。pwndbg 基于 GDB（GNU Debugger）并提供了一系列功能来简化二进制程序的调试过程。在我们的实验场景下，其主要的帮助有：
 
-1. 进阶调试指令：在原生 GDB 的基础上，pwndbg 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。例如：
-    - `telescope address [count]`：telescope 是 pwndbg 提供的一个自定义命令，用于显示内存中一系列连续的数据。若我们想查看当前堆栈，可以借助指令`telescope $rsp`：
-
-<div style="text-align: center;">
-    <img src="./assets/debug/pwndbg-tele-screenshot.png" alt="Image" style="max-width: 90%; height: auto;">
-</div>
-
+1. 进阶调试指令：在原生 GDB 的基础上，pwndbg 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。
 
 2. 调试信息展示：pwndbg 可以显示二进制程序的调试信息，如符号表、函数名、堆栈跟踪等。相较于 GDB，其**默认常驻**显示以上信息，简化操作。
 
@@ -103,7 +110,6 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 !!! tip " pwndbg 用法提示"
     pwndbg 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
     如果感兴趣的话，你可以查看[官方文档](https://github.com/pwndbg/pwndbg/blob/dev/FEATURES.md)
-
 
 参照[官方文档](https://github.com/pwndbg/pwndbg#how)，以下是一个参考的安装流程：
 
@@ -121,16 +127,17 @@ source <path-to-pwndbg>/gdbinit.py
 
 完整调试效果如下：
 
-<div style="text-align: center;">
-    <img src="./assets/debug/pwndbg-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
-</div>
+![pwndbg](./assets/debug/pwndbg-screenshot.png)
 
-## IDE 调试进阶：VSCode + GDB
+## IDE 调试进阶：VSCode
 
 VSCode 是一个轻量级的跨平台编辑器，支持多种编程语言，同时提供了丰富的插件支持。因此，除了**简单的代码编辑器**功能，VSCode 还可以作为**强大的 IDE **使用。在本节中，我们将介绍如何使用 VSCode 进行调试。
 
 !!! tip "调试提示"
-    所有源码级别的调试工具都需要二进制文件中包含调试符号。因此，我们需要在编译时加上 `DBG_INFO=true` 参数，以生成带调试符号的二进制文件。
+
+    所有源码级别的调试工具都需要二进制文件中包含调试符号。
+
+    因此，我们需要在编译时加上 `DBG_INFO=true` 参数，以生成带调试符号的二进制文件。
 
 ### 配置 VSCode
 
@@ -149,7 +156,7 @@ sudo apt install lldb
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) GGOS",
+            "name": "(lldb) YSOS",
             "type": "lldb",
             "request": "launch",
             "program": "<path-to-binary>",
@@ -168,22 +175,22 @@ sudo apt install lldb
 ```
 
 !!! note "注意"
-    不要直接复制配置文本，请先完成任务总的思考题。请将 `<path-to-binary>` 替换为你的二进制文件的路径，将 `<path-to-lldb>` 替换为你的 LLDB 的路径。
 
+    不要直接复制配置文本，请先完成任务总的思考题。
+
+    请将 `<path-to-binary>` 替换为你的二进制文件的路径，将 `<path-to-lldb>` 替换为你的 LLDB 的路径。
 
 ### 启动调试
 
 完成以上配置后，我们就可以在 VSCode 中调试内核了。首先，我们完成内核编译，并启动 QEMU 调试。贴心的 TA 已经将指令集成进 Makefile 中，只需要执行以下指令即可：
 
 ```bash
-make DBG_INFO=true run
+make run DBG_INFO=true
 ```
 
 在VSCode中设置任何你想要的断点，按下 `F5` 即可开始调试。例如，我们想调试内核入口函数：
 
-<div style="text-align: center;">
-    <img src="./assets/debug/vscode-screenshot.jpg" alt="Image" style="max-width: 90%; height: auto;">
-</div>
+![vscode](./assets/debug/vscode-screenshot.jpg)
 
 以上即是 VSCode + LLDB 的调试效果。我们可以看到，VSCode 提供了一个非常方便的调试界面，同时也提供了丰富的调试功能：
 
