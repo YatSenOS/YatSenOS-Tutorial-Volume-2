@@ -5,8 +5,17 @@ on:
     branches: ["main"]
     paths: ["docs/**"]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,5 +26,25 @@ jobs:
         with:
           python-version: 3.x
 
-      - run: pip install mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
-      - run: mkdocs gh-deploy --force
+      - name: Install dependencies
+        run: pip install mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
+
+      - name: Static HTML generation
+        run: mkdocs build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: site
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
