@@ -14,9 +14,60 @@
 
 与常规实验中直接将内核编译为二进制文件不同，而本实验需要将内核编译为 ELF 格式的文件，并将它存储在 UEFI 可以访问的文件系统中。
 
-为了达到这一目的，需要对 Rust 的编译目标、链接配置进行一些修改，这部分内容已经为大家准备好，
+!!! note 请阅读 [ELF 文件格式](../../wiki/elf.md) 部分，了解什么是 ELF 文件。
 
-请阅读 [ELF 文件格式](../../wiki/elf.md) 部分，了解什么是 ELF 文件。
+为了达到这一目的，需要对 Rust 的编译目标、链接配置进行一些修改，这部分内容已经为大家准备好，你可以在 [实验 0x01 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x01/pkg/kernel/config) 中看到进行这些配置的方式。
+
+在 `pkg/kernel/config` 中，引用了 `config/x86_64-unknown-none.json` 的编译目标配置，该配置文件如下所示：
+
+```json
+{
+  "llvm-target": "x86_64-unknown-none",
+  "data-layout": "e-m:e-i64:64-f80:128-n8:16:32:64-S128",
+  "linker-flavor": "ld.lld",
+  "target-endian": "little",
+  "target-pointer-width": "64",
+  "target-c-int-width": "32",
+  "arch": "x86_64",
+  "os": "none",
+  "executables": true,
+  "linker": "rust-lld",
+  "disable-redzone": true,
+  "features": "-mmx,-sse,+soft-float",
+  "panic-strategy": "abort",
+  "pre-link-args": {
+    "ld.lld": ["-Tpkg/kernel/config/kernel.ld", "-export-dynamic"]
+  }
+}
+```
+
+这个配置文件描述了 `cargo` 和 `rustc` 应该如何编译内核，这里指定了端序、指针长度、架构、链接器、链接脚本、目标架构等信息。具体细节留作读者自行探索。
+
+`"-Tpkg/kernel/config/kernel.ld"` 指定了链接脚本的位置，该链接脚本描述了内核的链接方式，其基本内容如下所示：
+
+```ld
+ENTRY(_start)
+KERNEL_BEGIN = 0xffffff0000000000;
+
+SECTIONS {
+  . = KERNEL_BEGIN;
+
+  . ... ALIGN(4K):
+  {
+    *( ... )
+  }
+
+  ...
+}
+```
+
+它描述了内核的入口地址为 `_start`，并将此 ELF 文件对应的虚拟地址空间的起始地址设置为 `0xffffff0000000000`。此外，它还描述了内核的各个段的链接方式。
+
+值得注意的是，为了后续实验代码编写的便利，我们将内核的代码段、数据段、BSS 段等都设置为了 4KB 对齐。
+
+请尝试在 `pkg/kernel` 目录下运行 `cargo build --release`，之后找到编译产物，并使用 `readelf` 命令查看其基本信息，回答以下问题：
+
+// TODO: some questions
 
 ## 在 UEFI 中加载内核
 
@@ -31,7 +82,9 @@
 1. 思考题：在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make QEMU_OUTPUT= run` 的输出，结合截图分析对应现象。
 
 !!! tip "现象观察提示"
-    若此时启动 QEMU 的输出提示是 `vnc server running on ::1:5900`，则说明 QEMU 的图形界面被启用并通过端口5900输出。你可以考虑使用 `VNC Viewer` 来观察 QEMU 界面。
+    若此时启动 QEMU 的输出提示是 `vnc server running on ::1:5900`，则说明 QEMU 的图形界面被启用并通过端口5900输出。
+
+    你可以考虑使用 `VNC Viewer` 来观察 QEMU 界面。
 
 2. 思考题：观察实验代码，串口驱动是在进入内核后启用的，那么在驱动加载前，显示的内容是如何输出的？请给出你的回答。
 
