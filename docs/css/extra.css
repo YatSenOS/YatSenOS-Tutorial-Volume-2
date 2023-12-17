@@ -10,6 +10,7 @@
     font-weight: 500;
   }
 }
+
 h1 {
   counter-reset: h2;
 }

@@ -74,6 +74,8 @@ nav:
     - Rust 语言基础: wiki/rust.md
     - UEFI 启动过程: wiki/uefi.md
     - QEMU 使用参考: wiki/qemu.md
+    - 分页内存简述: wiki/paging.md
+    - ELF 文件格式: wiki/elf.md
     - UART 串口通信: wiki/uart.md
 
 markdown_extensions:
@@ -113,3 +115,4 @@ extra_javascript:
 extra_css:
   - css/fonts.css
   - css/extra.css
+  - css/inst.css

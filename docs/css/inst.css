@@ -1,0 +1,63 @@
+.inst,
+.fl-table {
+  width: 100%;
+  display: inline-table;
+  table-layout: fixed;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  border-collapse: collapse;
+}
+.inst-node {
+  text-align: center;
+  padding: 0.2em;
+  border: 0.04rem solid var(--md-default-fg-color);
+}
+.inst-node-little,
+.fl-table-node {
+  text-align: center;
+  font-size: 0.7rem;
+  padding: 0.15em;
+  border: 0.04rem solid var(--md-default-fg-color);
+}
+.inst-numnode {
+  font-size: 0.5rem;
+}
+.inst-undernode {
+  font-size: 0.6rem;
+  text-align: center;
+}
+.inst-numnodel {
+  font-size: 0.5rem;
+  text-align: left;
+}
+.inst-numnoder {
+  font-size: 0.5rem;
+  text-align: right;
+}
+@media (max-width: 700px) {
+  .inst-node,
+  .inst-node-little,
+  .fl-table-node {
+    font-size: 0.6rem;
+  }
+}
+@media (max-width: 610px) {
+  .inst-node,
+  .inst-node-little,
+  .fl-table-node {
+    font-size: 0.5rem;
+  }
+}
+@media (max-width: 602px) {
+  .inst-node,
+  .inst-node-little {
+    overflow-x: scroll;
+    word-wrap: normal;
+  }
+  .inst-numnoder {
+    font-size: 0px;
+  }
+  .inst-numnodel {
+    word-wrap: normal;
+  }
+}
