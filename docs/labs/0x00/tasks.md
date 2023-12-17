@@ -45,7 +45,7 @@ wsl --install -d Ubuntu
 
 ### 安装项目开发环境
 
-在正确安装 Linux 系统后，我们需要安装和配置开发环境，包括 gcc, make, qemu 等。
+在正确安装 Linux 系统后，需要安装和配置开发环境，包括 gcc, make, qemu 等。
 
 为了保障 Linux 软件源的正常、快速访问，请参考 [Ubuntu 软件仓库镜像使用帮助](https://help.mirrors.cernet.edu.cn/ubuntu/) 提供的文档进行软件源更换。
 

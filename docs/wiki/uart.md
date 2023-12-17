@@ -31,22 +31,22 @@
 
 UART 16550 是一种集成电路芯片，用于串口通信。它是最常见和广泛使用的 UART 芯片之一，具有高可靠性和兼容性。UART 16550 芯片提供了一个标准的串行接口，可用于将计算机与外部设备进行数据传输。
 
-在 x86_64 体系结构中，UART 16550 常用于完成与串口设备的通信，对应的接口也被命名为 COM 接口。COM 接口会被映射到标准的 I/O 端口，我们可以通过**读写 I/O 端口**来完成与串口通信。
+在 x86_64 体系结构中，UART 16550 常用于完成与串口设备的通信，对应的接口也被命名为 COM 接口。COM 接口会被映射到标准的 I/O 端口，可以通过**读写 I/O 端口**来完成与串口通信。
 
 COM 端口和 I/O 端口的映射关系你可以在 [Port Addresses](https://wiki.osdev.org/Serial_Ports#Port_Addresses) 中找到。
 
-在我们的实验中，只需要关系 COM1 端口即可，它的 I/O 端口地址为 `0x3F8`。
+在本实验设计中，只需要关心 COM1 端口即可，它的 I/O 端口地址为 `0x3F8`。
 
 ## x86 I/O 端口
 
 !!! note "关于 I/O 端口"
       I/O 端口是一种特殊的内存映射，它是一种**内存地址**，但是对应的内存地址并不是 RAM，而是 I/O 设备的寄存器。
 
-      我们可以通过读写 I/O 端口来完成对 I/O 设备的控制。有关 I/O 端口的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
+      有关 I/O 端口的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
 
 在 x86 体系中，I/O 端口的读写是通过 `in` 和 `out` 指令完成的。`in` 指令用于从 I/O 端口读取数据，`out` 指令用于向 I/O 端口写入数据。
 
-在使用 [x86_64 crate](https://docs.rs/x86_64) 时，我们可以通过 `x86_64::instructions::port` 模块中的 [`PortGeneric`](https://docs.rs/x86_64/latest/x86_64/instructions/port/struct.PortGeneric.html) 结构体来完成对 I/O 端口的读写。
+在使用 [x86_64 crate](https://docs.rs/x86_64) 时，可以通过 `x86_64::instructions::port` 模块中的 [`PortGeneric`](https://docs.rs/x86_64/latest/x86_64/instructions/port/struct.PortGeneric.html) 结构体来完成对 I/O 端口的读写。
 
 !!! question "x86_64 crate 中是怎么封装 I/O 端口的？你能否通过查看源码找到答案？"
 
