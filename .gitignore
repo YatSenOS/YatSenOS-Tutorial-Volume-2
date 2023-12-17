@@ -9,3 +9,8 @@
 
 ### MKDocs ##
 /site
+
+### Rust ###
+**/esp
+**/target
+**/Cargo.lock
