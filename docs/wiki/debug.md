@@ -8,7 +8,7 @@
 
 尽管便利，但手动插入输出不仅需要调整源码、反复编译，而且不适合本课程的场景。课程要求我们结合 QEMU 开发操作系统内核，简单的输出无法完全支持我们观察内核的运行状态如寄存器、内存乃至函数调用栈等需求。
 
-因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（pwndbg）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
+因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（gef）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
 
 !!! note "读前提示"
 
@@ -78,11 +78,18 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
     - 若要查看 $rdi$ 寄存器指向的内存中的前 16 个字节，可以使用 `x/16x $rdi`。
     - 若要查看内存中对应的 20 条汇编指令，可以使用 `x/20i <addr>`：
 
-11. `telescope address [count]`：telescope 是 pwndbg 提供的一个自定义命令，用于显示内存中一系列连续的数据。它会递归地从指定地址开始对一系列指针进行解引用尝试，以展现内存的细节。
+11. `info registers`：查看寄存器的值。
 
-12. `info registers`：查看寄存器的值。
+12. `.gdbinit`：**这不是一条 GDB 指令**，而是 GDB 的配置文件。GDB 在启动时会默认调用该脚本，我们可以在其中设置GDB的默认行为，减少重复操作。这里附上一个 `.gdbinit` 以供参考：
 
-13. `.gdbinit`：**这不是一条 GDB 指令**，而是 GDB 的配置文件。GDB 在启动时会默认调用该脚本，我们可以在其中设置GDB的默认行为，减少重复操作。
+    ```bash
+    file esp/KERNEL.ELF
+    gef config context.layout "-legend regs -stack code -args source -threads -trace extra memory"
+    gef-remote localhost 1234
+    # Check the output tty use command `tty`
+    gef config context.redirect /dev/pts/8
+    b ysos_kernel::init
+    ```
 
 一些简单的命令使用示例如下图展示：
 
@@ -97,37 +104,50 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 - [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
 - [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
 
-## 命令行调试进阶：pwndbg
+## 命令行调试进阶：gef
 
-[pwndbg](https://github.com/pwndbg/pwndbg#portable-installation) 是 Pwntools 库中的一个子模块，它提供了一个更详细的调试器界面，用于调试和分析二进制程序。pwndbg 基于 GDB（GNU Debugger）并提供了一系列功能来简化二进制程序的调试过程。在我们的实验场景下，其主要的帮助有：
+[gef](https://github.com/hugsy/gef) 是一个功能更为强大的调试器插件，用于调试和分析二进制程序。gef 基于 GDB（GNU Debugger），并提供了一系列功能来简化二进制程序的调试过程。在我们的实验场景下，其主要的帮助有：
 
-1. 进阶调试指令：在原生 GDB 的基础上，pwndbg 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。
+1. 进阶调试指令：在原生 GDB 的基础上，gef 提供了一个更加丰富的调试指令集，帮助我们更灵活调试。
 
-2. 调试信息展示：pwndbg 可以显示二进制程序的调试信息，如符号表、函数名、堆栈跟踪等。相较于 GDB，其**默认常驻**显示以上信息，简化操作。
+2. 调试信息展示：gef 可以显示二进制程序的调试信息，如符号表、函数名、堆栈跟踪等。相较于 GDB，其**默认常驻**显示以上信息，简化操作。
 
-3. 脚本和扩展支持：pwndbg 允许用户编写脚本和扩展，以满足特定的调试需求。用户可以编写自定义命令、自动化调试任务，并与 Pwntools 库的其他组件进行集成。
+3. 脚本和扩展支持：gef 允许用户编写脚本和扩展，以满足特定的调试需求。用户可以编写自定义命令、自动化调试任务、定制常驻显示窗口等。
 
-!!! tip " pwndbg 用法提示"
-    pwndbg 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
-    如果感兴趣的话，你可以查看[官方文档](https://github.com/pwndbg/pwndbg/blob/dev/FEATURES.md)
-
-参照[官方文档](https://github.com/pwndbg/pwndbg#how)，以下是一个参考的安装流程：
+参照[官方文档](https://hugsy.github.io/gef/install/)，以下是**数个**参考的安装流程，大家可以根据自己的**网络情况**灵活选择：
 
 ```bash
-git clone https://github.com/pwndbg/pwndbg
-cd pwndbg
-./setup.sh
+# via the install script
+## using curl
+$ bash -c "$(curl -fsSL https://gef.blah.cat/sh)"
+
+## using wget
+$ bash -c "$(wget https://gef.blah.cat/sh -O -)"
+
+# or manually
+$ wget -O ~/.gdbinit-gef.py -q https://gef.blah.cat/py
+$ echo source ~/.gdbinit-gef.py >> ~/.gdbinit
+
+# or alternatively from inside gdb directly
+$ gdb -q
+(gdb) pi import urllib.request as u, tempfile as t; g=t.NamedTemporaryFile(suffix='-gef.py'); open(g.name, 'wb+').write(u.urlopen('https://tinyurl.com/gef-main').read()); gdb.execute('source %s' % g.name)
 ```
 
-完成安装后，在你的`~/.gdbinit`中添加以下内容，即可默认启动 pwndbg ：
+完成安装后，在你的`~/.gdbinit`中添加以下内容，即可默认启动 gef ：
 
 ```bash
-source <path-to-pwndbg>/gdbinit.py
+source <path-to-pwndbg>/gef.py
 ```
 
 完整调试效果如下：
 
-![pwndbg](./assets/debug/pwndbg-screenshot.png)
+![gef](./assets/debug/gef-screenshot.png)
+
+!!! note "gef 用法提示"
+
+    gef 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
+    以上截图展示效果正是源于 gef 提供的指令 `gef config context.layout` 和 `gef config context.redirect`。
+    请阅读[官方文档-Gef-Context](https://hugsy.github.io/gef/commands/context/)来学习如何定制你的调试界面；你还可以自行查阅文档来学习使用 gef 的其余功能。
 
 ## IDE 调试进阶：VSCode
 
