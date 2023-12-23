@@ -31,7 +31,7 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
     info!("Config: {:#x?}", config);
 
     // 2. Load ELF files
-    let elf = {/* FIXME: Load kernel elf file */};
+    let elf = { /* FIXME: Load kernel elf file */ };
 
     unsafe {
         set_entry(elf.header.pt2.entry_point() as usize);

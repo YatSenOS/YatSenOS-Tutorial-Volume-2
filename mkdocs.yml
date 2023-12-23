@@ -41,6 +41,7 @@ nav:
     - 代码规范要求: general/coding_convention.md
     - 寻求帮助: general/help.md
     - 常见问题及解答: general/faq.md
+    - 使用 Typst 编写报告: general/typst.md
   - 实验指南:
     - 实验零：实验准备:
       - labs/0x00/index.md
