@@ -10,7 +10,7 @@
 
 因此，本章 Wiki 将从 GDB 出发，介绍更为便利的程序调试方法论，同时结合先进的插件（gef）和强大的 IDE（VSCode）介绍进一步提高调试效率的方法。
 
-!!! note "读前提示"
+!!! note "开始之前"
 
     本章内容仅提供了一个快速上手的必备方法以及简略的参考资料。我们鼓励大家主动查找、翻阅应用文档，以解锁高阶调试技巧。
 
@@ -57,6 +57,7 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
    - QEMU 设置：请参考[QEMU Wiki](./qemu.md)中对`-s`参数的解释。
    - GDB 设置： `target remote <ip>:<port>`：连接到远程调试服务器，如连接到 QEMU 的 GDB 服务器：`target remote localhost:1234`
+   - 使用 gef 时进行远程调试：`gef-remote <ip> <port>`：连接到远程调试服务器，如：`gef-remote localhost 1234`
 
 3. `run`：运行程序，简写为 `r`。
 
@@ -80,20 +81,23 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
 11. `info registers`：查看寄存器的值。
 
-12. `.gdbinit`：**这不是一条 GDB 指令**，而是 GDB 的配置文件。GDB 在启动时会默认调用该脚本，我们可以在其中设置GDB的默认行为，减少重复操作。这里附上一个 `.gdbinit` 以供参考：
-
-    ```bash
-    file esp/KERNEL.ELF
-    gef config context.layout "-legend regs -stack code -args source -threads -trace extra memory"
-    gef-remote localhost 1234
-    # Check the output tty use command `tty`
-    gef config context.redirect /dev/pts/8
-    b ysos_kernel::init
-    ```
+12. `grep <pattern>`：在内存中搜索 `<pattern>`，如搜索字符串 "YatSenOS"：`grep YatSenOS`。详细可见文档：[search-pattern - gef](https://hugsy.github.io/gef/commands/search-pattern)
 
 一些简单的命令使用示例如下图展示：
 
-![GDB Commands](./assets/debug/pwndbg-commands-example.png)
+![GDB Commands](./assets/debug/gdb-commands-example.png)
+
+为了方便初始化一个调试会话，我们常常使用 `.gdbinit` 来配置和初始化 gdb。
+
+GDB 在启动时会默认调用该脚本，我们可以在其中设置GDB的默认行为，减少重复操作。这里附上一个 `.gdbinit` 以供参考：
+
+```bash
+file esp/KERNEL.ELF
+gef config context.layout "-legend regs -stack code -args source -threads -trace extra memory"
+gef-remote localhost 1234
+tmux-setup
+b ysos_kernel::init
+```
 
 !!! tip "GDB 用法提示"
 
@@ -133,12 +137,6 @@ $ gdb -q
 (gdb) pi import urllib.request as u, tempfile as t; g=t.NamedTemporaryFile(suffix='-gef.py'); open(g.name, 'wb+').write(u.urlopen('https://tinyurl.com/gef-main').read()); gdb.execute('source %s' % g.name)
 ```
 
-完成安装后，在你的`~/.gdbinit`中添加以下内容，即可默认启动 gef ：
-
-```bash
-source <path-to-pwndbg>/gef.py
-```
-
 完整调试效果如下：
 
 ![gef](./assets/debug/gef-screenshot.png)
@@ -146,8 +144,10 @@ source <path-to-pwndbg>/gef.py
 !!! note "gef 用法提示"
 
     gef 的使用方法与 GDB 类似，但是其提供了更多的功能，也有一个更加炫酷的界面。
+
     以上截图展示效果正是源于 gef 提供的指令 `gef config context.layout` 和 `gef config context.redirect`。
-    请阅读[官方文档-Gef-Context](https://hugsy.github.io/gef/commands/context/)来学习如何定制你的调试界面；你还可以自行查阅文档来学习使用 gef 的其余功能。
+
+    请阅读[官方文档](https://hugsy.github.io/gef)来学习如何定制你的调试界面、如何使用 gef 的其余功能。
 
 ## IDE 调试进阶：VSCode
 
