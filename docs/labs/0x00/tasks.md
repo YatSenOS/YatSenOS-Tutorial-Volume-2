@@ -403,8 +403,11 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 ## 思考题
 
 1. 了解现代操作系统（Windows）的启动过程，`legacy BIOS` 和 `UEFI` 的区别是什么？
+
 2. 尝试解释 Makefile 中的命令做了哪些事情？
+
 3. 利用 `cargo` 的包管理和 `docs.rs` 的文档，我们可以很方便的使用第三方库。这些库的源代码在哪里？它们是什么时候被编译的？
+
 4. 为什么我们需要使用 `#[entry]` 而不是直接使用 `main` 函数作为程序的入口？
 
 ## 加分项
