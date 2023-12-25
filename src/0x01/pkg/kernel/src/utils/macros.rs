@@ -49,53 +49,13 @@ macro_rules! print {
 }
 
 #[macro_export]
-macro_rules! print_warn {
-    ($($arg:tt)*) => ($crate::utils::print_warn_internal(format_args!($($arg)*)));
-}
-
-#[macro_export]
-macro_rules! print_serial {
-    ($($arg:tt)*) => ($crate::utils::print_serial_internal(format_args!($($arg)*)));
-}
-
-#[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n\r"));
     ($($arg:tt)*) => ($crate::print!("{}\n\r", format_args!($($arg)*)));
 }
 
-#[macro_export]
-macro_rules! println_warn {
-    () => ($crate::print_warn!("\n\r"));
-    ($($arg:tt)*) => ($crate::print_warn!("{}\n\r", format_args!($($arg)*)));
-}
-
-#[macro_export]
-macro_rules! println_serial {
-    () => ($crate::print_serial!("\n\r"));
-    ($($arg:tt)*) => ($crate::print_serial!("{}\n\r", format_args!($($arg)*)));
-}
-
 #[doc(hidden)]
 pub fn print_internal(args: Arguments) {
-    interrupts::without_interrupts(|| {
-        if let Some(mut serial) = get_serial() {
-            serial.write_fmt(args).unwrap();
-        }
-    });
-}
-
-#[doc(hidden)]
-pub fn print_warn_internal(args: Arguments) {
-    interrupts::without_interrupts(|| {
-        if let Some(mut serial) = get_serial() {
-            serial.write_fmt(args).unwrap();
-        }
-    });
-}
-
-#[doc(hidden)]
-pub fn print_serial_internal(args: Arguments) {
     interrupts::without_interrupts(|| {
         if let Some(mut serial) = get_serial() {
             serial.write_fmt(args).unwrap();

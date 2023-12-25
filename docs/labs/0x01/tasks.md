@@ -406,9 +406,31 @@ char read_serial() {
 }
 ```
 
+#### 串口驱动的测试
+
+在 `pkg/kernel/src/utils/macros.rs` 中，你可以找到 `print!` 和 `println!` 宏面向串口输出的实现。
+
+在调用 `drivers::serial::init()` 后，如果能够正常看到 `[+] Serial Initialized.` 的输出，说明串口驱动已经成功初始化。
+
 ### 日志输出
 
-1. 编程题：TODO：**我的构思是给一个超简化的输出版本，让他们自己实现一个日志完整的 log 系统，而 UART 部分只需要填空感受过程就好。**
+为了获取更好的日志管理，我们将使用 `log` crate 来进行日志输出，并将其输出接入到前文所实现的串口驱动中。
+
+你可以在 `pkg/kernel/src/utils/logger.rs` 中找到日志输出的相关代码，你需要完成其中的 `init` 函数和 `log` 函数。
+
+> `Logger` 是一个 Zero Sized Types (ZSTs)，在编译之后不会占用任何空间，它更像是一种类型标记，方便我们进行更灵活的操作。
+
+在 `init` 函数中，你需要完成对 `log` crate 的初始化，通过合适的日志级别过滤器来控制日志输出的等级。
+
+在 `log` 函数中，你需要完成对日志输出的实现，你可以选择直接使用 `print!` 和 `println!` 宏进行输出，也可以通过判断日志级别进行不同的格式化、处理。
+
+你可以使用 `self.enabled(record.metadata())` 来判断当前日志级别是否需要输出；也可以用 `record.file_static()` 和 `record.line()` 来获取产生这条日志输出的源文件位置；同时也可以进行不同的格式化、甚至将日志进行命令行着色，从而提高日志的可读性。
+
+以下是进行最常规输出的例子：
+
+```rust
+println!("{}", record.args());
+```
 
 ## 思考题
 
