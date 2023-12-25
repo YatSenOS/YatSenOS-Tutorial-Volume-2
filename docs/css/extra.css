@@ -9,6 +9,10 @@
   h3 {
     font-weight: 500;
   }
+
+  .admonition {
+    font-size: 0.75rem;
+  }
 }
 
 h1 {
