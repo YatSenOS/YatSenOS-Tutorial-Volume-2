@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "pkg/elf",
+    "pkg/boot",
+    "pkg/kernel"
+]
+exclude = ["pkg/app/config", "pkg/app/.cargo"]
+
+[profile.release-with-debug]
+inherits = "release"
+debug = true
+
+[profile.release-with-debug.package."*"]
+debug = false

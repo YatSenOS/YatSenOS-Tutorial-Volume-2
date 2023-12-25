@@ -64,7 +64,7 @@ no_comments: true
     - 不用类似 `a, b, c, d` 的命名方式。
 
 
-我们建议使用工具来辅助代码风格的检查：
+建议使用工具来辅助代码风格的检查：
 
 - 使用 `rustfmt`，`cargo fmt --all` 命令来格式化代码；
 - 使用 `clippy`，`cargo clippy` 来检查代码风格。

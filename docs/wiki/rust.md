@@ -39,7 +39,7 @@ Rust 语言的基础语法可以参考 [Rust圣经](https://course.rs/) 或者 [
 
 ## 善用 `docs.rs`
 
-Rust 提供了 [docs.rs](https://docs.rs/) 来帮助我们查看 crate 的文档，你可以在其中搜索你需要的 crate，然后查看其文档。
+Rust 提供了 [docs.rs](https://docs.rs/) 来帮助查看 crate 的文档，你可以在其中搜索你需要的 crate，然后查看其文档。
 
 在 Rust 中，你可以通过特殊的语法，借助 Markdown 的语法来编写文档，这些内容被称作文档注释，你可以在 [注释和文档](https://course.rs/basic/comment.html) 部分了解到这些内容。
 

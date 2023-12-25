@@ -41,6 +41,7 @@ nav:
     - 代码规范要求: general/coding_convention.md
     - 寻求帮助: general/help.md
     - 常见问题及解答: general/faq.md
+    - 使用 Typst 编写报告: general/typst.md
   - 实验指南:
     - 实验零：实验准备:
       - labs/0x00/index.md
@@ -69,10 +70,14 @@ nav:
     - 实验八：扩展实验:
       - labs/0x08/index.md
   - 实验资料:
+    - 实验调试指南: wiki/debug.md
     - Linux 使用指导: wiki/linux.md
     - Rust 语言基础: wiki/rust.md
     - UEFI 启动过程: wiki/uefi.md
     - QEMU 使用参考: wiki/qemu.md
+    - 分页内存简述: wiki/paging.md
+    - ELF 文件格式: wiki/elf.md
+    - UART 串口通信: wiki/uart.md
 
 markdown_extensions:
   - attr_list:
@@ -104,10 +109,13 @@ plugins:
       type: iso_datetime
 
 extra_javascript:
-  - scripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+  - scripts/katex.js
+
 
 extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css
   - css/fonts.css
   - css/extra.css
+  - css/inst.css
