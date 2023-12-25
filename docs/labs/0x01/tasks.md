@@ -90,7 +90,9 @@ SECTIONS {
 
 这一个 package 将被 `boot` 和 `kernel` 共同引用，并用于加载内核和用户程序的 ELF 文件。你可以参考 `Cargo.toml` 来了解这一部分的依赖关系。
 
-这一部分的核心代码任务被放置在 `pkg/boot/src/main.rs` 中，你需要按照下列步骤完成这一部分的实现。
+!!! warning "请留意代码中标注有 `FIXME:` 的部分，这些部分需要你自己实现。"
+
+此部分的核心代码任务被放置在 `pkg/boot/src/main.rs` 中，你需要按照下列步骤完成这一部分的实现。
 
 ### 加载相关文件
 
@@ -151,6 +153,7 @@ unsafe {
         let mut frame_allocator = UEFIFrameAllocator(bs);
         ```
 
+    - `pkg/elf/src/lib.rs` 中的 `load_segment` 函数需要你进行补全。**请认真学习实验文档所提供的有关分页内存权限管理、内核 ELF 文件格式的内容，以便你能够完成这一部分的实现。**
     - 阅读配置文件定义中有关内核栈的内容，利用相关参数计算内核栈的起始地址和大小。
     - 别忘了将你修改过的控制寄存器恢复原样。
 

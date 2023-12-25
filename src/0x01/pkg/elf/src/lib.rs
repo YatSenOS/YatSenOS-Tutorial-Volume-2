@@ -129,6 +129,7 @@ fn load_segment(
     let mut page_table_flags = PageTableFlags::PRESENT;
 
     // FIXME: handle page table flags with segment flags
+    unimplemented!("Handle page table flags with segment flags!");
 
     trace!("Segment page table flag: {:?}", page_table_flags);
 

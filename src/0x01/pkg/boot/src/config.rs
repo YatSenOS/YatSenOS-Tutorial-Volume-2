@@ -5,12 +5,12 @@ use core::str::FromStr;
 pub struct Config<'a> {
     /// The address at which the kernel stack is placed
     pub kernel_stack_address: u64,
+    /// The size we need to alloc the init kernel stack, 0 means alloc all
+    pub kernel_stack_auto_grow: u64,
     /// The size of the kernel stack, given in number of 4KiB pages
     pub kernel_stack_size: u64,
     /// The offset into the virtual address space where the physical memory is mapped
     pub physical_memory_offset: u64,
-    /// The size we need to alloc the init kernel stack, 0 means alloc all
-    pub kernel_stack_auto_grow: u64,
     /// The path of kernel ELF
     pub kernel_path: &'a str,
     /// Kernel command line
@@ -21,9 +21,9 @@ pub struct Config<'a> {
 
 const DEFAULT_CONFIG: Config = Config {
     kernel_stack_address: 0xFFFF_FF01_0000_0000,
+    kernel_stack_auto_grow: 0,
     kernel_stack_size: 512,
     physical_memory_offset: 0xFFFF_8000_0000_0000,
-    kernel_stack_auto_grow: 0,
     kernel_path: "\\KERNEL.ELF",
     cmdline: "",
     load_apps: false,
