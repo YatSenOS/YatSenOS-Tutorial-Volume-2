@@ -200,20 +200,211 @@ unsafe {
 
 ## UART 与日志输出
 
-### 串口
+### 串口驱动
 
-请阅读[串口输出简介](../../wiki/uart.md)一节，完成以下问题。
+在 [UART 串口通信](../../wiki/uart.md) 部分中介绍了 UART 的基本原理，以及相关的基础知识。在这一部分实验中，你将会实现一个简单的串口驱动，并将其用于内核的日志输出。
 
-1. 思考题：在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make QEMU_OUTPUT= run` 的输出，结合截图分析对应现象。
+由于这是第一次进行驱动的编写，你可以在 `pkg/kernel/src/drivers` 目录下看到一个基本的代码框架，你需要完成其中的 `uart16550` 驱动。
 
-!!! tip "现象观察提示"
-若此时启动 QEMU 的输出提示是 `vnc server running on ::1:5900`，则说明 QEMU 的图形界面被启用并通过端口 5900 输出。
+在 `pkg/kernel/src/drivers/serial.rs` 中存放了串口初始化的相关代码，你所实现的 `SerialPort` 结构体将会在这里被调用：
 
-    你可以考虑使用 `VNC Viewer` 来观察 QEMU 界面。
+```rust
+use super::uart16550::SerialPort;
 
-2. 思考题：观察实验代码，串口驱动是在进入内核后启用的，那么在驱动加载前，显示的内容是如何输出的？请给出你的回答。
+const SERIAL_IO_PORT: u16 = 0x3F8; // COM1
 
-3. 编程题：请实现 `uart16550` 模块的 `pub fn send(&mut self, data: u8)` 函数，完成对串口的输出。
+once_mutex!(pub SERIAL: SerialPort);
+
+pub fn init() {
+    init_SERIAL(SerialPort::new(SERIAL_IO_PORT));
+    get_serial_for_sure().init();
+
+    println!("{}", crate::get_ascii_header());
+    println!("[+] Serial Initialized.");
+}
+
+guard_access_fn!(pub get_serial(SERIAL: SerialPort));
+```
+
+#### 被保护的全局静态对象
+
+在 Rust 中对全局变量的写入是一个 unsafe 操作，因为这是**线程不安全的**，如果直接使用全局静态变量，编译器会进行报错。但是对于 **“串口设备”** 这一类 **静态的全局对象** 我们确实需要进行一些数据存储，为了内存安全，就会不可避免的引入了**互斥锁**来进行保护。
+
+!!! question "在 `pkg/boot/lib.rs` 中的 `ENTRY` 是如何被处理的？"
+
+在内核框架中，我们提供了两个宏来帮助你实现这一功能：
+
+```rust
+once_mutex!(pub SERIAL: SerialPort);
+guard_access_fn!(pub get_serial(SERIAL: SerialPort));
+```
+
+!!! note "你可以在 `pkg/kernel/src/utils/macros.rs` 中找到这些宏的定义。"
+
+这两段代码将会被展开为：
+
+```rust
+pub static SERIAL: spin::Once<spin::Mutex<SerialPort>> = spin::Once::new();
+
+#[allow(non_snake_case)]
+pub fn init_SERIAL(val_SERIAL: SerialPort) {
+    SERIAL.call_once(|| spin::Mutex::new(val_SERIAL));
+}
+
+#[inline(never)]
+#[allow(non_snake_case, dead_code)]
+pub fn get_serial<'a>() -> Option<spin::MutexGuard<'a, SerialPort>> {
+    SERIAL.get().and_then(spin::Mutex::try_lock)
+}
+
+#[inline(never)]
+#[allow(non_snake_case, dead_code)]
+pub fn get_serial_for_sure<'a>() -> spin::MutexGuard<'a, SerialPort> {
+    SERIAL.get().and_then(spin::Mutex::try_lock)
+        .expect("SERIAL has not been initialized or lockable")
+}
+```
+
+这里使用了 `spin::Mutex` 来对 `SerialPort` 进行了保护，同时提供了 `get_serial` 和 `get_serial_for_sure` 两个函数来尝试获取互斥锁所有权，并返回 `SerialPort` 的引用。
+
+`spin::Once` 声明了一个 `Once` 类型的静态变量，它的 `call_once` 方法接受一个闭包作为参数，这个闭包将会在第一次调用 `call_once` 时被执行，之后的调用将会被忽略。**这确保了 `SERIAL` 只会被初始化一次。**
+
+`spin::Mutex` 是一个基于自旋锁实现的互斥锁，它的 `try_lock` 方法尝试获取互斥锁的所有权，如果获取成功，则返回一个 `MutexGuard`，这个 `MutexGuard` 将会在离开作用域时自动释放互斥锁。
+
+部分有关于“自选锁”和“互斥锁”的实现代码如下所示：
+
+```rust
+pub fn lock(&self) -> SpinMutexGuard<T> {
+    loop {
+        if let Some(guard) = self.try_lock() {
+            break guard;
+        }
+
+        while self.is_locked() {
+            R::relax();
+        }
+    }
+}
+
+pub fn try_lock(&self) -> Option<SpinMutexGuard<T>> {
+    if self
+        .lock
+        .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+        .is_ok()
+    {
+        Some(SpinMutexGuard {
+            lock: &self.lock,
+            data: unsafe { &mut *self.data.get() },
+        })
+    } else {
+        None
+    }
+}
+```
+
+上述代码通过 `AtomicBool` 类型的 `compare_exchange` 函数中的**比较-交换原子指令**尝试获取互斥锁的所有权，并在没有成功获取时进行自旋等待。
+
+!!! tip "本次实验中，这部分不要求进行了解，只需要知道它们的基本原理和使用方法即可。"
+
+你可以在 `spin` crate 的[文档](https://docs.rs/spin/latest/spin)中找到更多信息。
+
+#### 串口驱动的设计
+
+在考虑 IO 设备驱动的设计时，你需要考虑如下问题：
+
+1. 为了描述驱动的**状态**，需要存储哪些数据？
+2. 需要如何与**硬件**进行交互？
+3. 与硬件交互的过程中，需要考虑哪些**并发**问题？
+4. 驱动需要向内核提供哪些**接口**？
+
+以 `uart16550` 为例，在 `x86_64` 架构下，你可以在 [Serial_Ports - OSDev](https://wiki.osdev.org/Serial_Ports) 中找到它的相关资料，包括寄存器标志位的含义、寄存器的地址等等。
+
+为了与串口设备进行交互，你需要存储一个设备端口的基地址，对于 COM1 端口，它的基地址为 `0x3F8`。
+
+在这一基地址的基础上，你可以通过偏移量来访问串口设备的寄存器，例如 `0x3F8 + 0` 将会访问串口设备的数据寄存器，`0x3F8 + 1` 将会访问串口设备的中断使能寄存器等等。*上方链接中的资料中有详细的寄存器地址和偏移量的对应关系。*
+
+为了与这些寄存器进行交互，你可以使用 `x86_64` crate 中的 `Port`，以下是一个简单的例子：
+
+```rust
+let data = Port::new(base);
+data.write(0x0A);
+let ret = data.read();
+```
+
+对于只读和只写的寄存器，你可以使用 `PortWriteOnly` 和 `PortReadOnly` 来从类型系统上防止误操作的发生。
+
+- 偏移量为 `1` 的寄存器是中断使能寄存器，可以使用 `PortWriteOnly::new(base + 1)` 操作。
+- 偏移量为 `5` 的寄存器是线控寄存器，可以使用 `PortReadOnly::new(base + 5)` 操作。
+
+对于串口设备，其寄存器均为 8 位，你可以使用 `u8` 类型来进行读写操作。
+
+!!! tip "线控寄存器的每一比特都有特定的含义，可以尝试使用 `bitflags` 宏来定义这些标志位。"
+
+#### 串口驱动的实现
+
+串口设备的驱动实现主要由初始化、发送数据、接收数据三部分组成。
+
+参考 [Serial_Ports - OSDev](https://wiki.osdev.org/Serial_Ports) 中提供的如下示例代码，编写这部分驱动的 Rust 实现：
+
+> 其中的 `outb` 和 `inb` 函数的含义是向指定的端口写入一个字节、从指定的端口读取一个字节。
+
+##### 初始化
+
+!!! note "请在初始化的每一步中使用注释说明你的操作。若存在其他代码参考，请使用注释说明。"
+
+```c
+#define PORT 0x3f8          // COM1
+
+static int init_serial() {
+   outb(PORT + 1, 0x00);    // Disable all interrupts
+   outb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+   outb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+   outb(PORT + 1, 0x00);    //                  (hi byte)
+   outb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
+   outb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+   outb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+   outb(PORT + 4, 0x1E);    // Set in loopback mode, test the serial chip
+   outb(PORT + 0, 0xAE);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+
+   // Check if serial is faulty (i.e: not same byte as sent)
+   if(inb(PORT + 0) != 0xAE) {
+      return 1;
+   }
+
+   // If serial is not faulty set it in normal operation mode
+   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
+   outb(PORT + 4, 0x0F);
+   return 0;
+}
+```
+
+##### 发送数据
+
+```c
+int is_transmit_empty() {
+   return inb(PORT + 5) & 0x20;
+}
+
+void write_serial(char a) {
+   while (is_transmit_empty() == 0);
+
+   outb(PORT,a);
+}
+```
+
+##### 接收数据
+
+```c
+int serial_received() {
+   return inb(PORT + 5) & 1;
+}
+
+char read_serial() {
+   while (serial_received() == 0);
+
+   return inb(PORT);
+}
+```
 
 ### 日志输出
 
@@ -223,6 +414,17 @@ unsafe {
 
 1. 在 `pkg/kernel` 的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，这是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
 2. 在 `pkg/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
+3. 串口驱动是在进入内核后启用的，那么在进入内核之前，显示的内容是如何输出的？
+4. 在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。
+
+    - 假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
+    - 在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
+
+    !!! note "现象观察提示"
+
+        若此时启动 QEMU 的输出提示是 `vnc server running on ::1:5900`，则说明 QEMU 的图形界面被启用并通过端口 5900 输出。你可以考虑使用 `VNC Viewer` 来观察 QEMU 界面。
+
+        **这一步骤不做要求，如果自身环境实现遇到困难，可以尝试与其他同学合作进行观察。**
 
 ## 加分项
 

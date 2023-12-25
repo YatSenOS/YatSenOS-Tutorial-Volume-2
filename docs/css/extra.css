@@ -10,6 +10,14 @@
     font-weight: 500;
   }
 
+  h5 {
+    font-size: .75rem;
+  }
+
+  h6 {
+    font-size: .7rem;
+  }
+
   .admonition {
     font-size: 0.75rem;
   }
