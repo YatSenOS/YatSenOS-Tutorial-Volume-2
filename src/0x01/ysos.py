@@ -76,7 +76,8 @@ def qemu(output: str = '-nographic', memory: str = '96M', debug: bool = False, i
 
     # add optional path C:\Program Files\qemu for Windows
     if qemu_exe is None and os.name == 'nt':
-        qemu_exe = shutil.which('qemu-system-x86_64', path='C:\\Program Files\\qemu')
+        qemu_exe = shutil.which('qemu-system-x86_64',
+                                path='C:\\Program Files\\qemu')
 
     if qemu_exe is None:
         raise Exception('qemu-system-x86_64 not found in PATH')
@@ -122,8 +123,8 @@ def build():
     bootloader = os.path.join(os.getcwd(), 'pkg', 'boot')
     info('Building', 'bootloader...')
     execute_command([cargo_exe, 'build', '--release'], bootloader)
-    compile_output = os.path.join(os.getcwd(),
-                                  'target', 'x86_64-unknown-uefi', 'release', 'ysos_boot.efi')
+    compile_output = os.path.join(
+        os.getcwd(), 'target', 'x86_64-unknown-uefi', 'release', 'ysos_boot.efi')
     copy_to_esp(compile_output, os.path.join('EFI', 'BOOT', 'BOOTX64.EFI'))
 
     # copy kernel config
@@ -138,8 +139,8 @@ def build():
     profile = '--release' if args.profile == 'release' else '--profile=release-with-debug'
     execute_command([cargo_exe, 'build', profile], kernel)
     profile_dir = 'release' if args.profile == 'release' else 'release-with-debug'
-    compile_output = os.path.join(os.getcwd(),
-                                  'target', 'x86_64-unknown-none', profile_dir, 'ysos_kernel')
+    compile_output = os.path.join(
+        os.getcwd(), 'target', 'x86_64-unknown-none', profile_dir, 'ysos_kernel')
     copy_to_esp(compile_output, 'KERNEL.ELF')
 
     # build apps
@@ -157,7 +158,7 @@ def build():
         info('Building', f'app {app}...')
         execute_command([cargo_exe, 'build', profile], app_path)
         compile_output = os.path.join(
-            'target', 'x86_64-unknown-ysos', profile_dir, app_name)
+            os.getcwd(), 'target', 'x86_64-unknown-ysos', profile_dir, app_name)
         copy_to_esp(compile_output, os.path.join('APP', app))
 
 
