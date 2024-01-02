@@ -70,9 +70,10 @@ nav:
     - 实验八：扩展实验:
       - labs/0x08/index.md
   - 实验资料:
-    - 实验调试指南: wiki/debug.md
-    - Linux 使用指导: wiki/linux.md
+    - Linux 环境配置: wiki/linux.md
+    - Windows 环境配置: wiki/windows.md
     - Rust 语言基础: wiki/rust.md
+    - 实验调试指南: wiki/debug.md
     - UEFI 启动过程: wiki/uefi.md
     - QEMU 使用参考: wiki/qemu.md
     - 分页内存简述: wiki/paging.md

@@ -16,83 +16,13 @@
 
 - Ubuntu 22.04 LTS
 - Ubuntu 22.04 LTS with WSL 2
-- macOS with Apple Silicon（请自行安装相关依赖）
+- Windows 11
+- macOS with Apple Silicon
 - 其他可行的平台，但我们不提供技术支持
-
-### 安装 Linux 系统和项目开发环境
-
-Linux 有许多发行版，这里出于环境一致性考虑，推荐使用 Ubuntu 22.04。
-
-其他发行版（如 Debian，Arch，Kali）也可以满足实验需求，但**请注意内核版本、QEMU 版本都不应低于本次实验的参考标准**。
-
-#### 使用 WSL2
-
-对于 Windows 10/11 的用户来说，可以使用 WSL（Windows Subsystem Linux）来安装 Linux 系统，WSL 意为面向 Windows 的 Linux 子系统，微软为其提供了很多特性方便我们使用，我们可以在 Windows 上运行 Linux 程序。
-
-你可以使用如下指令在 Windows 上安装 WSL2：
-
-```bash
-wsl --install -d Ubuntu
-```
-
-上述指令将会安装 WSL2 的全部依赖，并下载 Ubuntu 作为默认的发行版本。在安装过程中可能会重启电脑，安装完成后，你可以在 Windows 的应用列表中找到 Ubuntu，点击运行即可。
-
-关于其他的配置，可以在网上找到大量的参考资料，请自行搜索阅读，或寻求 LLM 的帮助。
-
-#### 使用 VMware Workstation
-
-参考 [VMware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
 
 ### 安装项目开发环境
 
-在正确安装 Linux 系统后，需要安装和配置开发环境，包括 gcc, make, qemu 等。
-
-为了保障 Linux 软件源的正常、快速访问，请参考 [Ubuntu 软件仓库镜像使用帮助](https://help.mirrors.cernet.edu.cn/ubuntu/) 提供的文档进行软件源更换。
-
-!!! note "校内镜像源"
-
-    我们还提供有**仅供校内、不确保一定可用**的内网镜像源：[matrix 镜像站](https://mirrors.matrix.moe)
-
-    请注意，使用上述镜像站会让你享受到更好的下载速度，但你同时也需要**承担不可用时带来的风险，并具有自主更换到其他镜像站的能力**。
-
-1. 使用以下命令更新 apt 源：
-
-    ```bash
-    sudo apt update && sudo apt upgrade
-    ```
-
-2. 安装 qemu 等工具：
-
-    ```bash
-    sudo apt install qemu-system-x86 build-essential gdb
-    ```
-
-3. 安装 rustup：
-
-    !!! note "rustup 安装过程中存在一些可配置选项，请按照默认选项进行安装。"
-
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    source "$HOME/.cargo/env"
-    ```
-
-在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
-
-```bash
-$ rustc --version
-rustc 1.74.0 (79e9716c9 2023-11-13)
-
-$ qemu-system-x86_64 --version
-QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)
-
-$ gcc --version
-gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
-
-$ gdb --version
-GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
-```
-
-!!! tip "如果上述内容不足以让你完全配置好开发环境，可以参考 THU Rust 课程的 [环境配置](https://lab.cs.tsinghua.edu.cn/rust/environment/)"
+!!! tip "对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。<br/> 对于选择使用 Windows 11 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。"
 
 ## 尝试使用 Rust 进行编程
 
@@ -244,7 +174,7 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
     选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
 
-    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹"
+    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹，Windows 环境请注意参数和路径的格式"
 
     ```bash
     $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
@@ -273,6 +203,7 @@ GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
     pkg/boot/Cargo.toml
     pkg/boot/src/main.rs
     rust-toolchain.toml
+    ysos.py
     ```
 
 ### 使用 QEMU 启动 UEFI Shell
@@ -391,7 +322,7 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 
 在 `efi_main` 函数中，首先对 `system_table` 和 `log` 进行初始化，然后进入一个死循环，每次循环输出一条日志后等待一段时间。
 
-在项目根目录下运行 `make run`，预期得到如下输出：
+在项目根目录下运行 `make run` 或 `python ysos.py run`，预期得到如下输出：
 
 ```bash
 [ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
@@ -404,7 +335,11 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 
 1. 了解现代操作系统（Windows）的启动过程，`legacy BIOS` 和 `UEFI` 的区别是什么？
 
-2. 尝试解释 Makefile 中的命令做了哪些事情？
+2. 尝试解释 Makefile 中的命令做了哪些事情？或许你可以参考下列命令来得到更易读的解释：
+
+    ```bash
+    python ysos.py run --dry-run
+    ```
 
 3. 利用 `cargo` 的包管理和 `docs.rs` 的文档，我们可以很方便的使用第三方库。这些库的源代码在哪里？它们是什么时候被编译的？
 

@@ -26,6 +26,8 @@
 
     请注意结合 Lab 0 的要求，将代码**复制到你自己的仓库**中进行实验，而不是在本仓库中进行。
 
+    请注意本次实验中的 `Makefile` 和 `ysos.py` 均有更新。
+
     ```bash
     $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x01 /path/to/your/workdir
     ```
@@ -184,8 +186,8 @@ unsafe {
 
 最后，你需要检验是否成功加载了内核：
 
-- 使用 `make build DBG_INFO=true` 编译内核，确保编译时开启了调试信息。
-- 使用 `make debug` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
+- 使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
+- 使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
 - 在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
 
     !!! note "使用 `.gdbinit` 方便你的调试过程"
@@ -464,6 +466,7 @@ println!("{}", record.args());
 
     - 假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
     - 在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
+    - 如果你使用 `ysos.py` 来启动 qemu，可以尝试修改 `-o` 选项来实现上述功能。
 
     !!! note "现象观察提示"
 

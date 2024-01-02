@@ -32,6 +32,12 @@ sudo apt install gdb
 make build DBG_INFO=true
 ```
 
+如果你没有配置好的 make 环境（比如 Windows 下），你也可以通过 `ysos.py` 脚本来编译内核，指令示例如下：
+
+```bash
+python ysos.py build -p debug
+```
+
 当观察到终端输出如下信息时，说明带调试符号已经生成成功：
 
 ```log
@@ -205,10 +211,17 @@ sudo apt install lldb
 完成以上配置后，我们就可以在 VSCode 中调试内核了。首先，我们完成内核编译，并启动 QEMU 调试。贴心的 TA 已经将指令集成进 Makefile 中，只需要执行以下指令即可：
 
 ```bash
-make run DBG_INFO=true
+make build DBG_INFO=true
+make debug
 ```
 
-在VSCode中设置任何你想要的断点，按下 `F5` 即可开始调试。例如，我们想调试内核入口函数：
+同样的，如果你没有配置好的 make 环境，也可以通过 `ysos.py` 脚本来运行内核，指令示例如下：
+
+```bash
+python ysos.py run -p debug -d
+```
+
+在 VSCode 中设置任何你想要的断点，按下 `F5` 即可开始调试。例如，我们想调试内核入口函数：
 
 ![vscode](./assets/debug/vscode-screenshot.jpg)
 
