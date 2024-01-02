@@ -152,7 +152,7 @@ def build():
         with open(os.path.join(app_path, 'Cargo.toml'), 'r') as f:
             for line in f.readlines():
                 if 'name' in line:
-                    app_name = line.split('=')[1].strip().strip('"')
+                    app_name = line.split('"')[1]
                     break
 
         info('Building', f'app {app}...')
