@@ -22,7 +22,20 @@
 
 ### 安装项目开发环境
 
-!!! tip "对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。<br/> 对于选择使用 Windows 11 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。"
+!!! note "选择你喜欢的环境"
+
+    本实验在 Windows 上进行项目开发是**完全可行的**，但是我们提供的各种工具的选项可能有所出入。
+
+    在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
+
+    在 Unix 平台上我们建议通过 VSCode (Remote) + Python / make + GDB with gef 插件进行开发、调试。
+
+
+- 对于选择使用 Windows 11 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
+
+- 对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
+
+- 对于选择使用 macOS 的同学，请安装 `brew`，和相应工具链，并参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
 ## 尝试使用 Rust 进行编程
 

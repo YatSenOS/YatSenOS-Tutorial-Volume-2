@@ -185,13 +185,9 @@ sudo apt install lldb
             "name": "(lldb) YSOS",
             "type": "lldb",
             "request": "launch",
-            "program": "<path-to-binary>",
+            "program": "${workspaceFolder}/esp/KERNEL.ELF",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "initCommands": [
-                "settings set target.exec-search-paths <path-to-lldb>",
-                "file <path-to-binary>"
-            ],
             "processCreateCommands": [
                 "gdb-remote 1234"
             ]
@@ -199,12 +195,6 @@ sudo apt install lldb
     ]
 }
 ```
-
-!!! note "注意"
-
-    不要直接复制配置文本，请先完成任务总的思考题。
-
-    请将 `<path-to-binary>` 替换为你的二进制文件的路径，将 `<path-to-lldb>` 替换为你的 LLDB 的路径。
 
 ### 启动调试
 
@@ -220,6 +210,12 @@ make debug
 ```bash
 python ysos.py run -p debug -d
 ```
+
+!! note "SIGTRAP"
+
+    刚开始调试时，你会在 VSCode 中看到一个位于 `0x0000FFF0` 的 `SIGTRAP` 异常，这是正常的情况。
+
+    因为我们为 QEMU 开启了 `-S` 参数，它的意思是在执行第一条指令时暂停虚拟机，并等待调试器连接。
 
 在 VSCode 中设置任何你想要的断点，按下 `F5` 即可开始调试。例如，我们想调试内核入口函数：
 
