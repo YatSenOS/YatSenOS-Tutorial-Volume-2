@@ -1,0 +1,1 @@
+# GDT、TSS 与 IDT
