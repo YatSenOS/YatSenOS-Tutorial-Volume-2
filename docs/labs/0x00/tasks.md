@@ -28,7 +28,7 @@
 
     在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
 
-    在 Unix 平台上我们建议通过 VSCode (Remote) + Python / make + GDB 结合 gef 进行开发、调试。
+    在 Linux 平台上我们建议通过 VSCode (Remote) + Python / make + GDB 结合 gef 进行开发、调试。
 
 
 - 对于选择使用 Windows 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
