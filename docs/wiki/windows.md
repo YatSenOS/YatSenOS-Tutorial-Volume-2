@@ -75,7 +75,7 @@ Python 的安装多种多样，同时由于包管理的混乱，也有很多虚�
 推荐通过 `winget` 来安装 Python 和 `mamba`，`mamba` 是一个基于 `conda` 的包管理器，比原生的 `conda` 解析速度更快、效果更好。
 
 ```bash
-winget info CondaForge.Miniforge3
+winget install CondaForge.Miniforge3
 ```
 
 安装后，打开开始菜单中的 `Miniforge Prompt`，输入如下命令来初始化 PowerShell：
