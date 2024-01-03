@@ -14,11 +14,11 @@
 
 我们支持并推荐如下平台进行实验：
 
+- Windows 10/11
 - Ubuntu 22.04 LTS
-- Ubuntu 22.04 LTS with WSL 2
-- Windows 11
+- Ubuntu 22.04 LTS on WSL 2
 - macOS with Apple Silicon
-- 其他可行的平台，但我们不提供技术支持
+- 其他可行的平台，但我们不提供技术支持。如 Debian、Fedora、Kali Linux、Arch Linux 等。
 
 ### 安装项目开发环境
 
@@ -28,14 +28,14 @@
 
     在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
 
-    在 Unix 平台上我们建议通过 VSCode (Remote) + Python / make + GDB with gef 插件进行开发、调试。
+    在 Unix 平台上我们建议通过 VSCode (Remote) + Python / make + GDB 结合 gef 进行开发、调试。
 
 
-- 对于选择使用 Windows 11 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
+- 对于选择使用 Windows 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
 
 - 对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
-- 对于选择使用 macOS 的同学，请安装 `brew`，和相应工具链，并参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
+- 对于选择使用 macOS 的同学，请安装 `brew` 和相应工具，参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
 ## 尝试使用 Rust 进行编程
 

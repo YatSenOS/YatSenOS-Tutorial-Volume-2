@@ -1,5 +1,14 @@
 # Windows 环境配置
 
+!!! tip "关于 Windows 10"
+
+    本文主要面向 Windows 11 用户，在 Windows 10 上你可能需要补全一些额外的步骤，如：
+
+    - 安装 `winget`
+    - 安装 `Terminal` 和 `PowerShell`
+
+    请自行搜索相关资料进行安装和配置。
+
 ## 安装 rustup
 
 请前往 [rustup 官网](https://rustup.rs/) 下载并运行 `rustup-init.exe`，安装选项请阅读下列内容：
@@ -43,6 +52,25 @@ rust 提供了两种 windows 上的工具链：`msvc` 和 `gnu`，详细信息�
 其余安装选择保持默认即可。
 
 对于实验来说，编译产物均为 ELF 文件，且不涉及 Windows 相关 SDK。因此二者均可完美达成实验要求，具体安装情况可根据自身情况选择。
+
+## winget 配置
+
+你可能会在使用 `winget` 时遇到一些网络访问问题，可以通过换源进行解决。
+
+请以管理员身份运行终端，然后执行如下命令替换 USTC 镜像：
+
+```bash
+winget source remove winget
+winget source add winget https://mirrors.ustc.edu.cn/winget-source
+```
+
+参考 [Windows Package Manager 软件源 - USTC](https://mirrors.ustc.edu.cn/help/winget-source.html)
+
+本文需要的软件安装程序也可以从 TA 处获取，或者通过其他方式下载，文档编写时的部分安装程序下载链接如下：
+
+QEMU: [qemu-w64-setup-20231214.exe](https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20231214.exe)
+
+Miniforge3: [Miniforge3-23.3.1-1-Windows-x86_64.exe (github)](https://github.com/conda-forge/miniforge/releases/download/23.3.1-1/Miniforge3-23.3.1-1-Windows-x86_64.exe)
 
 ## 安装 QEMU
 
