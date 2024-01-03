@@ -187,13 +187,13 @@
 
     选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
 
-    !!! warning "不要直接运行如下代码，选择你自己的工作文件夹，Windows 环境请注意参数和路径的格式"
+    !!! warning "不要直接运行如下代码，选择自己的工作文件夹，Windows 环境请注意命令和路径的格式"
 
     ```bash
     $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
     ```
 
-    !!! note "我们使用 `/path/to/your/workdir` 指代你自己的工作区，**请将其替换为你自己的工作区路径**"
+    !!! note "我们使用 `/path/to/your/workdir` 指代你的工作区，**请将其替换为你的工作区路径**"
 
 3. 初始化你的仓库：
 
@@ -231,9 +231,11 @@ UEFI Shell 是一个基于 UEFI 的命令行工具，它可以让我们在 UEFI 
 qemu-system-x86_64 -bios ./assets/OVMF.fd -net none -nographic
 ```
 
+> 你可能会需要在 Windows 环境下使用 `qemu-system-x86_64.exe` 的绝对路径来代替这里的 `qemu-system-x86_64`
+
 !!! note "QEMU 的相关参数含义，参考 [QEMU 使用参考](../../wiki/qemu.md)"
 
-你将会看到如下输出：
+在预期下将会看到如下输出：
 
 ```log
 UEFI Interactive Shell v2.2
