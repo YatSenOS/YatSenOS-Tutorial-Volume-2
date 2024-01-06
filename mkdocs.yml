@@ -79,7 +79,7 @@ nav:
     - 分页内存简述: wiki/paging.md
     - ELF 文件格式: wiki/elf.md
     - UART 串口通信: wiki/uart.md
-    - CPU 异常与中断处理: wiki/exceptions.md
+    - CPU 中断处理: wiki/interrupts.md
     - APIC 可编程中断控制器: wiki/apic.md
     - GDT、TSS 与 IDT: wiki/gdt.md
     - 内存管理: wiki/memory.md
