@@ -68,7 +68,7 @@ pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
 }
 ```
 
-由于中断处理函数需要遵循相应的调用约定（calling convention），在发生，因此需要使用 `extern "x86-interrupt"` 修饰符来声明函数，例如：
+由于中断处理函数需要遵循相应的调用约定（calling convention），因此需要使用 `extern "x86-interrupt"` 修饰符来声明函数，例如：
 
 ```rust
 pub extern "x86-interrupt" fn divide_error_handler(stack_frame: InterruptStackFrame) {

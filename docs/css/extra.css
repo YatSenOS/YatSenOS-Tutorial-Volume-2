@@ -22,11 +22,11 @@
     font-size: 0.75rem;
   }
 
-  li > p:first-child:not(:only-child) {
+  li > p:first-child {
     font-weight: bold;
   }
 
-  ::marker {
+  li:has(p:first-child)::marker {
     font-weight: bold;
   }
 }
