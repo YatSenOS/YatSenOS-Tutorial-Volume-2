@@ -1,0 +1,17 @@
+[package]
+name = "ysos_kernel"
+version = "0.2.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+boot = { package = "ysos_boot", path = "../boot", default-features = false }
+lazy_static = { version = "1.4", features = ["spin_no_std"] }
+paste = "1.0"
+spin = "0.9"
+x86 = "0.52"
+x86_64 = "0.14"
+log = "0.4"
+bitflags = "2.3"
+libm = "0.2"
+linked_list_allocator = "0.10"

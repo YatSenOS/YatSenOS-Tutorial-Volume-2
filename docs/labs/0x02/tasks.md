@@ -44,10 +44,10 @@ lazy_static! {
 
 对于软件中断，如在 `x86` 架构中的系统调用 `int 0x80`，我们将在 `syscall.rs` 中进行处理。从而统一地对中断进行代码组织。这部分内容将在后续实验中进行实现。
 
-之后按照项目规范，为 `interrupts` 模块添加 `pub fn init()` 函数，将中断系统的初始化工作统一起来：
+之后按照项目规范，为 `interrupt` 模块添加 `pub fn init()` 函数，将中断系统的初始化工作统一起来：
 
 ```rust
-/// init interrupts system
+/// init interrupt system
 pub fn init() {
     // Load the Interrupt Descriptor Table
     IDT.load();
