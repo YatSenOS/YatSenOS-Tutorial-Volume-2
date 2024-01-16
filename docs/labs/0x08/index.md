@@ -1,5 +1,4 @@
 # 实验八：扩展实验
 
-!!! tip ""
+!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
 
-    <p align="right" style="font-weight: bold">by</p>

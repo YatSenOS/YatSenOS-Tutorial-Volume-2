@@ -1,8 +1,6 @@
 # 实验四：用户程序与系统调用
 
-!!! tip ""
-
-    <p align="right" style="font-weight: bold">by</p>
+!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
 
 ## 实验目的
 

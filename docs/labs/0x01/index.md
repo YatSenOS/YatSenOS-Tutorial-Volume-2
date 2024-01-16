@@ -1,8 +1,6 @@
 # 实验一：操作系统的启动
 
-!!! tip "就像宇宙的大爆炸，操作系统的启动是一切的起点。<br/>在这个微妙的瞬间，一切从无到有，从混沌到秩序。"
-
-    <p align="right" style="font-weight: bold">by Copilot</p>
+!!! tip "就像宇宙的大爆炸，操作系统的启动是一切的起点。<br/>在这个微妙的瞬间，一切从无到有，从混沌到秩序。<br/>&nbsp;<span style="font-weight: bold; float: right">by Copilot</span>"
 
 ## 实验目的
 

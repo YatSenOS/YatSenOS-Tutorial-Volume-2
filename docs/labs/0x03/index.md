@@ -1,8 +1,6 @@
 # 实验三：内核线程与缺页异常
 
-!!! tip "在无尽的时间舞台上，微妙的轮转编织成了某种无形的序曲，舞者轮番上场，演绎着各自的生命。"
-
-    <p align="right" style="font-weight: bold">by ChatGPT</p>
+!!! tip "在无尽的时间舞台上，微妙的轮转编织成了某种无形的序曲<br/>舞者轮番上场，演绎着各自的生命。<br/>&nbsp;<span style="font-weight: bold; float: right">by ChatGPT</span>"
 
 ## 实验目的
 

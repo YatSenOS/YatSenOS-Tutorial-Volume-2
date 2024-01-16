@@ -1,8 +1,6 @@
 # 实验零：环境搭建与实验准备
 
-!!! tip "代码是一场无声的交流 <br/>有些人是优秀的诗人，能够将抽象的想法转化为优雅的语言 <br/>而有些人则是忠实的翻译者，将逻辑转换成计算机可理解的语言。"
-
-    <p align="right" style="font-weight: bold">by ChatGPT</p>
+!!! tip "代码是一场无声的交流 <br/>有些人是优秀的诗人，能够将抽象的想法转化为优雅的语言 <br/>而有些人则是忠实的翻译者，将逻辑转换成计算机可理解的语言。<br/>&nbsp;<span style="font-weight: bold; float: right">by ChatGPT</span>"
 
 ## 实验目的
 

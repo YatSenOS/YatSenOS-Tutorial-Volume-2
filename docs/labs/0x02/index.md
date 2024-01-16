@@ -1,8 +1,6 @@
 # 实验二：中断处理
 
-!!! tip "一场未预知的风暴，突如其来，改变了原本平静的世界。"
-
-    <p align="right" style="font-weight: bold">by Copilot</p>
+!!! tip "一场未预知的风暴，突如其来，改变了原本平静的世界。<br/>&nbsp;<span style="font-weight: bold; float: right">by Copilot</span>"
 
 ## 实验目的
 

@@ -1,8 +1,6 @@
 # 实验五：fork 的实现、并发与锁机制
 
-!!! tip ""
-
-    <p align="right" style="font-weight: bold">by</p>
+!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
 
 ## 实验目的
 
