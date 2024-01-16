@@ -20,7 +20,7 @@
 
 在 64 位长模式开启分页机制下，段描述符的作用被大大削弱，地址转换和访问权限由分页机制来控制，但它仍然被用于记录一些系统状态信息、进行特权级管理等。
 
-### 任务状态段
+## 任务状态段
 
 任务状态段（Task State Segment, TSS）也是一种数据结构，它存储有关任务的相关数据。
 
@@ -47,6 +47,12 @@
 <table class="wikitable"><caption>Gate Descriptor (64-bit)</caption><tr><th colspan="7" style="text-align: left;">127&#160;&#160;&#160;<span style="float: right;">96</span></th></tr><tr><td colspan="7">Reserved</td></tr><tr><th colspan="7" style="text-align: left;">95&#160;&#160;&#160;<span style="float: right;">64</span></th></tr><tr><td colspan="7"><b>Offset</b><br />63&#160;&#160;&#160;<span style="float: right;">32</span></td></tr><tr><th style="width: 50%; text-align: left;">63&#160;&#160;&#160;<span style="float: right;">48</span></th><th style="width: 3.1%">47</th><th style="width: 7%; text-align: left;">46&#160;&#160;&#160;<span style="float: right;">45</span></th><th style="width: 3.1%">44</th><th style="width: 12.5%; text-align: left;">43&#160;&#160;&#160;<span style="float: right;">40</span></th><th style="width: 15.625%; text-align: left;">39&#160;&#160;&#160;<span style="float: right;">35</span></th><th style="width: 9.375%; text-align: left;">34&#160;&#160;&#160;<span style="float: right;">32</span></th></tr><tr><td><b>Offset</b><br />31&#160;&#160;&#160;<span style="float: right;">16</span></td><td style="text-align: center; vertical-align: top;"><b>P</b></td><td><b>DPL</b><br />1&#160;&#160;&#160;<span style="float: right;">0</span></td><td style="text-align: center; vertical-align: top;">0</td><td><b>Gate Type</b><br />3&#160;&#160;&#160;<span style="float: right;">0</span></td><td style="vertical-align:top">Reserved</td><td><b>IST</b><br />2&#160;&#160;&#160;<span style="float: right;">0</span></td></tr><tr><th style="text-align: left;">31&#160;&#160;&#160;<span style="float: right;">16</span></th><th style="text-align: left;" colspan="6">15&#160;&#160;&#160;<span style="float: right;">0</span></th></tr><tr><td><b>Segment Selector</b><br />15&#160;&#160;&#160;<span style="float: right;">0</span></td><td colspan="6"><b>Offset</b><br />15&#160;&#160;&#160;<span style="float: right;">0</span></td></tr></table>
 
 可以看到，它存储了权限级别（DPL）、中断处理程序的入口地址（Offset）、中断栈（IST）等信息。
+
+门类型（Gate Type）字段指定了中断门的类型，包括：
+
+- 中断门（Interrupt Gate）：用于处理中断，中断处理程序会被调用，中断返回后，CPU 会恢复中断前的执行状态。
+- 陷阱门（Trap Gate）：用于处理陷阱，陷阱处理程序会被调用，不同之处在于，对于中断门，中断在进入时自动禁用，并在 IRET 时重新启用，而陷阱门则不会主动禁用中断。
+- 任务门（Task Gate）：曾用于任务切换，它在 x86-64 上已被完全删除。
 
 ## 参考资料
 
