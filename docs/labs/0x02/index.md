@@ -25,7 +25,7 @@
 
 - [CPU 异常与中断处理](../../wiki/interrupts.md)
 - [APIC 可编程中断控制器](../../wiki/apic.md)
-- [GDT、TSS 与 IDT](../../wiki/structures.md)
+- [x64 数据结构概述](../../wiki/structures.md)
 - [内存管理](../../wiki/memory.md)
 
 ## 实验任务与要求
