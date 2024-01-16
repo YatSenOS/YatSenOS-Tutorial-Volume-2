@@ -36,3 +36,9 @@ pub fn enable_irq(irq: u8) {
     let mut ioapic = unsafe { IoApic::new(physical_to_virtual(IOAPIC_ADDR)) };
     ioapic.enable(irq, 0);
 }
+
+#[inline(always)]
+pub fn ack() {
+    let mut lapic = unsafe { XApic::new(physical_to_virtual(LAPIC_ADDR)) };
+    lapic.eoi();
+}
