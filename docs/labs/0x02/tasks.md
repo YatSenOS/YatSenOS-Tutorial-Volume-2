@@ -61,8 +61,8 @@ lazy_static! {
     补全上述代码任务，并进行下列尝试，并在报告中保留对应的触发方式及相关代码片段：
 
     1. 尝试用你的方式触发 Triple Fault，开启 `intdbg` 对应的选项，在 QEMU 中查看调试信息，分析 Triple Fault 的发生过程。
-    2. 补全 Double Fault 的中断处理函数，观察 Double Fault 的发生过程。尝试通过调试器定位 Double Fault 发生时的栈是否符合预期。
-    3. 补全 Page Fault 的中断处理函数，通过访问非法地址触发 Page Fault，观察 Page Fault 的发生过程。分析 Cr2 寄存器的值，并尝试回答为什么 Page Fault 属于可恢复的异常。
+    2. 关注 Double Fault 的中断处理函数，观察 Double Fault 的发生过程。尝试通过调试器定位 Double Fault 发生时的栈是否符合预期。
+    3. 关注 Page Fault 的中断处理函数，通过访问非法地址触发 Page Fault，观察 Page Fault 的发生过程。分析 Cr2 寄存器的值，并尝试回答为什么 Page Fault 属于可恢复的异常。
 
 ## 注册中断处理程序
 
@@ -144,7 +144,7 @@ pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
 
 ## 初始化 APIC
 
-可编程中断控制器（PIC）是构成 x86 架构的重要组成部分之一。得益于这一类芯片的存在，x86 架构得以实现中断驱动的操作系统设计。中断是一种处理外部事件的机制，允许计算机在运行过程中响应异步的、不可预测的事件。PIC的引入为处理中断提供了关键的硬件支持。
+可编程中断控制器（PIC）是构成 x86 架构的重要组成部分之一。得益于这一类芯片的存在，x86 架构得以实现中断驱动的操作系统设计。中断是一种处理外部事件的机制，允许计算机在运行过程中响应异步的、不可预测的事件。PIC 的引入为处理中断提供了关键的硬件支持。
 
 最初，x86 架构使用的是 8259 可编程中断控制器，它是一种级联的、基于中断请求线（IRQ）的硬件设备。随着计算机体系结构的发展和性能需求的提高，单一的 8259 PIC 逐渐显露出瓶颈，无法满足现代系统对更高级别中断处理的需求。
 
@@ -152,7 +152,299 @@ pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
 
 !!! note "请阅读 [APIC 可编程中断控制器](../../wiki/apic.md) 部分，了解什么是 APIC 可编程中断控制器。"
 
-根据上述文档，你需要在 `src/interrupt/apic/xapic.rs` 中补全 APIC 的初始化代码，以便在后续实验中使用 APIC 实现时钟中断和 I/O 设备中断。
+你需要在 `src/interrupt/apic/xapic.rs` 中补全 APIC 的初始化代码，以便在后续实验中使用 APIC 实现时钟中断和 I/O 设备中断。
+
+对于一个寄存器的读写操作可以由下列参考代码实现：
+
+```rust
+use core::ptr::{read_volatile, write_volatile};
+
+pub struct XApic {
+    addr: u64,
+}
+
+impl XApic {
+    pub unsafe fn new(addr: u64) -> Self {
+        XApic { addr }
+    }
+
+    unsafe fn read(&self, reg: u32) -> u32 {
+        read_volatile((self.addr + reg as u64) as *const u32)
+    }
+
+    unsafe fn write(&mut self, reg: u32, value: u32) {
+        write_volatile((self.addr + reg as u64) as *mut u32, value);
+        self.read(0x20);
+    }
+}
+```
+
+!!! tip "你应当使用 `src/memory/address.rs` 中提供的函数进行 MMIO 地址到虚拟地址的映射"
+
+下面以部分操作为例讲解如何进行 APIC 的初始化。
+
+- 检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
+
+    ```rust
+    CpuId::new().get_feature_info().map(
+        |f| f.has_apic()
+    ).unwrap_or(false)
+    ```
+
+- 操作 SPIV 寄存器，启用 APIC 并设置 Spurious IRQ Vector。
+
+    查询文档可知，SPIV 寄存器的偏移量为 0xF0。其位描述如下：
+
+    <table class="inst">
+    <tr>
+        <td class="inst-numnodel">31</td>
+        <td class="inst-numnode" colspan="16"></td>
+        <td class="inst-numnoder">10</td>
+        <td class="inst-numnoder">9</td>
+        <td class="inst-numnoder">8</td>
+        <td class="inst-numnode" colspan="3"></td>
+        <td class="inst-numnoder">4</td>
+        <td class="inst-numnoder">3</td>
+        <td class="inst-numnoder">2</td>
+        <td class="inst-numnoder">1</td>
+        <td class="inst-numnoder">0</td>
+    </tr>
+    <tr>
+        <td colspan="18" class="inst-node-little"></td>
+        <td colspan="1" class="inst-node-little">FC</td>
+        <td colspan="1" class="inst-node-little">EN</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+        <td colspan="1" class="inst-node-little">1</td>
+        <td colspan="1" class="inst-node-little">1</td>
+        <td colspan="1" class="inst-node-little">1</td>
+        <td colspan="1" class="inst-node-little">1</td>
+    </tr>
+    </table>
+
+    因此，我们需要在保持其他位不变的情况下，将 EN bit 设置为 1，并将 Vector 设置为 `Irq::Spurious`，但是请注意实际设置的中断向量号需要加上 `Interrupts::IrqBase`。同时，此寄存器的 0-3 bit 无法被修改，始终为 1。
+
+    最终代码如下：
+
+    ```rust
+    let mut spiv = self.read(0xF0);
+    spiv |= 1 << 8; // set EN bit
+    // clear and set Vector
+    spiv &= !(0xFF);
+    spiv |= Interrupts::IrqBase as u32 + Irq::Spurious as u32;
+    self.write(0xF0, spiv);
+    ```
+
+- 设置 LVT 寄存器。
+
+    Local Vector Table 寄存器用于设置中断向量号和触发模式。它们的位描述如下：
+
+    <table class="inst">
+    <tr>
+        <td class="inst-numnode" colspan="4"></td>
+        <td class="inst-numnodel">31</td>
+        <td class="inst-numnode" colspan="8"></td>
+        <td class="inst-numnoder">18</td>
+        <td class="inst-numnoder">17</td>
+        <td class="inst-numnoder">16</td>
+        <td class="inst-numnoder">15</td>
+        <td class="inst-numnoder">14</td>
+        <td class="inst-numnoder">13</td>
+        <td class="inst-numnoder">12</td>
+        <td class="inst-numnoder">11</td>
+        <td class="inst-numnode" colspan="2"></td>
+        <td class="inst-numnoder">8</td>
+        <td class="inst-numnode" colspan="3"></td>
+        <td class="inst-numnoder">0</td>
+    </tr>
+    <tr>
+        <td colspan="4">Timer</td>
+        <td colspan="10" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">TP</td>
+        <td colspan="1" class="inst-node-little">M</td>
+        <td colspan="3" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="4" class="inst-node-little">-</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+    </tr>
+    <tr>
+        <td colspan="4">LINT0</td>
+        <td colspan="11" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">M</td>
+        <td colspan="1" class="inst-node-little">TM</td>
+        <td colspan="1" class="inst-node-little">RI</td>
+        <td colspan="1" class="inst-node-little">IP</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="1" class="inst-node-little">-</td>
+        <td colspan="3" class="inst-node-little">DMode</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+    </tr>
+    <tr>
+        <td colspan="4">LINT1</td>
+        <td colspan="11" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">M</td>
+        <td colspan="1" class="inst-node-little">TM</td>
+        <td colspan="1" class="inst-node-little">RI</td>
+        <td colspan="1" class="inst-node-little">IP</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="1" class="inst-node-little">-</td>
+        <td colspan="3" class="inst-node-little">DMode</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+    </tr>
+    <tr>
+        <td colspan="4">ERROR</td>
+        <td colspan="11" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">M</td>
+        <td colspan="3" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="4" class="inst-node-little">-</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+    </tr>
+    <tr>
+        <td colspan="4">PCINT</td>
+        <td colspan="11" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">M</td>
+        <td colspan="3" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="1" class="inst-node-little">-</td>
+        <td colspan="3" class="inst-node-little">DMode</td>
+        <td colspan="4" class="inst-node-little">Vector</td>
+    </tr>
+    </table>
+
+    - Vector 为中断向量号，当中断发生时，CPU 会跳转到中断向量表中对应处理程序执行。
+    - DMode（Delivery Mode）为中断传递模式，本实验中不做理解要求。
+    - DS（Delivery Status）为中断传递状态，只读。
+    - M（Mask）为中断屏蔽位，取值为 1 表示中断已屏蔽。
+    - TP（Timer Periodic Mode）为定时器周期模式，决定定时器周期触发还是仅触发一次。
+
+    其余的位暂时不需要关注，如有兴趣可以参考 APIC 文档下的参考资料。
+
+    以时钟中断的配置为例，需要将 Timer 的 Vector 设置为 `Irq::Timer`，并将 M 设置为 0，而后设置 TP 为 1，表示定时器周期模式。参考代码如下：
+
+    ```rs
+    let mut lvt_timer = self.read(0x320);
+    // clear and set Vector
+    lvt_timer &= !(0xFF);
+    lvt_timer |= Interrupts::IrqBase as u32 + Irq::Timer as u32;
+    lvt_timer &= !(1 << 16); // clear Mask
+    lvt_timer |= 1 << 17; // set Timer Periodic Mode
+    self.write(0x320, lvt_timer);
+    ```
+
+    若要禁用 LVT LINT0 则需要将 M 设置为 1，参考代码如下：
+
+    ```rs
+    self.write(0x350, 1 << 16); // set Mask
+    ```
+
+- 设置计时器相关寄存器。
+
+    APIC 中控制计时器的寄存器包括 TDCR、TICR 和 LVT Timer。其中，TDCR 用于设置分频系数，TICR 用于设置初始计数值。
+
+    - TDCR(0x3E0) 的分频系数决定了总线时钟与计时器时钟的比例，也即计时器的计数频率。
+    - TICR(0x380) 的初始计数值决定了计时器的计数周期，每当计数到 0 时，就会触发中断。
+
+    分频系数和 TDCR 寄存器的取值关系如下表所示，第二比特总是为 0：
+
+    | 分频系数（Timer Divide） | 寄存器值 | 分频系数（Timer Divide） | 寄存器值 |
+    | :----------------------: | :------: | :----------------------: | :------: |
+    |           By 1           |  0b1011  |           By 2           |  0b0000  |
+    |           By 4           |  0b0001  |           By 8           |  0b0010  |
+    |          By 16           |  0b0011  |          By 32           |  0b1000  |
+    |          By 64           |  0b1001  |          By 128          |  0b1010  |
+
+    其参考的设置代码如下：
+
+    ```rs
+    self.write(0x3E0, 0b1011); // set Timer Divide to 1
+    self.write(0x380, 0x20000); // set initial count to 0x20000
+    ```
+
+- 清除错误状态寄存器。
+
+    APIC 中的错误状态寄存器（Error Status Register, 0x280）用于记录 APIC 内部的错误状态。当 APIC 发生错误时，CPU 会将错误信息写入此寄存器。为了避免错误状态寄存器中的错误信息影响后续的错误处理，我们需要在初始化 APIC 时清除错误状态寄存器中的错误信息。
+
+    参考代码如下：
+
+    ```rs
+    self.write(0x280, 0);
+    self.write(0x280, 0);
+    ```
+
+- 设置 ICR 寄存器。
+
+    中断命令寄存器由两个 32 位寄存器组成，一个在 0x300，另一个在 0x310。它用于向不同的处理器发送中断。在写入 0x300 时发出中断，但在写入 0x310 时不发出中断。因此，要发送中断命令，应首先写入 0x310，然后写入 0x300。
+
+    中断命令寄存器的位描述如下：
+
+    <table class="inst">
+    <tr>
+        <td class="inst-numnode" colspan="3"></td>
+        <td class="inst-numnodel">63</td>
+        <td class="inst-numnode" colspan="3"></td>
+        <td class="inst-numnoder">56</td>
+        <td class="inst-numnode" colspan="17"></td>
+        <td class="inst-numnoder">32</td>
+    </tr>
+    <tr>
+        <td colspan="3" >0x310</td>
+        <td colspan="5" class="inst-node-little">DF</td>
+        <td colspan="18" class="inst-node-little">-</td>
+    </tr>
+    <tr>
+        <td class="inst-numnode" colspan="3"></td>
+        <td class="inst-numnodel">31</td>
+        <td class="inst-numnode" colspan="4"></td>
+        <td class="inst-numnoder">20</td>
+        <td class="inst-numnode" colspan="1"></td>
+        <td class="inst-numnoder">18</td>
+        <td class="inst-numnode" colspan="1"></td>
+        <td class="inst-numnoder">16</td>
+        <td class="inst-numnoder">15</td>
+        <td class="inst-numnoder">14</td>
+        <td class="inst-numnoder">13</td>
+        <td class="inst-numnoder">12</td>
+        <td class="inst-numnoder">11</td>
+        <td class="inst-numnode" colspan="2"></td>
+        <td class="inst-numnoder">8</td>
+        <td class="inst-numnode" colspan="4"></td>
+        <td class="inst-numnoder">0</td>
+    </tr>
+    <tr>
+        <td colspan="3" >0x300</td>
+        <td colspan="6" class="inst-node-little">-</td>
+        <td colspan="2" class="inst-node-little">DSH</td>
+        <td colspan="2" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">TM</td>
+        <td colspan="1" class="inst-node-little">LV</td>
+        <td colspan="1" class="inst-node-little">-</td>
+        <td colspan="1" class="inst-node-little">DS</td>
+        <td colspan="1" class="inst-node-little">DM</td>
+        <td colspan="3" class="inst-node-little">DMode</td>
+        <td colspan="5" class="inst-node-little">Vector</td>
+    </tr>
+    </table>
+
+    具体的配置配置细节这里不做理解要求，只需要按照如下描述进行配置即可：
+
+    - DSH（Destination Shorthand）：设置为 2，始终将中断发送给所有 APIC
+    - DMode（Delivery Mode）：设置为 5，INIT De-assert 模式
+    - LV（Level）：设置为 0，INIT De-assert 模式
+    - TM（Trigger Mode）：设置为 1，INIT De-assert 模式
+
+    参考代码如下：
+
+    ```rs
+    self.write(0x310, 0); // set ICR 0x310
+    const BCAST: u32 = 1 << 19;
+    const INIT: u32 = 5 << 8;
+    const LEVEL: u32 = 1 << 14;
+    self.write(0x300, BCAST | INIT | LEVEL); // set ICR 0x300
+    const DS: u32 = 1 << 12;
+    while self.read(0x300) & DS != 0 {} // wait for delivery status
+    ```
+
+!!! warning "上述例子并不是完整的初始化代码，你需要参考[APIC 可编程中断控制器](../../wiki/apic.md)，补全相关代码。"
 
 ## 时钟中断
 

@@ -16,44 +16,13 @@ APIC 不仅简单地分配中断向量，还提供了更为复杂的功能，如
 
 x2APIC 是 xAPIC 的变体和扩展，主要改进解决了支持的 CPU 数量和接口性能问题，他们都属于 LAPIC 的实现。在本实验中，我们将使用 xAPIC 来实现 LAPIC 的初始化和编程，在之后的描述中，出现的 APIC 均代指 xAPIC。
 
-对于一个寄存器的读写操作可以由下列参考代码实现：
-
-```rust
-use core::ptr::{read_volatile, write_volatile};
-
-pub struct XApic {
-    addr: u64,
-}
-
-impl XApic {
-    pub unsafe fn new(addr: u64) -> Self {
-        XApic { addr }
-    }
-
-    unsafe fn read(&self, reg: u32) -> u32 {
-        read_volatile((self.addr + reg as u64) as *const u32)
-    }
-
-    unsafe fn write(&mut self, reg: u32, value: u32) {
-        write_volatile((self.addr + reg as u64) as *mut u32, value);
-        self.read(0x20);
-    }
-}
-```
-
-APIC 的简单初始化过程包括以下几个步骤：
+APIC 的初始化过程基本包括以下几个步骤：
 
 - 禁用 8259 PIC，使得系统只使用 APIC 进行中断处理。
 
      这一步被 UEFI BIOS 自动完成，我们无需关心。
 
-- 检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
-
-    ```rust
-    CpuId::new().get_feature_info().map(
-        |f| f.has_apic()
-    ).unwrap_or(false)
-    ```
+- 检测系统中是否存在 APIC。
 
 - 确定 APIC 的地址空间，即 LAPIC 和 IOAPIC 的 MMIO 地址空间。
 
@@ -79,12 +48,8 @@ APIC 的简单初始化过程包括以下几个步骤：
 
 - 设置 ICR 寄存器：
 
-    中断命令寄存器由两个 32 位寄存器组成，一个在 0x300，另一个在 0x310。它用于向不同的处理器发送中断。
-
-    在写入 0x300 时发出中断，但在写入 0x310 时不发出中断。因此，要发送中断命令，应首先写入 0x310，然后写入 0x300。
-
-    - Destination type(bit 18-19): 设置为 2，始终将中断发送给所有 APIC
-    - Delivery mode(bit 8-10): 设置为 5，INIT De-assert 模式所需
+    - Destination Shorthand(bit 18-19): 设置为 2，始终将中断发送给所有 APIC
+    - Delivery Mode(bit 8-10): 设置为 5，INIT De-assert 模式所需
     - Level(bit 14): 设置为 0，INIT De-assert 所需
     - Trigger Mode(bit 15): 设置为 1，INIT De-assert 所需
 
@@ -92,7 +57,7 @@ APIC 的简单初始化过程包括以下几个步骤：
 
 - 设置 TPR 寄存器，允许接收中断。
 
-以上过程会在实验任务文档中进行详细描述，具体细节和设置原因涉及对称多处理 SMP 等内容，不做理解要求，如有兴趣可以自行查阅参考资料了解。
+以上过程的代码示例会在实验任务文档中进行详细描述，具体细节和设置原因涉及对称多处理 SMP 等内容，不做理解要求，如有兴趣可以自行查阅参考资料了解。
 
 ## Local APIC 寄存器
 
@@ -107,4 +72,6 @@ APIC 的简单初始化过程包括以下几个步骤：
 - [APIC - OSDev](https://wiki.osdev.org/APIC)
 - [/arch/x86/kernel/apic/apic.c - Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/kernel/apic/apic.c?h=v6.7#n1525)
 - [Symmetric Multiprocessing - OSDev](https://wiki.osdev.org/Symmetric_Multiprocessing)
+- [APIC Timer - OSDev](https://wiki.osdev.org/APIC_timer)
 - [Multiprocessing Support for Hobby OSes Explained](http://www.osdever.net/tutorials/view/multiprocessing-support-for-hobby-oses-explained)
+- [apic crate - theseus-os](https://www.theseus-os.com/Theseus/doc/apic/)
