@@ -446,6 +446,8 @@ impl XApic {
 
 !!! warning "上述例子并不是完整的初始化代码，你需要参考[APIC 可编程中断控制器](../../wiki/apic.md)，补全相关代码。"
 
+为了提高代码的可读性，你可以尝试为不同的寄存器安排不同的**标识常量**，也可以**通过枚举的方式**标识这些寄存器，这可能需要修改 `read` 和 `write` 函数的参数类型。
+
 ## 时钟中断
 
 在顺利配置好 XAPIC 并初始化后，APIC 的中断就被成功启用了。为了响应时钟中断，我们需要为 IRQ0 Timer 设置中断处理程序。创建 `src/interrupt/clock.rs` 文件，参考如下代码，为 Timer 设置中断处理程序：
@@ -455,7 +457,7 @@ use core::sync::atomic::{AtomicU64, Ordering};
 use super::consts::*;
 
 pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
-    idt[(Interrupts::IrqBase as u8 + Irq::Timer as u8) as usize]
+    idt[Interrupts::IrqBase as usize + Irq::Timer as usize]
         .set_handler_fn(clock_handler);
 }
 
@@ -499,6 +501,105 @@ x86_64::instructions::interrupts::enable();
 
 ## 串口输入中断
 
-## 内核缓冲区
+遵循 I/O 中断处理的 Top half & Bottom half 原则，在中断发生时，我们只在中断处理中做尽量少的事：读取串口的输入，并将其放入缓冲区。而在中断处理程序之外，我们可以在合适的时机，从缓冲区中读取数据，并进行处理。
+
+为了承接全部（可能的）用户输入数据，并将他们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `crossbeam_queue` crate 实现一个输入缓冲区。
+
+!!! tip "在 memory 初始化的过程中，我们已经有了内核堆分配的能力，可以动态分配内存。"
+
+!!! question "实验任务"
+
+    1. 使用 `crossbeam_queue::ArrayQueue` 存储用户输入的数据。
+
+        借助 `once_mutex!` 和 `guard_access_fn!` 宏，构造一个上锁的全局静态变量 `INPUT_BUFFER`。
+
+        此缓冲区大小和存储的数据类型由你自行决定，一个参考的缓冲区大小为 128。
+
+    2. 实现并暴露 `init` 函数。
+
+        初始化 `INPUT_BUFFER`，完成后输出日志：`Input Initialized.`，并在 `src/lib.rs` 中调用它，初始化输入缓冲区。
+
+    3. 实现并暴露 `push_key` 函数。
+
+        按照你所定义的类型，对 `INPUT_BUFFER` 上锁后，将数据放入缓冲区。若缓冲区已满，则丢弃数据，并使用 `warn!` 宏输出相关日志。
+
+    4. 实现并暴露 `try_pop_key` 函数。
+
+        从缓冲区中**非阻塞**取出数据。若缓冲区为空或上锁失败，则返回 `None`。
+
+        *Note: 或许需要在这一过程中暂时关闭中断。*
+
+    5. 实现并暴露 `pop_key` 函数。
+
+        利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据。循环等待，直到缓冲区中有数据。
+
+    6. 实现并暴露 `get_line` 函数。
+
+        从缓冲区中**阻塞**取出数据，并将其实时打印出来。直到遇到换行符 `\n`。将数据转换为 `String` 类型，并返回。
+
+        对于 `0x08` 和 `0x7F` 字符，表示退格，你需要对其进行特殊处理。若当前字符串不为空，则删除最后一个字符，并将其从屏幕上删除。
+
+        删除操作可以通过发送 `0x08`、`0x20`、`0x08` 序列实现。你可以在串口驱动中将它封装为 `backspace` 函数。
+
+        *Note: `String::with_capacity` 可以帮助你预先分配足够的内存。*
+
+串口的输入中断与时钟中断类似，请在 `src/interrupt/serial.rs` 中补全代码，为 IRQ4 Serial0 设置中断处理程序：
+
+```rust
+use super::consts::*;
+
+pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
+    idt[Interrupts::IrqBase as usize + Irq::Serial0 as usize]
+        .set_handler_fn(serial_handler);
+}
+
+pub extern "x86-interrupt" fn serial_handler(_st: InterruptStackFrame) {
+    receive();
+    super::ack();
+}
+
+/// Receive character from uart 16550
+/// Should be called on every interrupt
+fn receive() {
+    // FIXME: receive character from uart 16550
+}
+```
+
+你需要补全 `receive` 函数，利用刚刚完成的 `input` 驱动，将接收到的字符放入缓冲区。
 
 ## 用户交互
+
+在完善了输入缓冲区后，可以在 `src/main.rs` 中，使用 `get_line` 函数来获取用户输入的一行数据，并将其打印出来、或进行更多其他的处理，实现响应用户输入的操作。
+
+为了避免时钟中断频繁地打印日志，你可以在 `clock_handler` 中，删除输出相关的代码，只保留计数器的增加操作。之后在 `get_line` 中，打印计数器的值，以便证明时钟中断的正确执行。
+
+```rust
+#![no_std]
+#![no_main]
+
+use ysos::*;
+use ysos_kernel as ysos;
+
+extern crate alloc;
+
+boot::entry_point!(kernel_main);
+
+pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
+    ysos::init(boot_info);
+
+    loop {
+        print!("> ");
+        let input = input::get_line();
+
+        match input.trim() {
+            "exit" => break,
+            _ => {
+                println!("You said: {}", input);
+                println!("The counter value is {}", interrupt::clock::read_counter());
+            }
+        }
+    }
+
+    ysos::shutdown(boot_info);
+}
+```
