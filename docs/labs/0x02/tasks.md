@@ -32,7 +32,7 @@
 在 `pkg/kernel/src/interrupt` 文件夹中，增量代码补充包含了如下的模块：
 
 - `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
-- `consts.rs`：有关于中断向量、IQR 的常量定义。
+- `consts.rs`：有关于中断向量、IRQ 的常量定义。
 - `exceptions.rs`：包含了 CPU 异常的处理函数，并暴露 `register_idt` 用于注册 IDT。
 - `mod.rs`：定义了 `init` 函数，用于初始化中断系统，加载 IDT。
 

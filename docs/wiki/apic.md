@@ -94,6 +94,14 @@ APIC 的简单初始化过程包括以下几个步骤：
 
 以上过程会在实验任务文档中进行详细描述，具体细节和设置原因涉及对称多处理 SMP 等内容，不做理解要求，如有兴趣可以自行查阅参考资料了解。
 
+## Local APIC 寄存器
+
+在启用分页内存的情况下，需要对 LAPIC 寄存器地址进行映射，并虚拟内存地址进行操作。每个寄存器位宽为 32 位，并期望以 32 位整数的形式进行写入和读取。
+
+<table border="2" cellpadding="4" cellspacing="0" class="wikitable"><tbody><tr><td> Offset</td><td> Register name</td><td> Read/Write permissions</td></tr><tr><td> 000h - 010h</td><td> Reserved</td><td></td></tr><tr><td> 020h</td><td> LAPIC ID Register</td><td> Read/Write</td></tr><tr><td> 030h</td><td> LAPIC Version Register</td><td> Read only</td></tr><tr><td> 040h - 070h</td><td> Reserved</td><td></td></tr><tr><td> 080h</td><td> Task Priority Register (TPR)</td><td> Read/Write</td></tr><tr><td> 090h</td><td> Arbitration Priority Register (APR)</td><td> Read only</td></tr><tr><td> 0A0h</td><td> Processor Priority Register (PPR)</td><td> Read only</td></tr><tr><td> 0B0h</td><td> EOI register</td><td> Write only</td></tr><tr><td> 0C0h</td><td> Remote Read Register (RRD)</td><td> Read only</td></tr><tr><td> 0D0h</td><td> Logical Destination Register</td><td> Read/Write</td></tr><tr><td> 0E0h</td><td> Destination Format Register</td><td> Read/Write</td></tr><tr><td> 0F0h</td><td> Spurious Interrupt Vector Register</td><td> Read/Write</td></tr><tr><td> 100h - 170h</td><td> In-Service Register (ISR)</td><td> Read only</td></tr><tr><td> 180h - 1F0h</td><td> Trigger Mode Register (TMR)</td><td> Read only</td></tr><tr><td> 200h - 270h</td><td> Interrupt Request Register (IRR)</td><td> Read only</td></tr><tr><td> 280h</td><td> Error Status Register</td><td> Read only</td></tr><tr><td> 290h - 2E0h</td><td> Reserved</td><td></td></tr><tr><td> 2F0h</td><td> LVT Corrected Machine Check Interrupt (CMCI) Register</td><td> Read/Write</td></tr><tr><td> 300h - 310h</td><td> Interrupt Command Register (ICR)</td><td> Read/Write</td></tr><tr><td> 320h</td><td> LVT Timer Register</td><td> Read/Write</td></tr><tr><td> 330h</td><td> LVT Thermal Sensor Register</td><td> Read/Write</td></tr><tr><td> 340h</td><td> LVT Performance Monitoring Counters Register</td><td> Read/Write</td></tr><tr><td> 350h</td><td> LVT LINT0 Register</td><td> Read/Write</td></tr><tr><td> 360h</td><td> LVT LINT1 Register</td><td> Read/Write</td></tr><tr><td> 370h</td><td> LVT Error Register</td><td> Read/Write</td></tr><tr><td> 380h</td><td> Initial Count Register (for Timer)</td><td> Read/Write</td></tr><tr><td> 390h</td><td> Current Count Register (for Timer)</td><td> Read only</td></tr><tr><td> 3A0h - 3D0h</td><td> Reserved</td><td></td></tr><tr><td> 3E0h</td><td> Divide Configuration Register (for Timer)</td><td> Read/Write</td></tr><tr><td> 3F0h</td><td> Reserved</td><td></td></tr></tbody></table>
+
+你可以参考文末给出的参考资料以获取这些寄存器的细节信息。
+
 ## 参考资料
 
 - [APIC - OSDev](https://wiki.osdev.org/APIC)
