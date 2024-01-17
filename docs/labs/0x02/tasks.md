@@ -56,14 +56,6 @@ lazy_static! {
 
 你需要参考上下文，在 `src/memory/gdt.rs` 中补全 TSS 的中断栈表，为 Double Fault 和 Page Fault 准备独立的栈。
 
-!!! question "实验任务"
-
-    补全上述代码任务，并进行下列尝试，并在报告中保留对应的触发方式及相关代码片段：
-
-    1. 尝试用你的方式触发 Triple Fault，开启 `intdbg` 对应的选项，在 QEMU 中查看调试信息，分析 Triple Fault 的发生过程。
-    2. 关注 Double Fault 的中断处理函数，观察 Double Fault 的发生过程。尝试通过调试器定位 Double Fault 发生时的栈是否符合预期。
-    3. 关注 Page Fault 的中断处理函数，通过访问非法地址触发 Page Fault，观察 Page Fault 的发生过程。分析 Cr2 寄存器的值，并尝试回答为什么 Page Fault 属于可恢复的异常。
-
 ## 注册中断处理程序
 
 在 `src/interrupt/mod.rs` 中，参考如下代码，将中断描述符表的注册委托给各个模块。
@@ -453,7 +445,6 @@ impl XApic {
 在顺利配置好 XAPIC 并初始化后，APIC 的中断就被成功启用了。为了响应时钟中断，我们需要为 IRQ0 Timer 设置中断处理程序。创建 `src/interrupt/clock.rs` 文件，参考如下代码，为 Timer 设置中断处理程序：
 
 ```rust
-use core::sync::atomic::{AtomicU64, Ordering};
 use super::consts::*;
 
 pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
@@ -470,7 +461,7 @@ pub extern "x86-interrupt" fn clock_handler(_sf: InterruptStackFrame) {
     });
 }
 
-static COUNTER: AtomicU64 = AtomicU64::new(0);
+static COUNTER: /* FIXME */ = /* FIXME */;
 
 #[inline]
 pub fn read_counter() -> u64 {
@@ -493,11 +484,9 @@ x86_64::instructions::interrupts::enable();
 
 !!! question "实验任务"
 
-    补全上述代码任务，并进行下列尝试：
+    补全上述代码任务，并尝试修改你的代码，调节时钟中断的频率，并观察 QEMU 中的输出。
 
-    1. 如何调节时钟中断的频率？请尝试修改你的代码，更改不同的频率，并观察 QEMU 中的输出。说明你修改了哪些代码，如果想要中断的频率减半，应该如何修改？
-    2. 考虑时钟中断进行进程调度的场景，时钟中断的频率应该如何设置？太快或太慢的频率会带来什么问题？请分别回答。
-    3. `without_interrupts` 函数的作用是什么？为什么需要使用它？它的实现原理是什么？
+    说明你修改了哪些代码，如果想要中断的频率减半，应该如何修改？
 
 ## 串口输入中断
 
@@ -603,3 +592,27 @@ pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
     ysos::shutdown(boot_info);
 }
 ```
+
+## 思考题
+
+1. 为什么需要在 `clock_handler` 中使用 `without_interrupts` 函数？如果不使用它，会发生什么情况？
+
+2. 考虑时钟中断进行进程调度的场景，时钟中断的频率应该如何设置？太快或太慢的频率会带来什么问题？请分别回答。
+
+3. 进行下列尝试，并在报告中保留对应的触发方式及相关代码片段：
+
+    - 尝试用你的方式触发 Triple Fault，开启 `intdbg` 对应的选项，在 QEMU 中查看调试信息，分析 Triple Fault 的发生过程。
+    - 尝试触发 Double Fault，观察 Double Fault 的发生过程，尝试通过调试器定位 Double Fault 发生时使用的栈是否符合预期。
+    - 通过访问非法地址触发 Page Fault，观察 Page Fault 的发生过程。分析 Cr2 寄存器的值，并尝试回答为什么 Page Fault 属于**可恢复的异常**。
+
+4. 如果在 TSS 中为中断分配的栈空间不足，会发生什么情况？请分析 CPU 异常的发生过程，并尝试回答什么时候会发生 Triple Fault。
+
+## 加分项
+
+1. 😋 为**全部可能的 CPU 异常**设置对应的处理程序，使用 `panic!` 输出异常信息。
+
+2. 😋 你如何定义用于计数的 `COUNTER`，它能够做到线程安全吗？如果不能，如何修改？
+
+3. 🤔 操作 APIC 时存在大量比特操作，尝试结合使用 `bitflags` 和 `bit_field` 来操作他们，获得更好的可读性。
+
+4. 🤔 你的串口输入驱动是否能正确的处理中文甚至 emoji 输入？如何能够正确处理？
