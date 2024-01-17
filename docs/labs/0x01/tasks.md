@@ -249,6 +249,26 @@ pub fn init() {
 guard_access_fn!(pub get_serial(SERIAL: SerialPort));
 ```
 
+!!! tip "更好的写法？"
+
+    你可以尝试使用常量泛型（Const Generics）来实现对于不同端口的定义：
+
+    ```rs
+    pub struct SerialPort<const BASE_ADDR: u16> {
+        // ...
+    }
+
+    impl<const BASE_ADDR: u16> SerialPort<BASE_ADDR> {
+        pub const unsafe fn new() -> Self {
+            Self {
+                // use BASE_ADDR here
+            }
+        }
+    }
+    ```
+
+    这样定义之后，你还需要适当修改上述 `serial.rs` 文件中的代码，以便使用这一泛型结构体。
+
 #### 被保护的全局静态对象
 
 在 Rust 中对全局变量的写入是一个 unsafe 操作，因为这是**线程不安全的**，如果直接使用全局静态变量，编译器会进行报错。但是对于 **“串口设备”** 这一类 **静态的全局对象** 我们确实需要进行一些数据存储，为了内存安全，就会不可避免的引入了**互斥锁**来进行保护。
