@@ -58,6 +58,8 @@ lazy_static! {
 
 ## 注册中断处理程序
 
+!!! note "请阅读 [CPU 中断处理](../../wiki/interrupts.md) 部分，学习中断基本知识。"
+
 在 `src/interrupt/mod.rs` 中，参考如下代码，将中断描述符表的注册委托给各个模块。
 
 ```rust
