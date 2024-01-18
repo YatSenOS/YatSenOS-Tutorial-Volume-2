@@ -432,8 +432,8 @@ impl XApic {
     self.write(0x310, 0); // set ICR 0x310
     const BCAST: u32 = 1 << 19;
     const INIT: u32 = 5 << 8;
-    const LEVEL: u32 = 1 << 15;
-    self.write(0x300, BCAST | INIT | LEVEL); // set ICR 0x300
+    const TMLV: u32 = 1 << 15; // TM = 1, LV = 0
+    self.write(0x300, BCAST | INIT | TMLV); // set ICR 0x300
     const DS: u32 = 1 << 12;
     while self.read(0x300) & DS != 0 {} // wait for delivery status
     ```
