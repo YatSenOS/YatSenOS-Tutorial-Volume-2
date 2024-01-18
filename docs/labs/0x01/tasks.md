@@ -179,7 +179,6 @@ unsafe {
 
 ### 调试内核
 
-
 依据[调试教程](../../wiki/debug.md)的相关内容，搭建基于命令行的 GDB 调试环境。
 
 作为实验的推荐调试环境，你需要配置好 `gef` 插件以进行更加灵活的二进制调试。同时利用 VSCode 进行调试也是一个不错的选择，鼓励你进行尝试，它将会作为实验的加分项目之一。
@@ -249,6 +248,26 @@ pub fn init() {
 
 guard_access_fn!(pub get_serial(SERIAL: SerialPort));
 ```
+
+!!! tip "更好的写法？"
+
+    你可以尝试使用常量泛型（Const Generics）来实现对于不同端口的定义：
+
+    ```rs
+    pub struct SerialPort<const BASE_ADDR: u16> {
+        // ...
+    }
+
+    impl<const BASE_ADDR: u16> SerialPort<BASE_ADDR> {
+        pub const unsafe fn new() -> Self {
+            Self {
+                // use BASE_ADDR here
+            }
+        }
+    }
+    ```
+
+    这样定义之后，你还需要适当修改上述 `serial.rs` 文件中的代码，以便使用这一泛型结构体。
 
 #### 被保护的全局静态对象
 

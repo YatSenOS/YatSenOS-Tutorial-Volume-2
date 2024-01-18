@@ -21,6 +21,14 @@
   .admonition {
     font-size: 0.75rem;
   }
+
+  li > p:first-child {
+    font-weight: bold;
+  }
+
+  li:has(p:first-child)::marker {
+    font-weight: bold;
+  }
 }
 
 h1 {
@@ -63,4 +71,28 @@ h6:before {
   content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "."
     counter(h6);
   margin-right: 0.8rem;
+}
+
+table.wikitable {
+  margin: 1em 1em 1em 0;
+  width: 100%;
+  font-size: 12.8px;
+  background-color: var(--md-default-bg-color--lighter);
+  border: 1px #aaa solid;
+  border-collapse: collapse;
+  color: var(--md-default-fg-color);
+}
+
+.wikitable th,.wikitable td {
+  border: 1px #aaa solid;
+  padding: 0.2em
+}
+
+.wikitable th {
+  background-color: var(--md-code-bg-color);
+  text-align: center
+}
+
+.wikitable caption {
+  font-weight: bold;
 }

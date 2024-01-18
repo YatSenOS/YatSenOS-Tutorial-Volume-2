@@ -1,8 +1,7 @@
 # 实验七：更好的内存管理
 
-!!! tip ""
+!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
 
-    <p align="right" style="font-weight: bold">by</p>
 
 ## 实验目的
 

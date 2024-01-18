@@ -19,7 +19,7 @@
     <td class="inst-numnodel">64</td>
     <td class="inst-numnode" colspan="16"></td>
     <td class="inst-numnoder">48</td>
-    <td class="inst-numnode" colspan="8"4></td>
+    <td class="inst-numnode" colspan="8"></td>
     <td class="inst-numnoder">39</td>
     <td class="inst-numnode" colspan="8"></td>
     <td class="inst-numnodel">30</td>
