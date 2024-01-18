@@ -432,7 +432,7 @@ impl XApic {
     self.write(0x310, 0); // set ICR 0x310
     const BCAST: u32 = 1 << 19;
     const INIT: u32 = 5 << 8;
-    const LEVEL: u32 = 1 << 14;
+    const LEVEL: u32 = 1 << 15;
     self.write(0x300, BCAST | INIT | LEVEL); // set ICR 0x300
     const DS: u32 = 1 << 12;
     while self.read(0x300) & DS != 0 {} // wait for delivery status
@@ -498,43 +498,45 @@ x86_64::instructions::interrupts::enable();
 
 !!! tip "在 memory 初始化的过程中，我们已经有了内核堆分配的能力，可以动态分配内存。"
 
-!!! question "实验任务"
+按照下列描述，补全 `src/drivers/input.rs` 驱动代码：
 
-    1. 使用 `crossbeam_queue::ArrayQueue` 存储用户输入的数据。
+1. 使用 `crossbeam_queue::ArrayQueue` 存储用户输入的数据。
 
-        借助 `once_mutex!` 和 `guard_access_fn!` 宏，构造一个上锁的全局静态变量 `INPUT_BUFFER`。
+    借助 `once_mutex!` 和 `guard_access_fn!` 宏，构造一个上锁的全局静态变量 `INPUT_BUFFER`。
 
-        此缓冲区大小和存储的数据类型由你自行决定，一个参考的缓冲区大小为 128。
+    此缓冲区大小和存储的数据类型由你自行决定，一个参考的缓冲区大小为 128。
 
-    2. 实现并暴露 `init` 函数。
+2. 实现并暴露 `init` 函数。
 
-        初始化 `INPUT_BUFFER`，完成后输出日志：`Input Initialized.`，并在 `src/lib.rs` 中调用它，初始化输入缓冲区。
+    初始化 `INPUT_BUFFER`，完成后输出日志：`Input Initialized.` 并在在 `src/lib.rs` 中调用它，在操作系统启动时进行。
 
-    3. 实现并暴露 `push_key` 函数。
+    请注意：`ysos_kernel::init` 函数中组件的初始化存在顺序，各种组件间可能存在依赖关系。由于输入缓冲区是动态分配的内存，因此需要在 `memory` 模块初始化之后，才能进行初始化。
 
-        按照你所定义的类型，对 `INPUT_BUFFER` 上锁后，将数据放入缓冲区。若缓冲区已满，则丢弃数据，并使用 `warn!` 宏输出相关日志。
+3. 实现并暴露 `push_key` 函数。
 
-    4. 实现并暴露 `try_pop_key` 函数。
+    按照你所定义的类型，对 `INPUT_BUFFER` 上锁后，将数据放入缓冲区。若缓冲区已满，则丢弃数据，并使用 `warn!` 宏输出相关日志。
 
-        从缓冲区中**非阻塞**取出数据。若缓冲区为空或上锁失败，则返回 `None`。
+4. 实现并暴露 `try_pop_key` 函数。
 
-        *Note: 或许需要在这一过程中暂时关闭中断。*
+    从缓冲区中**非阻塞**取出数据。若缓冲区为空或上锁失败，则返回 `None`。
 
-    5. 实现并暴露 `pop_key` 函数。
+    *Note: 或许需要在这一过程中暂时关闭中断。*
 
-        利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据。循环等待，直到缓冲区中有数据。
+5. 实现并暴露 `pop_key` 函数。
 
-    6. 实现并暴露 `get_line` 函数。
+    利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据。循环等待，直到缓冲区中有数据。
 
-        从缓冲区中**阻塞**取出数据，并将其实时打印出来。直到遇到换行符 `\n`。将数据转换为 `String` 类型，并返回。
+6. 实现并暴露 `get_line` 函数。
 
-        对于 `0x08` 和 `0x7F` 字符，表示退格，你需要对其进行特殊处理。若当前字符串不为空，则删除最后一个字符，并将其从屏幕上删除。
+    从缓冲区中**阻塞**取出数据，并将其实时打印出来。直到遇到换行符 `\n`。将数据转换为 `String` 类型，并返回。
 
-        删除操作可以通过发送 `0x08`、`0x20`、`0x08` 序列实现。你可以在串口驱动中将它封装为 `backspace` 函数。
+    对于 `0x08` 和 `0x7F` 字符，表示退格，你需要对其进行特殊处理。若当前字符串不为空，则删除最后一个字符，并将其从屏幕上删除。
 
-        *Note: `String::with_capacity` 可以帮助你预先分配足够的内存。*
+    删除操作可以通过发送 `0x08`、`0x20`、`0x08` 序列实现。你可以在串口驱动中将它封装为 `backspace` 函数。
 
-串口的输入中断与时钟中断类似，请在 `src/interrupt/serial.rs` 中补全代码，为 IRQ4 Serial0 设置中断处理程序：
+    *Note: `String::with_capacity` 可以帮助你预先分配足够的内存。*
+
+串口的输入中断与时钟中断类似，在 `src/interrupt/serial.rs` 中补全代码，为 IRQ4 Serial0 设置中断处理程序：
 
 ```rust
 use super::consts::*;
