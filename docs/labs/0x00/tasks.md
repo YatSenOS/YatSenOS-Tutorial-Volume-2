@@ -12,13 +12,14 @@
 
 ## 配置实验环境
 
-我们支持并推荐如下平台进行实验：
+我们推荐在以下环境进行实验：
 
 - Windows 10/11
 - Ubuntu 22.04 LTS
 - Ubuntu 22.04 LTS on WSL 2
 - macOS with Apple Silicon
-- 其他可行的平台，但我们不提供技术支持。如 Debian、Fedora、Kali Linux、Arch Linux 等。
+
+以上环境经过我们的测试和验证，可以正常进行实验。对于其他常用的 Linux 发行版，通常也可以正常进行实验，但我们不提供技术支持。
 
 ### 安装项目开发环境
 
@@ -348,7 +349,7 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 
 ## 思考题
 
-1. 了解现代操作系统（Windows）的启动过程，`legacy BIOS` 和 `UEFI` 的区别是什么？
+1. 了解现代操作系统（Windows）的启动过程，`UEFI` 和 `Legacy`（`BIOS`）的区别是什么？
 
 2. 尝试解释 Makefile 中的命令做了哪些事情？或许你可以参考下列命令来得到更易读的解释：
 

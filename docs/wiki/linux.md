@@ -38,11 +38,11 @@ wsl --install -d Ubuntu
 
 !!! note "校内镜像源"
 
-    我们还提供有**仅供校内、不确保一定可用**的内网镜像源：[matrix 镜像站](https://mirrors.matrix.moe)
+    我们还提供有**仅供校内、不确保一定可用**的内网镜像源：[Matrix 软件源镜像服务](https://mirrors.matrix.moe)
 
     请注意，使用上述镜像站会让你享受到更好的下载速度，但你同时也需要**承担不可用时带来的风险，并具有自主更换到其他镜像站的能力**。
 
-1. 使用以下命令更新 apt 源：
+1. 使用以下命令更新 apt 源并进行软件升级：
 
     ```bash
     sudo apt update && sudo apt upgrade

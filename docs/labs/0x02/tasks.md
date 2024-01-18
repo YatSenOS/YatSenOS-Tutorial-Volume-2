@@ -438,7 +438,7 @@ impl XApic {
     while self.read(0x300) & DS != 0 {} // wait for delivery status
     ```
 
-!!! warning "上述例子并不是完整的初始化代码，你需要参考[APIC 可编程中断控制器](../../wiki/apic.md)，补全相关代码。"
+!!! warning "上述例子并不是完整的初始化代码，你需要参考 [APIC 可编程中断控制器](../../wiki/apic.md)，补全相关代码。"
 
 为了提高代码的可读性，你可以尝试为不同的寄存器安排不同的**标识常量**，也可以**通过枚举的方式**标识这些寄存器，这可能需要修改 `read` 和 `write` 函数的参数类型。
 
