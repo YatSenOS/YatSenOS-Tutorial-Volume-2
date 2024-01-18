@@ -36,9 +36,7 @@ APIC 的初始化过程基本包括以下几个步骤：
     - TICR(0x380): Initial Count Register，设置初始计数值。
     - LVT Timer(0x320): Local Vector Table Timer，设置中断向量号和触发模式。
 
-- 禁用 LVT LINT0, LVT LINT1，向对应寄存器写入 0x10000。
-
-- 如果设备支持了性能计数器 LVT PC 溢出中断，则禁用它。
+- 禁用 LVT LINT0, LVT LINT1，LVT PCINT，向对应寄存器写入 Mask 位。
 
 - 设置错误中断 LVT Error 到对应的中断向量号。
 
@@ -55,7 +53,7 @@ APIC 的初始化过程基本包括以下几个步骤：
 
     设置完成后等待 Delivery Status(bit 12) 为 0。
 
-- 设置 TPR 寄存器，允许接收中断。
+- 设置 TPR 寄存器为 0，允许接收中断。
 
 以上过程的代码示例会在实验任务文档中进行详细描述，具体细节和设置原因涉及对称多处理 SMP 等内容，不做理解要求，如有兴趣可以自行查阅参考资料了解。
 

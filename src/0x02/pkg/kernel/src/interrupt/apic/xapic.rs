@@ -39,10 +39,9 @@ impl LocalApic for XApic {
 
             // FIXME: The timer repeatedly counts down at bus frequency
 
-            // FIXME: Disable logical interrupt lines.
+            // FIXME: Disable logical interrupt lines (LINT0, LINT1)
 
-            // FIXME: Disable performance counter overflow interrupts
-            // on machines that provide that interrupt entry.
+            // FIXME: Disable performance counter overflow interrupts (PCINT)
 
             // FIXME: Map error interrupt to IRQ_ERROR.
 
