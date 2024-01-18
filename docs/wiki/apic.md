@@ -14,7 +14,7 @@ APIC 不仅简单地分配中断向量，还提供了更为复杂的功能，如
 
 在基于 APIC 的系统中，每个 CPU 都由一个本地 APIC（LAPIC）控制。LAPIC 通过 MMIO（Memory Mapped I/O）方式映射到物理内存中的某个地址空间，这个地址空间称为 LAPIC 寄存器空间。同时，系统中还有一个 I/O APIC（IOAPIC），它是一个独立的芯片，负责管理系统中所有 I/O 设备的中断请求。I/O APIC 也通过 MMIO 方式映射到物理内存中的某个地址空间。
 
-x2APIC 是 xAPIC 的变体和扩展，主要改进解决了支持的 CPU 数量和接口性能问题，他们都属于 LAPIC 的实现。在本实验中，我们将使用 xAPIC 来实现 LAPIC 的初始化和编程，在之后的描述中，出现的 APIC 均代指 xAPIC。
+x2APIC 是 xAPIC 的变体和扩展，主要改进解决了支持的 CPU 数量和接口性能问题，它们都属于 LAPIC 的实现。在本实验中，我们将使用 xAPIC 来实现 LAPIC 的初始化和编程，在之后的描述中，出现的 APIC 均代指 xAPIC。
 
 APIC 的初始化过程基本包括以下几个步骤：
 

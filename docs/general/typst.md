@@ -12,31 +12,36 @@
 
 为了方便，我们从头开始，新建一个文件夹，专门用来进行实验报告的撰写。
 
-假设你本地已经克隆了一份[模板](https://github.com/GZTimeWalker/GZ-Typst-Templates)，使用 `ln -s /path/to/the/template/repo base` 创建一个名为 `base` 的软链接，这样的目的是为了方便我们后续使用模板，这样操作成功后，你的目录结构应该类似于
+假设你本地已经克隆了一份[模板](https://github.com/GZTimeWalker/GZ-Typst-Templates)，在 Unix 系统中使用 `ln -s /path/to/the/template/repo base` 创建一个名为 `base` 的软链接，目的是为了方便我们后续使用模板。操作成功后，你的目录结构应该类似于：
 
-```log
+```txt
 .
 └── base -> ../GZ-Typst-Templates
 ```
 
-!!! note "对于 Windows 用户，可以考虑使用 mklink 来创建软链接，具体方法请自行搜索"
+!!! tip "对于 Windows 用户，可以考虑使用 mklink 来创建软链接，或直接拷贝模版文件"
 
 考虑到可能有多个实验，推荐每个实验都新建一个文件夹，并创建对应的图片等目录，例如如下的结构
 
-```log
+```txt
 .
 ├── base -> ../GZ-Typst-Templates
-└── report1
+└── lab-0
     ├── images
-    │   └── 1.png
+    │   └── linux.png
     └── example.typ
 ```
 
-当然，图片命名为 1.png 并不是一个很好的习惯。
+之后，在当前文件夹中打开终端或使用 VSCode，正常使用 typst 即可，例如：
+
+
+!!! note "保证 typst 的工作路径为 `.`"
+
+    引用其他更上层的目录是被 Typst 默认禁止的，这是为了避免[任意文件读取](https://github.com/typst/typst/issues/219)问题。
 
 ### 编写报告
 
-打开 `example.typ`，输入
+打开 `example.typ`，并输入：
 
 ```js
 #import "../base/templates/report.typ": *
@@ -56,7 +61,7 @@
 
 如果安装了上文说的 Typst LSP 插件，那么此时应该能看到此时会自动生成一个 example.pdf，打开就能进行实时的预览。如果此时你没安装对应的字体的话，typst 会使用默认的字体来进行渲染，可能的话，请安装模板对应的字体。
 
-!!! note "如果需要修改模板字体，可以修改模板中的 `functions/style.typ` 中的 `fonts`，这里不做过多赘述。"
+!!! note "若需要修改字体，可以修改模板中的 `functions/style.typ` 中的 `fonts`，这里不做赘述。"
 
 #### 标题
 

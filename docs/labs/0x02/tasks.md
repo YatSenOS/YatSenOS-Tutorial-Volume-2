@@ -25,7 +25,7 @@
 - `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
 - `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
 - `gdt.rs`：定义 TSS 和 GDT，为内核提供内存段描述符和任务状态段。
-- `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而允许内核使用 `alloc` crate 进行需要动态内存分配的操作、使用其中定义的数据结构，如 `Vec`、`String`、`Box` 等。
+- `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而能够在内核中使用 `alloc` 提供的操作和数据结构，进行动态内存分配的操作，如 `Vec`、`String`、`Box` 等。
 
 !!! note "动态内存分配算法在这里不做要求，本次实验直接使用现有的库赋予内核堆分配能力。"
 
@@ -494,7 +494,7 @@ x86_64::instructions::interrupts::enable();
 
 遵循 I/O 中断处理的 Top half & Bottom half 原则，在中断发生时，我们只在中断处理中做尽量少的事：读取串口的输入，并将其放入缓冲区。而在中断处理程序之外，我们可以在合适的时机，从缓冲区中读取数据，并进行处理。
 
-为了承接全部（可能的）用户输入数据，并将他们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `crossbeam_queue` crate 实现一个输入缓冲区。
+为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `crossbeam_queue` crate 实现一个输入缓冲区。
 
 !!! tip "在 memory 初始化的过程中，我们已经有了内核堆分配的能力，可以动态分配内存。"
 
@@ -615,6 +615,6 @@ pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
 
 2. 😋 你如何定义用于计数的 `COUNTER`，它能够做到线程安全吗？如果不能，如何修改？
 
-3. 🤔 操作 APIC 时存在大量比特操作，尝试结合使用 `bitflags` 和 `bit_field` 来操作他们，获得更好的可读性。
+3. 🤔 操作 APIC 时存在大量比特操作，尝试结合使用 `bitflags` 和 `bit_field` 来定义和操作这些寄存器的值，从而获得更好的可读性。
 
 4. 🤔 你的串口输入驱动是否能正确的处理中文甚至 emoji 输入？如何能够正确处理？
