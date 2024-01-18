@@ -1,8 +1,6 @@
 # 使用 typst 编写实验报告
 
-[typst](https://github.com/typst/typst) 是一个新型的基于标记的轻量化排版系统，相较于安装复杂且体积庞大的 LaTex，typst 所需要的空间仅仅约 30M，安装方法也十分简单，下载对应的二进制文件，添加到系统路径即可。
-
-安装完成后可以撰写美观的文档的，推荐使用 VSCode，并安装 Typst LSP 插件实现实时预览。
+[typst](https://github.com/typst/typst) 是一个新型的基于标记的轻量化排版系统，相较于安装复杂且体积庞大的 LaTex，typst 所需要的空间仅仅约 30M，安装方法也十分简单，下载对应的二进制文件，添加到系统路径即可。对于IDE，推荐使用 VSCode，并安装 Typst LSP 插件实现实时预览。
 
 关于 typst 的一些细节可以参考 [typst doc](https://typst.app/docs/)，同时，推荐使用模板来撰写格式更加更为统一的实验报告，可以参考[模板](https://github.com/GZTimeWalker/GZ-Typst-Templates)，后文给出了一个可能的使用方法。
 
