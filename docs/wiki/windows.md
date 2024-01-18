@@ -68,9 +68,9 @@ winget source add winget https://mirrors.ustc.edu.cn/winget-source
 
 本文需要的软件安装程序也可以从 TA 处获取，或者通过其他方式下载，文档编写时的部分安装程序下载链接如下：
 
-QEMU: [qemu-w64-setup-20231214.exe](https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20231214.exe)
+QEMU: [qemu-w64-setup-20231224.exe](https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20231224.exe)
 
-Miniforge3: [Miniforge3-23.3.1-1-Windows-x86_64.exe (github)](https://github.com/conda-forge/miniforge/releases/download/23.3.1-1/Miniforge3-23.3.1-1-Windows-x86_64.exe)
+Miniforge3: [Miniforge3-23.11.0-0-Windows-x86_64.exe (github)](https://github.com/conda-forge/miniforge/releases/download/23.11.0-0/Miniforge3-23.11.0-0-Windows-x86_64.exe)
 
 ## 安装 QEMU
 
