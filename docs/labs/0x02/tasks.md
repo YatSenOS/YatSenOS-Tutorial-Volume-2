@@ -504,7 +504,7 @@ static int init_serial() {
 
    // ...
 
-   outb(PORT + 1, 0x00);    // Enable interrupts
+   outb(PORT + 1, 0x01);    // Enable interrupts
    return 0;
 }
 ```
