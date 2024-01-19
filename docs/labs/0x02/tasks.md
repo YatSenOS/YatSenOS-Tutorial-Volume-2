@@ -494,6 +494,21 @@ x86_64::instructions::interrupts::enable();
 
 遵循 I/O 中断处理的 Top half & Bottom half 原则，在中断发生时，我们只在中断处理中做尽量少的事：读取串口的输入，并将其放入缓冲区。而在中断处理程序之外，我们可以在合适的时机，从缓冲区中读取数据，并进行处理。
 
+为了开启串口设备的中断，你需要参考如下代码，在 `src/drivers/uart16550.rs` 的 `init` 函数末尾为串口设备开启中断：
+
+```c
+#define PORT 0x3f8          // COM1
+
+static int init_serial() {
+   outb(PORT + 1, 0x00);    // Disable all interrupts
+
+   // ...
+
+   outb(PORT + 1, 0x00);    // Enable interrupts
+   return 0;
+}
+```
+
 为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `crossbeam_queue` crate 实现一个输入缓冲区。
 
 !!! tip "在 memory 初始化的过程中，我们已经有了内核堆分配的能力，可以动态分配内存。"
@@ -554,7 +569,7 @@ pub extern "x86-interrupt" fn serial_handler(_st: InterruptStackFrame) {
 /// Receive character from uart 16550
 /// Should be called on every interrupt
 fn receive() {
-    // FIXME: receive character from uart 16550
+    // FIXME: receive character from uart 16550, put it into INPUT_BUFFER
 }
 ```
 
