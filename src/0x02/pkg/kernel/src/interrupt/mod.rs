@@ -32,9 +32,9 @@ pub fn init() {
 }
 
 #[inline(always)]
-pub fn enable_irq(irq: u8) {
+pub fn enable_irq(irq: u8, cpuid: u8) {
     let mut ioapic = unsafe { IoApic::new(physical_to_virtual(IOAPIC_ADDR)) };
-    ioapic.enable(irq, 0);
+    ioapic.enable(irq, cpuid);
 }
 
 #[inline(always)]

@@ -2,6 +2,8 @@
 ///
 /// [Intel Doc](http://www.intel.com/design/chipsets/datashts/29056601.pdf)
 
+use bit_field::BitField;
+
 /// Default physical address of IO APIC
 pub const IOAPIC_ADDR: u64 = 0xFEC00000;
 
@@ -64,16 +66,16 @@ impl IoApic {
         }
     }
 
-    pub fn enable(&mut self, irq: u8, cpunum: u8) {
+    pub fn enable(&mut self, irq: u8, cpuid: u8) {
         // Mark interrupt edge-triggered, active high,
-        // enabled, and routed to the given cpunum,
+        // enabled, and routed to the given cpuid,
         // which happens to be that cpu's APIC ID.
-        self.write_irq(irq, RedirectionEntry::NONE, cpunum);
-        trace!("Enable IOApic: IRQ={}, CPU={}", irq, cpunum);
+        self.write_irq(irq, RedirectionEntry::NONE, cpuid);
+        trace!("Enable IOApic: IRQ={}, CPU={}", irq, cpuid);
     }
 
-    pub fn disable(&mut self, irq: u8) {
-        self.write_irq(irq, RedirectionEntry::DISABLED, 0);
+    pub fn disable(&mut self, irq: u8, cpuid: u8) {
+        self.write_irq(irq, RedirectionEntry::DISABLED, cpuid);
     }
 
     pub fn id(&mut self) -> u8 {

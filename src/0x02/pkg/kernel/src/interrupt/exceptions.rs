@@ -11,7 +11,9 @@ pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
         .set_handler_fn(page_fault_handler)
         .set_stack_index(gdt::PAGE_FAULT_IST_INDEX);
 
-    // FIXME: handle other exceptions
+    // TODO: you should handle more exceptions here
+    // especially gerneral protection fault (GPF)
+    // see: https://wiki.osdev.org/Exceptions
 }
 
 pub extern "x86-interrupt" fn divide_error_handler(stack_frame: InterruptStackFrame) {

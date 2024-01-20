@@ -525,7 +525,7 @@ static int init_serial() {
 
     初始化 `INPUT_BUFFER`，完成后输出日志：`Input Initialized.` 并在在 `src/lib.rs` 中调用它，在操作系统启动时进行。
 
-    请注意：`ysos_kernel::init` 函数中组件的初始化存在顺序，各种组件间可能存在依赖关系。由于输入缓冲区是动态分配的内存，因此需要在 `memory` 模块初始化之后，才能进行初始化。
+    请注意：`ysos_kernel::init` 函数中组件的初始化存在顺序，各种组件间可能存在**依赖关系**。由于输入缓冲区初始化是动态分配内存，因此需要在 `memory` 模块初始化之后，才能进行初始化。
 
 3. 实现并暴露 `push_key` 函数。
 
@@ -614,17 +614,19 @@ pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
 
 ## 思考题
 
-1. 为什么需要在 `clock_handler` 中使用 `without_interrupts` 函数？如果不使用它，会发生什么情况？
+1. 为什么需要在 `clock_handler` 中使用 `without_interrupts` 函数？如果不使用它，可能会发生什么情况？
 
 2. 考虑时钟中断进行进程调度的场景，时钟中断的频率应该如何设置？太快或太慢的频率会带来什么问题？请分别回答。
 
-3. 进行下列尝试，并在报告中保留对应的触发方式及相关代码片段：
+3. 输入缓冲区在什么情况下会满？如果缓冲区满了，用户输入的数据会发生什么情况？
+
+4. 进行下列尝试，并在报告中保留对应的触发方式及相关代码片段：
 
     - 尝试用你的方式触发 Triple Fault，开启 `intdbg` 对应的选项，在 QEMU 中查看调试信息，分析 Triple Fault 的发生过程。
     - 尝试触发 Double Fault，观察 Double Fault 的发生过程，尝试通过调试器定位 Double Fault 发生时使用的栈是否符合预期。
     - 通过访问非法地址触发 Page Fault，观察 Page Fault 的发生过程。分析 Cr2 寄存器的值，并尝试回答为什么 Page Fault 属于**可恢复的异常**。
 
-4. 如果在 TSS 中为中断分配的栈空间不足，会发生什么情况？请分析 CPU 异常的发生过程，并尝试回答什么时候会发生 Triple Fault。
+5. 如果在 TSS 中为中断分配的栈空间不足，会发生什么情况？请分析 CPU 异常的发生过程，并尝试回答什么时候会发生 Triple Fault。
 
 ## 加分项
 
