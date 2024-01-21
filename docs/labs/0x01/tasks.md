@@ -22,15 +22,11 @@
 
     为了帮助大家进行项目代码的结构组织，本次实验给出的参考代码中包含了**完整的文件结构**。
 
-    这意味着你可以**直接使用本次实验的[参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x01/)**进行实验，而不需要从头开始编写项目结构。
+    这意味着你可以**直接使用本次实验的[参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x01/)** （路径为 `YatSenOS-Tutorial-Volume-2/src/0x01`）进行实验，而不需要从头开始编写项目结构。
 
-    请注意结合 Lab 0 的要求，将代码**复制到你自己的仓库**中进行实验，而不是在本仓库中进行。
+    请将代码**复制到你自己的仓库中并替换重复文件以进行实验**，而不是在本仓库中进行。
 
-    请注意本次实验中的 `Makefile` 和 `ysos.py` 均有更新。
-
-    ```bash
-    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x01 /path/to/your/workdir
-    ```
+    请注意本次实验中的 `Makefile` 和 `ysos.py` 均有更新，并注意保留 `assets/OVMF.fd` 文件。
 
 在 `pkg/kernel/config` 中，引用了 `config/x86_64-unknown-none.json` 的编译目标配置，该配置文件如下所示：
 

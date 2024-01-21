@@ -194,17 +194,11 @@
     $ git clone https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2
     ```
 
-2. 参考[实验 0x00 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)的文件结构，初始化你的仓库。
+2. 参考[实验 0x00 代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)的文件结构，初始化你的仓库。
 
-    选择一个合适的目录，并拷贝此文件夹的内容到你的仓库中：
+    选择一个合适的目录，复制 `YatSenOS-Tutorial-Volume-2/src/0x00` 中的内容到目录中。
 
-    !!! warning "不要直接运行如下代码，选择自己的工作文件夹，Windows 环境请注意命令和路径的格式"
-
-    ```bash
-    $ cp -Lr YatSenOS-Tutorial-Volume-2/src/0x00 /path/to/your/workdir
-    ```
-
-    !!! note "我们使用 `/path/to/your/workdir` 指代你的工作区，**请将其替换为你的工作区路径**"
+    !!! tip "网络不好的情况下可以尝试直接下载代码 zip 压缩包"
 
 3. 初始化你的仓库：
 
@@ -230,6 +224,8 @@
     ysos.py
     ```
 
+    !!! note "请注意根 git 根目录下应当存在 `Cargo.toml` 等文件，而不是 `0x00` 文件夹"
+
 ### 使用 QEMU 启动 UEFI Shell
 
 UEFI Shell 是一个基于 UEFI 的命令行工具，它可以让我们在 UEFI 环境下进行一些简单的操作。
@@ -249,6 +245,9 @@ qemu-system-x86_64 -bios ./assets/OVMF.fd -net none -nographic
 在预期下将会看到如下输出：
 
 ```log
+BdsDxe: failed to load Boot0001 "UEFI QEMU DVD-ROM QM00003 " from ...: Not Found
+BdsDxe: loading Boot0002 "EFI Internal Shell" from ...
+BdsDxe: starting Boot0002 "EFI Internal Shell" from ...
 UEFI Interactive Shell v2.2
 EDK II
 UEFI v2.70 (EDK II, 0x00010000)
@@ -260,6 +259,10 @@ Shell>
 ```
 
 !!! tip "使用 <kbd>Ctrl</kbd> + <kbd>A</kbd> 后输入 <kbd>X</kbd> 可以退出 QEMU"
+
+!!! note "你是否尝试过更改自己的电脑的启动项（启动顺序）？"
+
+    这里以 `BdsDxe` 开头的信息是 UEFI 正在尝试从 `DVD-ROM` 启动，但是没有找到可启动项，因此启动了 `EFI Internal Shell`。我们并没有给 QEMU 提供任何光盘设备挂载，因此这是预期的行为。
 
 ## YSOS 启动！
 
@@ -351,9 +354,14 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
 在项目根目录下运行 `make run` 或 `python ysos.py run`，预期得到如下输出：
 
 ```bash
+BdsDxe: failed to load Boot0001 "UEFI QEMU DVD-ROM QM00003 " from ...: Not Found
+BdsDxe: loading Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
+BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
 [ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
 [ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
 ```
+
+!!! note "与上述同理，这里 UEFI 尝试从磁盘启动，并成功加载运行刚刚编译出的引导程序。"
 
 至此，你已经做好了编写 OS 的准备工作。
 

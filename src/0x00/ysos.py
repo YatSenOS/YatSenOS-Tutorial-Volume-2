@@ -42,7 +42,7 @@ def debug(step: str, content: str):
         print(f'\033[1;34m[?] {step}:\033[0m {content}')
 
 
-def execute_command(cmd: list, workdir: str | None = None, shell: bool = False) -> int:
+def execute_command(cmd: list, workdir: str = None, shell: bool = False) -> int:
     debug('Executing', " ".join(cmd) + (f' in {workdir}' if workdir else ''))
 
     if args.dry_run:
