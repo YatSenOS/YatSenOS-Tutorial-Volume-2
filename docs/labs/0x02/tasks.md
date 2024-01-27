@@ -511,7 +511,16 @@ static int init_serial() {
 }
 ```
 
-为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `crossbeam_queue` crate 实现一个输入缓冲区。
+为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `alloc`、`crossbeam_queue` 等 crate 实现一个输入缓冲区。
+
+!!! note "`crossbeam_queue` 的引入"
+
+    `crossbeam_queue` 默认依赖于 `std`，可以使用如下方式引用：
+
+    ```toml
+    [dependencies]
+    crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
+    ```
 
 !!! tip "在 memory 初始化的过程中，你已经有了内核堆分配的能力，可以动态分配内存。"
 
