@@ -22,7 +22,7 @@
 
 进程控制块（Process Control Block，PCB）是操作系统中用于描述进程的一种数据结构，它包含了进程的所有信息。
 
-在实验中，我们使用 `Process` 结构体表示一个进程，它含有 `pid` 和 `inner` 两个字段，分别表示进程的 ID 和内部数据。`inner` 字段是一个 `Arc<RwLock<ProcessInner>>` 类型的智能指针，它指向了一个 `ProcessInner` 结构体，这个结构体包含了进程的其他信息，包括进程的状态、调度计次、退出返回值、内存空间、父子关系、中断上下文、文件描述符表等等。
+在实验中使用 `Process` 结构体表示一个进程，它含有 `pid` 和 `inner` 两个字段，分别表示进程的 ID 和内部数据。`inner` 字段是一个 `Arc<RwLock<ProcessInner>>` 类型的智能指针，它指向了一个 `ProcessInner` 结构体，这个结构体包含了进程的其他信息，包括进程的状态、调度计次、退出返回值、内存空间、父子关系、中断上下文、文件描述符表等等。
 
 !!! note "`RwLock` 读写锁"
 
@@ -58,7 +58,7 @@
 
     如果完全按照调用约定，并不是全部寄存器都应当在中断发生和进程切换时被保存。
 
-    但是在实验中，为了简化实现，我们将所有通用寄存器都保存到了进程上下文中。
+    但是在实验中，为了简化实现，将所有通用寄存器都保存到了进程上下文中。
 
 在 `src/utils/regs.rs` 中，实现了寄存器的保存和恢复，并为寄存器声明了自己的结构体。
 
@@ -89,11 +89,11 @@ macro_rules! as_handler {
 }
 ```
 
-`as_handler` 宏接受一个函数名作为参数，它会生成一个函数名为 `[函数名]_handler` 的函数，中断栈本身会包含 `InterruptStackFrame` 作为参数（`x86-interrupt` 调用约定中实现），而我们需要保存更多寄存器到栈上，因此使用 `naked` 属性来禁用 Rust 的栈帧生成，然后使用汇编代码来手动保存和恢复寄存器。
+`as_handler` 宏接受一个函数名作为参数，它会生成一个函数名为 `[函数名]_handler` 的函数，中断栈本身会包含 `InterruptStackFrame` 作为参数（`x86-interrupt` 调用约定中实现），而这里需要保存更多寄存器到栈上，因此使用 `naked` 属性来禁用 Rust 的栈帧生成，然后使用汇编代码来手动保存和恢复寄存器。
 
 在保存了寄存器后，使用 `call` 指令调用原函数，然后恢复寄存器，使用 `iretq` 指令返回。
 
-在此宏进行转换后，我们使用如下的方式声明并使用一个中断处理函数：
+在此宏进行转换后，使用如下的方式声明并使用一个中断处理函数：
 
 ```rust
 pub unsafe fn reg_idt(idt: &mut InterruptDescriptorTable) {
@@ -133,7 +133,7 @@ pub struct ProcessContextValue {
 
     x86_64 架构下的四级页表是一个树形结构，进而能够映射到很大的虚拟地址空间，且不需要很大的内存开销。
 
-    我们假设**页表的页面在映射后不会被修改**，且用户进程的地址空间和内核地址空间有一定的差距，一般的实现是将内核映射到很高的地址空间，而用户进程映射到较低的地址，这一点可以从 lab 1 的映射中看出。
+    这里假设**页表的页面在映射后不会被修改**，且用户进程的地址空间和内核地址空间有一定的差距，一般的实现是将内核映射到很高的地址空间，而用户进程映射到较低的地址，这一点可以从 lab 1 的映射中看出。
 
     在这样的假设下克隆页表的过程中，就不需要将整棵页表树都复制一遍，只需要复制根节点即可。
 
@@ -149,7 +149,7 @@ pub struct ProcessContextValue {
 
 在 PID 的设计中，**本实验使用 `0` 表示当前没有进程在运行**，因此在 `Processor` 结构体初始化时，将其初始化为 `0`。
 
-为了支持*实际上不计划支持的*多处理器，我们把 `Processor` 结构体放在一个静态数组之中，数组的长度为 `MAX_CPU_NUM`。
+为了支持*实际上不计划支持的*多处理器，实验设计把 `Processor` 结构体放在一个静态数组之中，数组的长度为 `MAX_CPU_NUM`。
 
 ```rust
 const MAX_CPU_COUNT: usize = 8;
@@ -170,5 +170,92 @@ impl Processor {
 
 这里使用了一个小技巧来初始化一个静态数组，`clippy` 的提示 `declare_interior_mutable_const` 会说明 `EMPTY` 在进行复制的时候会进行内存复制，这或许不是代码作者所期望的行为。
 
-然而，这里恰好利用这一特性来绕过 `AtomicU16` 没有实现 `Copy` 的限制，将 `EMPTY` 复制到数组中的每一个元素，从而实现了数组的初始化。
+然而，这里恰好利用这一特性来绕过 `AtomicU16` 没有实现 `Copy` 的限制，将 `EMPTY` 复制到数组中的每一个元素，从而实现了这一数组的初始化。
 
+在 `src/proc/manager.rs` 中，定义了 `ProcessManager`:
+
+```rust
+pub struct ProcessManager {
+    processes: RwLock<BTreeMap<ProcessId, Arc<Process>>>,
+    ready_queue: Mutex<VecDeque<ProcessId>>,
+}
+```
+
+其中 `processes` 字段用于存储所有的进程，`ready_queue` 字段则用于存储就绪的进程队列。`ProcessManager` 结构体被设计为“不可变”的，也就是说，它由 `RwLock` 和 `Mutex` 来提供内部可变性。
+
+就绪队列的操作（`push` 和 `pop`）是需要对 `VecDeque` 进行修改，所以是在 `Mutex` 的保护下进行的，并没有读写操作的区别。
+
+而进程列表只有 `insert` 操作需要对 `BTreeMap` 的可变引用，因此 `RwLock` 的保护下更加合适。
+
+在 `ProcessManager` 的不可变约束下，就可以通过 `spin::Once` 来定义一个全局的 `ProcessManager`，并在 `init()` 函数中初始化它：
+
+```rust
+pub static PROCESS_MANAGER: spin::Once<ProcessManager> = spin::Once::new();
+
+pub fn init(init: Arc<Process>) {
+    processor::set_pid(init.pid());
+    PROCESS_MANAGER.call_once(|| ProcessManager::new(init));
+}
+
+pub fn get_process_manager() -> &'static ProcessManager {
+    PROCESS_MANAGER
+        .get()
+        .expect("Process Manager has not been initialized")
+}
+```
+
+#### 内核进程
+
+在初始化进程管理器时，为了让内核始终和其他进程有一样的获取时间片的机会，需要将内核进程作为第一个进程加入进程列表。
+
+之后的每次切换时，内核进程也就会被视作一个普通的进程，从而能够被调度器选中、保存、执行。
+
+因此，`ProcessManager` 初始化时需要传入一个 `init` 进程，它会作为内核进程加入进程列表：
+
+```rust
+pub fn new(init: Arc<Process>) -> Self {
+    let mut processes = BTreeMap::new();
+    let ready_queue = VecDeque::new();
+    let pid = init.pid();
+
+    trace!("Init {:#?}", init);
+
+    processes.insert(pid, init);
+    Self {
+        processes: RwLock::new(processes),
+        ready_queue: Mutex::new(ready_queue),
+    }
+}
+```
+
+#### 时钟中断的处理
+
+时钟中断发生时，进程调度器被运行，CPU 通过 IDT 调用 `proc::switch` 函数来完成进程的切换。
+
+在一次进程切换的过程中，需要**关闭中断**，之后完成以下几个步骤：
+
+- 保存当前进程的上下文
+
+    经过上述进程上下文的描述可知，作为可变引用参数被传入的 `ProcessContext` 中存储了进程切换时需要保存的所有寄存器的值，并且其中的内容将会在进程切换完成后被恢复，进而真正实现进程的切换。
+
+    因此，进程切换的第一步就是将 `context` 保存至当前进程的 `ProcessInner` 中，以便下次恢复运行状态。
+
+- 更新当前进程的状态
+
+    进程切换时，若它当前的状态并非 `Dead`，则当前进程的状态会被更新为 `Ready`。
+
+    同时，为了记录进程的执行时间，一般也会记录进程的调度次数，这里使用 `usize` 类型的 `ticks_passed` 字段来记录进程的调度次数。
+
+- 将当前进程放入就绪队列
+
+    当前进程被切换出去后，它会被放入就绪队列的末尾，等待下一次调度。
+
+    !!! tip "被调度的进程状态可能在就绪队列中时发生了改变，因此需要进行检查"
+
+- 从就绪队列中选取下一个进程
+
+    进程调度器会从就绪队列中选取第一个进程，检查进程的状态，如果进程处于可调度状态，就将其状态更新为 `Running`，并将其 PID 写入 `Processor` 中。
+
+- 切换进程上下文和页表
+
+    进程调度器会将选中的进程的上下文重新加载，并将新进程的页表物理地址写入 `Cr3` 寄存器，从而完成进程的切换。
