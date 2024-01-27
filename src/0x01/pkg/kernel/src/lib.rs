@@ -1,12 +1,9 @@
 #![no_std]
-#![allow(dead_code)]
 #![feature(core_intrinsics)]
 #![feature(naked_functions)]
 #![feature(abi_x86_interrupt)]
 #![feature(type_alias_impl_trait)]
 #![feature(panic_info_message)]
-#![allow(clippy::missing_safety_doc)]
-#![allow(clippy::result_unit_err)]
 
 #[macro_use]
 extern crate log;
