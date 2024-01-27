@@ -39,10 +39,17 @@ COM 端口和 I/O 端口的映射关系你可以在 [Port Addresses](https://wik
 
 ## x86 I/O 端口
 
-!!! note "关于 I/O 端口"
-      I/O 端口是一种特殊的内存映射，它是一种**内存地址**，但是对应的内存地址并不是 RAM，而是 I/O 设备的寄存器。
+!!! note "关于 I/O 的访问方式"
 
-      有关 I/O 端口的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
+      CPU 与计算机外部 I/O 设备的常见交互模式分为 Memory-mapped I/O (MMIO) 和 Port-mapped I/O 两种，这两种方式也被称为统一编址和独立编址。
+
+      - Memory-mapped I/O (MMIO) 即通过将需要进行交互的 I/O 设备的相关寄存器映射到某一段内存地址空间，从而实现对 I/O 设备的访问。在启用虚拟内存机制的系统中，这些内存空间**同样需要通过虚拟地址进行访问**。
+
+      - Port-mapped I/O 即将 I/O 设备的相关寄存器编址在相对与内存地址独立的地址空间，并使用专门的指令与 I/O 设备尽心交互。在 x86 系统中，I/O 端口的地址空间为 0x0000 - 0xFFFF，可以通过 `in` 和 `out` 指令进行访问。
+
+      由于历史遗留原因，x86 架构中同时存在 MMIO 和 port-mapped I/O 两种访问方式，不过由于 Port I/O 地址空间太小和其他的一些需求，现代硬件越来越偏向于使用 MMIO。
+
+      有关串口设备驱动实现的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
 
 在 x86 体系中，I/O 端口的读写是通过 `in` 和 `out` 指令完成的。`in` 指令用于从 I/O 端口读取数据，`out` 指令用于向 I/O 端口写入数据。
 

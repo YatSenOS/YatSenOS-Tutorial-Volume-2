@@ -138,3 +138,37 @@ pub struct ProcessContextValue {
     在这样的假设下克隆页表的过程中，就不需要将整棵页表树都复制一遍，只需要复制根节点即可。
 
 在后续有关用户进程的实现中，还会遇到有关页表共享的问题，这里暂时不作展开。
+
+### 进程调度
+
+进程调度的工作目的简单来说就是从就绪队列中选取一个进程，并将其分配给选定的 CPU 核心运行。在实验中，为了实现简单，YSOS 自始至终只会使用一个 CPU 核心。
+
+在实验中，将实现一个简单的 FIFO 调度器，它会将就绪队列中的第一个进程选出来，然后将其分配给 CPU 核心运行，当进程的时间片用完后，调度器会将其重新放回就绪队列的末尾。
+
+在 `src/proc/processor.rs` 中，`Processor` 结构体存储了一个 `AtomicU16`，用于表示当前正在运行的进程的 PID。
+
+在 PID 的设计中，**本实验使用 `0` 表示当前没有进程在运行**，因此在 `Processor` 结构体初始化时，将其初始化为 `0`。
+
+为了支持*实际上不计划支持的*多处理器，我们把 `Processor` 结构体放在一个静态数组之中，数组的长度为 `MAX_CPU_NUM`。
+
+```rust
+const MAX_CPU_COUNT: usize = 8;
+
+#[allow(clippy::declare_interior_mutable_const)]
+const EMPTY: Processor = Processor::new(); // means no process
+
+static PROCESSORS: [Processor; MAX_CPU_COUNT] = [EMPTY; MAX_CPU_COUNT];
+
+pub struct Processor(AtomicU16);
+
+impl Processor {
+    pub const fn new() -> Self {
+        Self(AtomicU16::new(0))
+    }
+}
+```
+
+这里使用了一个小技巧来初始化一个静态数组，`clippy` 的提示 `declare_interior_mutable_const` 会说明 `EMPTY` 在进行复制的时候会进行内存复制，这或许不是代码作者所期望的行为。
+
+然而，这里恰好利用这一特性来绕过 `AtomicU16` 没有实现 `Copy` 的限制，将 `EMPTY` 复制到数组中的每一个元素，从而实现了数组的初始化。
+
