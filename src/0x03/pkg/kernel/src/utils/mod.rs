@@ -26,17 +26,6 @@ __  __      __  _____            ____  _____
     )
 }
 
-pub fn stack_thread_test() {
-    let pid = spawn_kernel_thread(
-        utils::func::stack_test,
-        alloc::string::String::from("stack"),
-        None,
-    );
-
-    // wait for progress exit
-    wait(pid);
-}
-
 pub fn new_test_thread(id: &str) -> ProcessId {
     let proc_data = ProcessData::new();
     proc_data.set_env("id", id);
@@ -46,8 +35,17 @@ pub fn new_test_thread(id: &str) -> ProcessId {
         format!("#{}_test", id),
         Some(proc_data),
     )
+}
 
-    // no wait
+pub fn new_stack_test_thread() {
+    let pid = spawn_kernel_thread(
+        utils::func::stack_test,
+        alloc::string::String::from("stack"),
+        None,
+    );
+
+    // wait for progress exit
+    wait(pid);
 }
 
 fn wait(pid: ProcessId) {

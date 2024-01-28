@@ -12,7 +12,11 @@ use x86_64::VirtAddr;
 pub static PROCESS_MANAGER: spin::Once<ProcessManager> = spin::Once::new();
 
 pub fn init(init: Arc<Process>) {
-    processor::set_pid(init.pid());
+
+    // FIXME: set init process as Running
+    
+    // FIXME: set processor's current pid to init's pid
+
     PROCESS_MANAGER.call_once(|| ProcessManager::new(init));
 }
 
@@ -58,7 +62,7 @@ impl ProcessManager {
     }
 
     pub fn current(&self) -> Arc<Process> {
-        self.get_proc(&processor::current_pid())
+        self.get_proc(&processor::get_pid())
             .expect("No current process")
     }
 
@@ -107,7 +111,7 @@ impl ProcessManager {
     }
 
     pub fn kill_current(&self, ret: isize) {
-        self.kill(processor::current_pid(), ret);
+        self.kill(processor::get_pid(), ret);
     }
 
     pub fn handle_page_fault(&self, addr: VirtAddr, err_code: PageFaultErrorCode) -> bool {

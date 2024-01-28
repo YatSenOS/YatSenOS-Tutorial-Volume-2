@@ -49,7 +49,7 @@ pub fn set_pid(pid: ProcessId) {
 }
 
 #[inline]
-pub fn current_pid() -> ProcessId {
+pub fn get_pid() -> ProcessId {
     current().get_pid().expect("No current process")
 }
 

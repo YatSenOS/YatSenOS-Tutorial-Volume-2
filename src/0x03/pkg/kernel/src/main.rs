@@ -28,7 +28,7 @@ pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
                 ysos::proc::print_process_list();
             }
             "stack" => {
-                ysos::stack_thread_test();
+                ysos::new_stack_test_thread();
             }
             "test" => {
                 ysos::new_test_thread(format!("{}", test_num).as_str());
