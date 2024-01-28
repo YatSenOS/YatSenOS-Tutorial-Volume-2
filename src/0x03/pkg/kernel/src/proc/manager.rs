@@ -14,7 +14,7 @@ pub static PROCESS_MANAGER: spin::Once<ProcessManager> = spin::Once::new();
 pub fn init(init: Arc<Process>) {
 
     // FIXME: set init process as Running
-    
+
     // FIXME: set processor's current pid to init's pid
 
     PROCESS_MANAGER.call_once(|| ProcessManager::new(init));
@@ -101,7 +101,7 @@ impl ProcessManager {
         // alloc stack for the new process base on pid
         let stack_top = proc.alloc_init_stack();
 
-        // FIXME: set the stack pointer to the top of the stack
+        // FIXME: set the stack frame
 
         // FIXME: add to process map
 
