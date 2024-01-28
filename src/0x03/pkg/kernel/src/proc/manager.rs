@@ -130,6 +130,11 @@ impl ProcessManager {
 
         let proc = proc.unwrap();
 
+        if proc.read().status() == ProgramStatus::Dead {
+            warn!("Process #{} is already dead.", pid);
+            return;
+        }
+
         trace!("Kill {:#?}", &proc);
 
         proc.kill(ret);
