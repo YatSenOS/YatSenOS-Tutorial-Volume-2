@@ -471,6 +471,14 @@ char read_serial() {
 println!("{}", record.args());
 ```
 
+### Panic 处理
+
+在拥有了日志输出的能力之后可以对 panic 进行更好的处理，以便在 panic 时输出更加详细的信息。代码中已经为大家启用了 `#![feature(panic_info_message)]` 特性，并且默认给出了一个 `error!` 的输出。
+
+在 `src/utils/macros.rs` 中，你可以选择按照自己的预期修改 `panic_handler` 的实现。
+
+!!! note "`PanicInfo` 实现了 `Debug` trait，在最简的情况下，你可以使用 `{:#?}` 来输出它。"
+
 ## 思考题
 
 1. 在 `pkg/kernel` 的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，这是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
