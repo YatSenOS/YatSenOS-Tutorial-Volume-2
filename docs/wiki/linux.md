@@ -67,7 +67,7 @@ wsl --install -d Ubuntu
 
 ```bash
 $ rustc --version
-rustc 1.74.0 (79e9716c9 2023-11-13)
+rustc 1.77.0-nightly (11f32b73e 2024-01-31)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)
