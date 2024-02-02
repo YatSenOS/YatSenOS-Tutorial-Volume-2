@@ -303,7 +303,7 @@ pub const STACK_MAX_SIZE: u64 = STACK_MAX_PAGES * PAGE_SIZE;
 
 `STACK_MAX_SIZE` 定义了每个进程栈的最大大小，这里定义为 4GiB，即 `0x100000` 个页面。
 
-作为一个常识：栈的增长方向是向下的，即在进行 `push` 操作时，栈指针会减小。因此，栈的起始地址应当是栈的最大地址，而栈的结束地址应当是栈的最小地址。
+作为一个常识：栈的增长方向是向下的，即在进行 `push` 操作时，栈指针会减小。因此，栈总是从最大地址开始，向更小的地址空间“增长”。
 
 在本次实验中，笔者带领大家做一个临时的、取巧的实现：根据进程的 PID 来为进程分配对应的栈空间。
 
@@ -403,7 +403,9 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 
 ## 进程管理器的初始化
 
-在 `src/utils/mod.rs` 中，可以看到待补全的 `init` 函数，这个函数将内核包装成进程，并将其传递给 `ProcessManager`，使其成为第一个进程。
+在 `src/proc/mod.rs` 中，可以看到待补全的 `init` 函数，这个函数将内核包装成进程，并将其传递给 `ProcessManager`，使其成为第一个进程。
+
+!!! note "记得在 `src/lib.rs` 中使用 `pub mod proc` 引用进程模块，并在 `crate::init` 函数中调用 `proc::init` 函数（位于内存初始化之后、启用中断之前）"
 
 1. 设置内核相关信息
 
@@ -415,6 +417,7 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 
     调用 `Process::new` 函数，创建内核进程，它会返回一个 `Process` 的智能指针。
 
+    - 在上述的假设中，实验使用 `0` 表示无进程（正在运行），因此内核进程获取的 PID 为 `1`。
     - 内核进程没有父进程，可以直接传入 `None`。
     - 内核进程的页表就是当前 `Cr3` 寄存器的内容，使用 `PageTableContext::new()` 进行加载。
 
@@ -493,7 +496,15 @@ pub fn new_test_thread(id: &str) -> ProcessId {
 
 在 `src/proc/process.rs` 中，根据你的内存布局预设和当前进程的 PID，为其分配初始栈空间。
 
-参考 bootloader 中为内核分配栈空间的代码，克隆内核页表，映射新的页面。你可以使用 `get_frame_alloc_for_sure()` 来获得内核的帧分配器。在完成栈分配后，将栈顶地址返回。
+参考 bootloader 中为内核分配栈空间的代码，克隆内核页表，使用 `elf::map_range` 函数来进行新的页面的映射。完成栈分配后，将栈顶地址返回。
+
+!!! note "获取内核的帧分配器"
+
+    可以通过 `get_frame_alloc_for_sure` 函数来获取能够传递给 `elf::map_range` 的 `&mut impl FrameAllocator<Size4KiB>` 类型的参数：
+
+    ```rust
+    let frame_allocator = &mut *get_frame_alloc_for_sure();
+    ```
 
 在获取了栈顶地址、待执行函数的入口地址后，将它们放入初始化的进程栈帧中。你可以修改或添加函数，利用 `ProcessContext` 的 `init_stack_frame` 函数来完成这一操作。
 
@@ -570,14 +581,13 @@ pub extern "x86-interrupt" fn page_fault_handler(
 
     分配新的页面、更新页表、更新进程数据中的栈信息。
 
-    *HINT：继续使用 `elf::map_range` 函数来进行新的页面的映射。*
-
 !!! note "关于页面的记录与处理"
 
     - 你可以使用 `Page::<Size4KiB>::containing_address(addr)` 来获取一个地址所在的页面。
     - `PageRange` 结构体是**前闭后开**的，即 `start..end` 表示的是 `[start, end)` 的页面范围。你可以访问其 `start` 和 `end` 字段来获取页面范围的起始和结束页。
     - 页面 `Page` 之间可以进行减运算，它们的结果是 `u64`，表示两个页面之间的页面数量。
     - 使用 `PageTableContext` 的 `mapper()` 函数获取 `map_range` 函数所需的 `page_table` 参数。
+    - 越权访问可以使用 `PageFaultErrorCode::PROTECTION_VIOLATION` 访问对应标志位。
 
 ## 进程的退出
 
