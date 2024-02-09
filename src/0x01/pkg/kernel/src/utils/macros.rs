@@ -65,7 +65,7 @@ pub fn print_internal(args: Arguments) {
 
 #[allow(dead_code)]
 #[cfg_attr(not(test), panic_handler)]
-fn panic(_: &core::panic::PanicInfo) -> ! {
-    error!("ERROR: panic!");
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    error!("ERROR: panic!\n\n{:#?}", info);
     loop {}
 }
