@@ -1,6 +1,6 @@
 # 实验四：用户程序与系统调用
 
-!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
+!!! tip "精巧的机械齿轮配合无声的引擎，构筑为处理万物而生的机械。<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
 
 ## 实验目的
 
@@ -23,6 +23,7 @@
 
 对于本次实验内容，你需要参考学习如下实验资料：
 
+- [用户空间](../../wiki/userspace.md)
 
 ## 实验任务与要求
 

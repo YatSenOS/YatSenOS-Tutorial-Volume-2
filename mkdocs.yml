@@ -82,6 +82,7 @@ nav:
     - CPU 中断处理: wiki/interrupts.md
     - APIC 可编程中断控制器: wiki/apic.md
     - x64 数据结构概述: wiki/structures.md
+    - 用户空间: wiki/userspace.md
 
 markdown_extensions:
   - attr_list:
