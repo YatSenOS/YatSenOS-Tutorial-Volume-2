@@ -16,16 +16,19 @@ pub fn spawn_process(args: &SyscallArgs) -> usize {
     0
 }
 
-pub fn sys_read(args: &SyscallArgs) -> usize {
+pub fn sys_write(args: &SyscallArgs) -> usize {
     // FIXME: get handle by fd
     // FIXME: handle read from fd & return length
-    //       - core::slice::from_raw_parts_mut
+    //       - core::slice::from_raw_parts
     // FIXME: return 0 if failed
+
     0
 }
 
-pub fn sys_write(args: &SyscallArgs) -> usize {
-    // FIXME: just like sys_read
+pub fn sys_read(args: &SyscallArgs) -> usize {
+    // FIXME: just like sys_write
+
+    0
 }
 
 pub fn exit_process(args: &SyscallArgs, context: &mut ProcessContext) {

@@ -34,19 +34,19 @@ pub struct SyscallArgs {
 
 pub fn dispatcher(context: &mut ProcessContext) {
     let args = super::syscall::SyscallArgs::new(
-        Syscall::try_from(context.regs.rax as u16).unwrap(),
+        Syscall::try_from(context.regs.rax).unwrap_or_default(),
         context.regs.rdi,
         context.regs.rsi,
         context.regs.rdx,
     );
 
     match args.syscall {
-        // fd: arg0 as u8, buf: &[u8] (arg1 as *const u8, arg2 as len)
+        // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
         Syscall::Read => { /* FIXME: read from fd & return length */},
-        // fd: arg0 as u8, buf: &[u8] (arg1 as *const u8, arg2 as len)
+        // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
         Syscall::Write => { /* FIXME: write to fd & return length */},
 
-        // path: &str (arg0 as *const u8, arg1 as len) -> pid: u16
+        // path: &str (ptr: arg0 as *const u8, len: arg1) -> pid: u16
         Syscall::Spawn => { /* FIXME: spawn process from name */},
         // ret: arg0 as isize
         Syscall::Exit => { /* FIXME: exit process with retcode */},
@@ -64,9 +64,8 @@ pub fn dispatcher(context: &mut ProcessContext) {
         Syscall::Allocate => context.set_rax(sys_allocate(&args)),
         // ptr: arg0 as *mut u8
         Syscall::Deallocate => sys_deallocate(&args),
-
-        // None
-        _ => {}
+        // Unknown
+        Syscall::Unknown => warn!("Unhandled syscall: {:x?}", context.regs.rax),
     }
 }
 

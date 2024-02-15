@@ -4,7 +4,7 @@ use num_enum::TryFromPrimitive;
 
 pub mod macros;
 
-#[repr(u16)]
+#[repr(usize)]
 #[derive(Clone, Debug, TryFromPrimitive)]
 pub enum Syscall {
     Read = 0,
@@ -20,5 +20,5 @@ pub enum Syscall {
     Deallocate = 65534,
 
     #[num_enum(default)]
-    None = 65535,
+    Unknown = 65535,
 }
