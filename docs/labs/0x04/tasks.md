@@ -44,7 +44,7 @@
 
 对于不同的运行环境，即使指令集相同，一个可执行的程序仍然有一定的差异。
 
-与内核的编译类似，在 `pkg/app/config/x86_64-unknown-ysos.json` 中，定义了用户程序的编译目标，并定义了相关的 LD 链接脚本。
+与内核的编译类似，在 `pkg/app/config` 中，定义了用户程序的编译目标，并定义了相关的 LD 链接脚本。
 
 在 `Cargo.toml` 中，使用通配符引用了 `pkg/app` 中的所有用户程序。相关的编译过程在先前给出的编译脚本中均已定义，可以直接编译。
 
@@ -52,7 +52,60 @@
 
 在编写 C 语言时 `printf`、`scanf` 等函数并不是直接调用系统调用，以 gcc on Linux 的一般行为为例，这些函数被定义在 `glibc` 中，而 `glibc` 会处理系统调用。相对应的，在 Windows 上，也会存在 `msvcrt` (Microsoft Visual C Run-time) 等库。
 
-为了让用户态程序更好地与 YSOS 进行交流，处理程序的生命周期等，需要提供用户态库，以便用户程序调用。
+为了让用户态程序更好地与 YSOS 进行交互，处理程序的生命周期，便于编写用户程序等，需要提供用户态库，以便用户程序调用。
+
+用户态库被定义在 `pkg/lib` 中，在用户程序中，编辑 `Cargo.toml`，使用如下方式引用用户库：
+
+```rust
+[dependencies]
+lib = { path="../../lib", package="yslib"}
+```
+
+一个简单的用户程序示例如下所示，同样存在于 `app/hello/src/main.rs` 中：
+
+```rust
+#![no_std]
+#![no_main]
+
+use lib::*;
+
+extern crate lib;
+
+fn main() -> usize {
+    println!("Hello, world!!!");
+
+    233
+}
+
+entry!(main);
+```
+
+- `#![no_std]` 表示不使用标准库，rust 并没有支持 YSOS 的标准库，需要我们自行实现。
+- `#![no_main]` 表示不使用标准的 `main` 函数入口，而是使用 `entry!` 宏定义的入口函数。
+
+`entry!` 宏的定义如下：
+
+```rust
+#[macro_export]
+macro_rules! entry {
+    ($fn:ident) => {
+        #[export_name = "_start"]
+        pub extern "C" fn __impl_start() {
+            let ret = $fn();
+            // FIXME: after syscall, add lib::sys_exit(ret);
+            loop {}
+        }
+    };
+}
+```
+
+在 `__impl_start` 函数中，调用用户程序的 `main` 函数，并在用户程序退出后，进入死循环。在后续完善了进程退出的系统调用后，你需要将 `FIXME` 的部分替换为正确的系统调用。
+
+!!! note "关于 `libc` 的处理"
+
+    在 Linux 中，一个正常的用户程序在编译后也不会直接执行 `main` 函数，而是执行 `_start` 函数，这个函数会通过调用 `__libc_start_main`，最终通过 `__libc_stop_main`、`__exit` 等一系列函数，准备好应用程序需要执行的环境，并在程序退出后进行一些后续的工作。
+
+在一切配置顺利之后，应当可以使用 `cargo build` 在用户程序目录中正确地编译用户程序。
 
 ## 用户程序的加载
 
