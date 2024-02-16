@@ -40,7 +40,9 @@
 
 !!! note "别忘了更新 `Cargo.toml`"
 
-## 用户程序的编译
+## 用户程序
+
+### 编译用户程序
 
 对于不同的运行环境，即使指令集相同，一个可执行的程序仍然有一定的差异。
 
@@ -105,15 +107,272 @@ macro_rules! entry {
 
     在 Linux 中，一个正常的用户程序在编译后也不会直接执行 `main` 函数，而是执行 `_start` 函数，这个函数会通过调用 `__libc_start_main`，最终通过 `__libc_stop_main`、`__exit` 等一系列函数，准备好应用程序需要执行的环境，并在程序退出后进行一些后续的工作。
 
-在一切配置顺利之后，应当可以使用 `cargo build` 在用户程序目录中正确地编译用户程序。
+!!! note "阶段性目标"
 
-## 用户程序的加载
+    在一切配置顺利之后，应当可以使用 `cargo build` 在用户程序目录中正确地编译用户程序。
 
-load_elf，Process
+### 加载程序文件
+
+在成功编译了用户程序后，用户程序将被脚本移动到 `esp/APP` 目录下，并**以文件夹命名**。
+
+> 由于 FAT16 文件系统的限制，文件名长度不能超过 8 个字符，所以建议使用简短的文件夹名。
+
+目前的内核尚不具备访问磁盘和文件系统，并将它们读取加载的能力（将会在实验六中实现），因此需要另辟蹊径：在 bootloader 中将符合条件的用户程序加载到内存中，并将它们交给内核，用于生成用户进程。
+
+!!! note "修改内核配置文件"
+
+    这就是 lab 1 中 `Config` 含有 `load_apps` 的原因。
+
+    本次实验你应当在 `pkg/kernel/config/boot.conf` 中，将 `load_apps` 设置为 `true`。
+
+为了存储用户程序的相关信息，在 bootloader 中，定义一个 `App` 结构体，并添加“已加载的用户程序”字段到 `BootInfo` 结构体中：
+
+```rust
+use arrayvec::{ArrayString, ArrayVec};
+
+/// App information
+pub struct App<'a> {
+    /// The name of app
+    pub name: ArrayString<16>,
+    /// The ELF file
+    pub elf: ElfFile<'a>,
+}
+
+pub type AppList = ArrayVec<App<'static>, 16>;
+
+/// This structure represents the information that the bootloader passes to the kernel.
+pub struct BootInfo {
+    // ...
+    // Loaded apps
+    pub loaded_apps: Option<AppList>,
+}
+```
+
+!!! tip "更好的类型声明？"
+
+    - 使用 `const` 指定用户程序数组的最大长度。
+    - 尝试定义 `AppListRef` 类型，用于存储 `loaded_apps.as_ref()` 的返回值类型。
+    - 抛弃 `App` 类型的生命周期，直接声明 `ElfFile<'static>`。
+
+之后，在 `pkg/boot/src/fs.rs` 中，创建函数 `load_apps` 用于加载用户程序，并参考 `fs.rs` 中的其他函数，处理文件系统相关逻辑，补全代码：
+
+```rust
+/// Load apps into memory, when no fs implemented in kernel
+///
+/// List all file under "APP" and load them.
+pub fn load_apps(bs: &BootServices) -> AppList {
+    let mut root = open_root(bs);
+    let mut buf = [0; 8];
+    let cstr_path = uefi::CStr16::from_str_with_buf("\\APP\\", &mut buf).unwrap();
+
+    let mut handle = { /* FIXME: get handle for \APP\ dir */ };
+
+    let mut apps = ArrayVec::new();
+    let mut entry_buf = [0u8; 0x100];
+
+    loop {
+        let info = handle
+            .read_entry(&mut entry_buf)
+            .expect("Failed to read entry");
+
+        match info {
+            Some(entry) => {
+                let file = { /* FIXME: get handle for app binary file */ };
+
+                if file.is_directory().unwrap_or(true) {
+                    continue;
+                }
+
+                let elf = {
+                    // FIXME: load file with `load_file` function
+                    // FIXME: convert file to `ElfFile`
+                };
+
+                let mut name = ArrayString::<16>::new();
+                entry.file_name().as_str_in_buf(&mut name).unwrap();
+
+                apps.push(App { name, elf });
+            }
+            None => break,
+        }
+    }
+
+    info!("Loaded {} apps", apps.len());
+
+    apps
+}
+```
+
+在 `boot/src/main.rs` 中，`main` 函数中加载好内核的 `ElfFile` 之后，根据配置选项按需加载用户程序，并将其信息传递给内核：
+
+```rust
+// ...
+
+let apps = if config.load_apps {
+    info!("Loading apps...");
+    Some(load_apps(system_table.boot_services()))
+} else {
+    info!("Skip loading apps");
+    None
+};
+
+// ...
+
+// construct BootInfo
+let bootinfo = BootInfo {
+    // ...
+    loaded_apps: apps,
+};
+```
+
+修改 `ProcessManager` 的定义与初始化逻辑，将 `AppList` 添加到 `ProcessManager` 中：
+
+```rust
+pub struct ProcessManager {
+    // ...
+    app_list: boot::AppListRef,
+}
+```
+
+最后修改 `kernel/src/proc/mod.rs` 的 `init` 函数：
+
+```rust
+/// init process manager
+pub fn init(boot_info: &'static boot::BootInfo) {
+    // ...
+    let app_list = boot_info.loaded_apps.as_ref();
+    manager::init(kproc, app_list);
+}
+```
+
+之后，在 `kernel/src/proc/mod.rs` 中，定义一个 `list_app` 函数，用于列出当前系统中的所有用户程序和相关信息：
+
+```rust
+pub fn list_app() {
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        let app_list = get_process_manager().app_list();
+        if app_list.is_none() {
+            println!("[!] No app found in list!");
+            return;
+        }
+
+        let apps = app_list
+            .unwrap()
+            .iter()
+            .map(|app| app.name.as_str())
+            .collect::<Vec<&str>>()
+            .join(", ");
+
+        // TODO: print more information like size, entry point, etc.
+
+        println!("[+] App list: {}", apps);
+    });
+}
+```
+
+!!! note "阶段性目标"
+
+    在 `kernel/src/main.rs` 初始化内核之后，尝试调用 `list_app` 函数，查看是否成功加载。
+
+### 生成用户程序
+
+在 `kernel/src/proc/mod.rs` 中，添加 `spawn` 和 `elf_spawn` 函数，将 ELF 文件从列表中取出，并生成用户程序：
+
+```rust
+pub fn spawn(name: &str) -> Option<ProcessId> {
+    let app = x86_64::instructions::interrupts::without_interrupts(|| {
+        let app_list = get_process_manager().app_list()?;
+        app_list.iter().find(|&app| app.name.eq(name))
+    })?;
+
+    elf_spawn(name.to_string(), &app.unwrap().elf)
+}
+
+pub fn elf_spawn(name: String, elf: &ElfFile) -> Option<ProcessId> {
+    let pid = x86_64::instructions::interrupts::without_interrupts(|| {
+        let manager = get_process_manager();
+        let process_name = name.to_lowercase();
+        let parent = Arc::downgrade(&manager.current());
+        let pid = manager.spawn(elf, name, Some(parent), None);
+
+        debug!("Spawned process: {}#{}", process_name, pid);
+        pid
+    });
+
+    Some(pid)
+}
+```
+
+??? question "为什么独立一个 `elf_spawn`？"
+
+    在后续的实验中，`spawn` 将接收一个文件路径，操作系统需要从文件系统中读取文件，并将其加载到内存中。
+
+    通过将 `elf_spawn` 独立出来，可以在后续实验中直接对接到文件系统的读取结果，而无需修改后续代码。
+
+**删除或注释上次实验中有关内核线程的代码**，防止后续修改后的进程模型在执行内核线程时遇到意外的问题。
+
+在 `ProcessManager` 中，实现 `spawn` 函数：
+
+```rust
+pub fn spawn(
+    &self,
+    elf: &ElfFile,
+    name: String,
+    parent: Option<Weak<Process>>,
+    proc_data: Option<ProcessData>,
+) -> ProcessId {
+    let kproc = self.get_proc(&KERNEL_PID).unwrap();
+    let page_table = kproc.read().clont_page_table();
+    let proc = Process::new(name, parent, page_table, proc_data);
+    let pid = proc.pid();
+
+    let mut inner = proc.write();
+    // FIXME: load elf to process pagetable
+    // FIXME: alloc new stack for process
+    // FIXME: mark process as ready
+    drop(inner);
+
+    trace!("New {:#?}", &proc);
+
+    // FIXME: something like kernel thread
+    pid
+}
+```
+
+在加载的过程中，你可以复用 `elf::load_elf` 函数。可以通过为它添加参数的方式，控制这一映射的内容是否可以被用户权限访问。
+
+```rust
+pub fn load_elf(
+    elf: &ElfFile,
+    physical_offset: u64,
+    page_table: &mut impl Mapper<Size4KiB>,
+    frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+    user_access: bool
+) -> /* return type */ {
+    // ...
+}
+```
+
+在映射页面时，根据此参数决定是否添加 `USER_ACCESSIBLE` 标识位：
+
+```rust
+if user_access {
+    page_table_flags |= PageTableFlags::USER_ACCESSIBLE;
+}
+```
+
+!!! note "**对于用户进程而言，不再与内核共享页表，而是通过克隆内核页表获取了自己的页表。这意味着可以为每个用户进程分配同样的栈地址，而不会相互干扰。**"
+
+!!! tip "一些提示"
+
+    - 与内核类似，使用 `elf.header.pt2.entry_point()` 获取 ELF 文件的入口地址。
+    - 或许可以在 `ProcesssInner` 中实现一个 `load_elf` 函数，来处理代码段映射等内容。
+    - 记得为进程分配好合适的栈空间，并使用 `init_stack_frame` 初始化栈帧。
+    - 或许你可以同时实现 **加分项 1** 所描述的功能。
 
 !!! note "阶段性目标？"
 
-    由于并没有实现任何系统调用服务（包括程序的退出、输入输出、内存分配等），因此你在加载用户程序后，基本无法进行任何操作。
+    但由于并没有实现任何系统调用服务（包括程序的退出、输入输出、内存分配等），因此你在加载用户程序后，基本无法进行任何操作。
 
     在这一阶段，为了不触发异常，你只能加载执行一个没有其他作用的死循环程序……
 
@@ -407,3 +666,5 @@ pub fn syscall3(n: Syscall, arg0: usize, arg1: usize, arg2: usize) -> usize {
 ## 思考题
 
 ## 加分项
+
+1. 🤔 尝试在 `ProcessData` 中记录代码段的占用情况，并统计当前进程所占用的页面数量，并在打印进程信息时，将进程的内存占用打印出来。

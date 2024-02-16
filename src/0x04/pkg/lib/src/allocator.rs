@@ -15,5 +15,5 @@ static ALLOCATOR: KernelAllocator = KernelAllocator;
 #[cfg(not(test))]
 #[alloc_error_handler]
 fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
-    panic!("allocation error: {:?}", layout)
+    panic!("allocation error: {:#?}", layout)
 }
