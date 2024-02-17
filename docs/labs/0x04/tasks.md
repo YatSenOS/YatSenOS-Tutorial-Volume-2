@@ -800,7 +800,7 @@ Syscall::ListApp => { /* ... */},
 作为之前所有程序功能的测试和检验，你需要在用户态下正确运行如下程序：
 
 ```rust
-const MOD: u64 = 1_000_000_007;
+const MOD: u64 = 1000000007;
 
 fn factorial(n: u64) -> u64 {
     if n == 0 {
@@ -818,8 +818,8 @@ fn main() -> usize {
     // prase input as u64
     let n = input.parse::<u64>().unwrap();
 
-    if n > 1_000_000 {
-        println!("n must be less than 1_000_000");
+    if n > 1000000 {
+        println!("n must be less than 1000000");
         return 1;
     }
 
@@ -838,7 +838,13 @@ fn main() -> usize {
 entry!(main);
 ```
 
-你可以进行一些交互测试，例如输入 `100` 或更大的数据（会产生更大的栈占用！）并查看输出结果。
+你可以进行一些交互测试，例如输入 `100` 或更大的数据（会产生更大的栈占用！）并查看输出结果。在最大规模（输入数据为 `999999` 时），预期输出为：
+
+```
+The factorial of 999999 under modulo 1000000007 is 128233642.
+```
+
+你可以使用此测例来进行对照参考。此用户程序约占用 3929 个页面，总计内存占用约 15.3MiB。
 
 ## 思考题
 
