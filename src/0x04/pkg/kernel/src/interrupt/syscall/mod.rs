@@ -50,6 +50,8 @@ pub fn dispatcher(context: &mut ProcessContext) {
         Syscall::Spawn => { /* FIXME: spawn process from name */},
         // ret: arg0 as isize
         Syscall::Exit => { /* FIXME: exit process with retcode */},
+        // pid: arg0 as u16 -> status: isize
+        Syscall::WaitPid => { /* FIXME: check if the process is running or get retcode */},
 
         // None
         Syscall::Stat => { /* FIXME: list processes */ },
