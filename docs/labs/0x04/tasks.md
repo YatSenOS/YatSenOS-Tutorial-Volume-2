@@ -38,7 +38,7 @@
 - `memory/user`：用户堆内存分配的实现，会被用在系统调用的处理中，将用户态的内存分配委托给内核。
 - `utils/resource`：定义了用于进行 I/O 操作的 `Resource` 结构体，用于处理用户态的读写系统调用。
 
-!!! note "别忘了更新 `Cargo.toml`"
+!!! tip "别忘了更新 `Cargo.toml`"
 
 ## 用户程序
 
@@ -107,7 +107,7 @@ macro_rules! entry {
 
     在 Linux 中，一个正常的用户程序在编译后也不会直接执行 `main` 函数，而是执行 `_start` 函数，这个函数会通过调用 `__libc_start_main`，最终通过 `__libc_stop_main`、`__exit` 等一系列函数，准备好应用程序需要执行的环境，并在程序退出后进行一些后续的工作。
 
-!!! tip "阶段性成果"
+!!! success "阶段性成果"
 
     在一切配置顺利之后，应当可以使用 `cargo build` 在用户程序目录中正确地编译用户程序。
 
@@ -278,7 +278,7 @@ pub fn list_app() {
 }
 ```
 
-!!! tip "阶段性成果"
+!!! success "阶段性成果"
 
     在 `kernel/src/main.rs` 初始化内核之后，尝试调用 `list_app` 函数，查看是否成功加载。
 
@@ -405,7 +405,7 @@ pub fn init_stack_frame(&mut self, entry: VirtAddr, stack_top: VirtAddr) {
     - 记得为进程分配好合适的栈空间，并使用 `init_stack_frame` 初始化程序栈和指令指针。
     - 或许你可以同时实现 **加分项 1** 所描述的功能。
 
-!!! tip "阶段性成果？"
+!!! question "阶段性成果？"
 
     但由于并没有实现任何系统调用服务（包括程序的退出、输入输出、内存分配等），因此你在加载用户程序后，基本无法进行任何操作。
 
@@ -731,7 +731,7 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 
 3. 设置进程的返回值，并设置状态为 `Dead`。
 
-!!! tip "阶段性成果"
+!!! success "阶段性成果"
 
     终于！在实现进程的退出之后，用户程序可以生成并正确退出了！
 

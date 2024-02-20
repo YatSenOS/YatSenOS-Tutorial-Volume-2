@@ -513,7 +513,7 @@ static int init_serial() {
 
 为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `alloc`、`crossbeam_queue` 等 crate 实现一个输入缓冲区。
 
-??? note "`crossbeam_queue` 的使用提示"
+??? example "`crossbeam_queue` 的使用提示"
 
     `crossbeam_queue` 默认依赖于 `std`，可以使用如下方式引用：
 
