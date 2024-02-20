@@ -328,7 +328,7 @@ pub const STACK_START_MASK: u64 = !(STACK_MAX_SIZE - 1);
 pub const STACK_DEF_PAGE: u64 = 1;
 pub const STACK_DEF_SIZE: u64 = STACK_DEF_PAGE * PAGE_SIZE;
 
-pub const STACT_INIT_BOT: u64 = STACK_MAX - STACK_DEF_SIZE;
+pub const STACK_INIT_BOT: u64 = STACK_MAX - STACK_DEF_SIZE;
 pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 ```
 
@@ -336,7 +336,7 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 
 `STACK_DEF_PAGE` 定义了栈的默认大小，这里定义为 1 个 4KiB 的页面。
 
-`STACT_INIT_BOT` 定义了初始化栈的底部地址，它是栈的最大地址减去默认大小。
+`STACK_INIT_BOT` 定义了初始化栈的底部地址，它是栈的最大地址减去默认大小。
 
 `STACK_INIT_TOP` 定义了初始化栈的顶部地址，它是栈的最大地址减去 8，这是为了进行内存对齐，保证 `rsp` 和 `rbp` 寄存器总是 8 的倍数。
 
