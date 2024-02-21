@@ -7,12 +7,12 @@ mod process;
 mod processor;
 
 use manager::*;
-use paging::*;
 use process::*;
 use crate::memory::PAGE_SIZE;
 
 use alloc::string::String;
 pub use context::ProcessContext;
+pub use paging::PageTableContext;
 pub use data::ProcessData;
 pub use pid::ProcessId;
 

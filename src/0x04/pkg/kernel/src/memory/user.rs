@@ -1,5 +1,4 @@
-// reference: https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/allocator.rs
-
+use crate::proc::PageTableContext;
 use linked_list_allocator::LockedHeap;
 use x86_64::structures::paging::{
     mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
@@ -30,7 +29,9 @@ pub fn init_user_heap() -> Result<(), MapToError<Size4KiB>> {
         page_range.end.start_address().as_u64()
     );
 
-    let mapper = &mut *super::get_page_table_for_sure();
+    // Get current pagetable mapper
+    let mapper = &mut PageTableContext::new().mapper();
+    // Get global frame allocator
     let frame_allocator = &mut *super::get_frame_alloc_for_sure();
 
     for page in page_range {
