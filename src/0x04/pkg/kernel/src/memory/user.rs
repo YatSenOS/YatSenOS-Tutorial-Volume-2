@@ -18,26 +18,13 @@ pub fn init() {
 }
 
 pub fn init_user_heap() -> Result<(), MapToError<Size4KiB>> {
-    let page_range = {
-        // FIXME: get heap page range by constants
-        //       - Page::range(start, end)
-    };
-
-    debug!(
-        "User Heap        : 0x{:016x}-0x{:016x}",
-        page_range.start.start_address().as_u64(),
-        page_range.end.start_address().as_u64()
-    );
-
     // Get current pagetable mapper
     let mapper = &mut PageTableContext::new().mapper();
     // Get global frame allocator
     let frame_allocator = &mut *super::get_frame_alloc_for_sure();
 
-    for page in page_range {
-        // FIXME: allocate new frame
-        // FIXME: map the page to the frame (R/W/User Access)
-    }
+    // FIXME: use elf::map_range to allocate & map
+    //        frames (R/W/User Access)
 
     unsafe {
         USER_ALLOCATOR
