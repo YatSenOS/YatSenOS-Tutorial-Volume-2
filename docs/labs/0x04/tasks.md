@@ -159,7 +159,7 @@ pub struct BootInfo {
 !!! tip "更好的类型声明？"
 
     - 使用 `const` 指定用户程序数组的最大长度。
-    - 尝试定义 `AppListRef` 类型，用于存储 `loaded_apps.as_ref()` 的返回值类型。
+    - 尝试定义 `AppListRef` 类型，用于存储 `loaded_apps.as_ref()` 的返回值类型，可以只关心 `'static` 生命周期。
     - 抛弃 `App` 类型的生命周期，直接声明 `ElfFile<'static>`。
 
 之后，在 `pkg/boot/src/fs.rs` 中，创建函数 `load_apps` 用于加载用户程序，并参考 `fs.rs` 中的其他函数，处理文件系统相关逻辑，补全代码：
@@ -293,7 +293,7 @@ pub fn spawn(name: &str) -> Option<ProcessId> {
         app_list.iter().find(|&app| app.name.eq(name))
     })?;
 
-    elf_spawn(name.to_string(), &app.unwrap().elf)
+    elf_spawn(name.to_string(), &app.elf)
 }
 
 pub fn elf_spawn(name: String, elf: &ElfFile) -> Option<ProcessId> {
@@ -328,7 +328,7 @@ pub fn spawn(
     proc_data: Option<ProcessData>,
 ) -> ProcessId {
     let kproc = self.get_proc(&KERNEL_PID).unwrap();
-    let page_table = kproc.read().clont_page_table();
+    let page_table = kproc.read().clone_page_table();
     let proc = Process::new(name, parent, page_table, proc_data);
     let pid = proc.pid();
 
@@ -403,7 +403,7 @@ pub fn init_stack_frame(&mut self, entry: VirtAddr, stack_top: VirtAddr) {
 !!! tip "一些提示"
 
     - 与内核类似，使用 `elf.header.pt2.entry_point()` 获取 ELF 文件的入口地址。
-    - 或许可以在 `ProcesssInner` 中实现一个 `load_elf` 函数，来处理代码段映射等内容。
+    - 或许可以在 `ProcessInner` 中实现一个 `load_elf` 函数，来处理代码段映射等内容。
     - 记得为进程分配好合适的栈空间，并使用 `init_stack_frame` 初始化程序栈和指令指针。
     - 或许你可以同时实现 **加分项 1** 所描述的功能。
 
@@ -696,17 +696,18 @@ pub fn syscall3(n: Syscall, arg0: usize, arg1: usize, arg2: usize) -> usize {
 
 `sys_read` 的实现与 `sys_write` 类似，为了更好的兼容性和更低的实现难度，在实现 `read` 时候需要注意如下几点：
 
-1. 在 `Resource` 中添加 `read` 方法时，从输入缓冲区中读取数据并写入到用户程序的缓冲区中。
+1. 在 `Resource` 中添加 `read` 方法时，从内核输入缓冲区中读取数据并写入到用户程序的缓冲区中。
 2. 遵循相关原则，系统调用理论上不应等待，如果没有数据可读，应立即返回。
 3. 对用户输入的等待行为应当在用户态程序中实现，并应该提供非阻塞的读取方式。
 4. 对于一个固定的输入序列，需要特殊处理控制字符，如回车、退格等。这些处理需要在用户态进行，并通过 `write` 系统调用进行反馈输出。
 5. 在用户态需要控制好缓冲区的大小，遵守系统调用返回的长度进行处理。
+6. 使用 `from_raw_parts_mut` 将用户程序的缓冲区转换为 `&mut [u8]`。
 
 ### 进程的退出
 
 与内核线程防止再次被调度的“退出”不同，用户程序的正常结束，需要在用户程序中调用 `exit` 系统调用，以通知内核释放资源。
 
-由于此时通过中断进入内核态，与时钟中断勒烯，操作系统得以控制**退出中断时的 CPU 上下文**。因此可以在退出的时候清理进程占用的资源，并调用 `switch_next` 函数，切换到下一个就绪的进程。
+由于此时通过中断进入内核态，与时钟中断类似，操作系统得以控制**退出中断时的 CPU 上下文**。因此可以在退出的时候清理进程占用的资源，并调用 `switch_next` 函数，切换到下一个就绪的进程。
 
 > 为了实现的简单，不需要实验程序异常退出的相关情况处理，将错误展示出来也更便于调试。
 

@@ -1,6 +1,5 @@
 use crate::{memory::gdt, proc::*};
 use alloc::format;
-use core::convert::TryFrom;
 use syscall_def::Syscall;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
@@ -34,7 +33,7 @@ pub struct SyscallArgs {
 
 pub fn dispatcher(context: &mut ProcessContext) {
     let args = super::syscall::SyscallArgs::new(
-        Syscall::try_from(context.regs.rax).unwrap_or_default(),
+        Syscall::from(context.regs.rax),
         context.regs.rdi,
         context.regs.rsi,
         context.regs.rdx,

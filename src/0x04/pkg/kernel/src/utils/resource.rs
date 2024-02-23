@@ -18,7 +18,7 @@ impl Resource {
         match self {
             Resource::Console(stdio) => match stdio {
                 &StdIO::Stdin => {
-                    // FIXME: read from input buffer
+                    // FIXME: just read from kernel input buffer
                     Some(0)
                 }
                 _ => None,
