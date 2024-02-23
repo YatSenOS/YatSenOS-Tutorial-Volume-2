@@ -766,7 +766,32 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 2. 生成 `init` 进程，并等待它退出
 3. 关机
 
-而具体的进程操作、目录操作等功能，将会移步到用户态程序进行实现。为了给予用户态程序操作进程、等待进程退出的能力，这里还缺少最后两个系统调用需要实现：`spawn` 和 `waitpid`。
+其中，等待进程退出的函数 `ysos::wait` 可以定义在 `kernel/src/lib.rs` 中：
+
+```rust
+pub fn wait(init: proc::ProcessId) {
+    loop {
+        if proc::still_alive(init) {
+            x86_64::instructions::hlt();
+        } else {
+            break;
+        }
+    }
+}
+```
+
+并在 `kernel/src/proc/mod.rs` 中，补全 `still_alive` 函数：
+
+```rust
+#[inline]
+pub fn still_alive(pid: ProcessId) -> bool {
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        // check if the process is still alive
+    })
+}
+```
+
+对于具体的进程操作、目录操作等功能，将会移步到用户态程序进行实现。为了给予用户态程序操作进程、等待进程退出的能力，这里还缺少最后两个系统调用需要实现：`spawn` 和 `waitpid`。
 
 对这两个系统调用有如下约定：
 
@@ -878,6 +903,8 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 1. 是否可以在内核线程中使用系统调用？并借此来实现同样的进程退出能力？分析并尝试回答。
 
 2. 为什么需要克隆内核页表？在系统调用的内核态下使用的是哪一张页表？用户态程序尝试访问内核空间会被正确拦截吗？尝试验证你的实现是否正确。
+
+3. 为什么在使用 `still_alive` 函数判断进程是否存活时，需要关闭中断？在不关闭中断的情况下，会有什么问题？
 
 ## 加分项
 
