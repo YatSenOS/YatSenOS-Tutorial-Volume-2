@@ -457,6 +457,16 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 4. 你可以通过 `drop` 函数在合适的时候主动释放取得的锁。
 5. 你可以通过 `print_process_list` 函数，在合适的情况下打印进程列表，或降低时钟中断的触发频率，从而便于调试。
 
+!!! question "如何获得一个关闭中断的上下文？"
+
+    可以使用 `without_interrupts` 函数来处理中断的开关，它接受一个闭包作为参数，这个闭包中的代码将会在关闭中断的情况下执行。
+
+    ```rust
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        // do something
+    })
+    ```
+
 !!! success "阶段性成果"
 
     在成功实现进程调度后，你应当可以观察到内核进程不断被调度，并继续执行的情况。
