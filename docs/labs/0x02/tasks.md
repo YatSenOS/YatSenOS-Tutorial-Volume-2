@@ -496,7 +496,7 @@ x86_64::instructions::interrupts::enable();
 
 遵循 I/O 中断处理的 Top half & Bottom half 原则，在中断发生时，仅仅在中断处理中做尽量少的事：读取串口的输入，并将其放入缓冲区。而在中断处理程序之外，选择合适的时机，从缓冲区中读取数据，并进行处理。
 
-为了开启串口设备的中断，你需要参考如下代码，在 `src/drivers/uart16550.rs` 的 `init` 函数末尾为串口设备开启中断：
+为了开启串口设备的中断，你需要参考如下 C 语言代码，在 `src/drivers/uart16550.rs` 的 `init` 函数末尾为串口设备开启中断：
 
 ```c
 #define PORT 0x3f8          // COM1
@@ -511,48 +511,56 @@ static int init_serial() {
 }
 ```
 
-为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，并借助 `alloc`、`crossbeam_queue` 等 crate 实现一个输入缓冲区。
-
-??? note "`crossbeam_queue` 的使用提示"
-
-    `crossbeam_queue` 默认依赖于 `std`，可以使用如下方式引用：
-
-    ```toml
-    [dependencies]
-    crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
-    ```
+为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，使用 `crossbeam_queue` crate 实现一个无锁输入缓冲区。
 
 !!! tip "在 memory 初始化的过程中，你已经有了内核堆分配的能力，可以动态分配内存。"
 
 按照下列描述，补全 `src/drivers/input.rs` 驱动代码：
 
-1. 使用 `crossbeam_queue::ArrayQueue` 存储用户输入的数据。
-
-    借助 `once_mutex!` 和 `guard_access_fn!` 宏，构造一个上锁的全局静态变量 `INPUT_BUFFER`。
+1. 使用你喜欢的数据结构存储用户输入的数据。
 
     此缓冲区大小和存储的数据类型由你自行决定，一个参考的缓冲区大小为 128。
 
-2. 实现并暴露 `init` 函数。
+    推荐使用 `crossbeam_queue::ArrayQueue` 作为缓冲区的实现，它是一个无锁的、固定大小的队列，可以在多线程环境下安全地进行读写操作。
 
-    初始化 `INPUT_BUFFER`，完成后输出日志：`Input Initialized.` 并在在 `src/lib.rs` 中调用它，在操作系统启动时进行。
+    ??? example "`crossbeam_queue` 的使用提示"
 
-    请注意：`ysos_kernel::init` 函数中组件的初始化存在顺序，各种组件间可能存在**依赖关系**。由于输入缓冲区初始化是动态分配内存，因此需要在 `memory` 模块初始化之后，才能进行初始化。
+        `crossbeam_queue` 默认依赖于 `std`，可以使用如下方式引用：
 
-3. 实现并暴露 `push_key` 函数。
+        ```toml
+        [dependencies]
+        crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
+        ```
 
-    按照你所定义的类型，对 `INPUT_BUFFER` 上锁后，将数据放入缓冲区。若缓冲区已满，则丢弃数据，并使用 `warn!` 宏输出相关日志。
+2. 处理数据结构的初始化，暴露基本功能。
 
-4. 实现并暴露 `try_pop_key` 函数。
+    初始化 `INPUT_BUFFER`，你可以直接使用 `lazy_static` 初始化：
 
-    从缓冲区中**非阻塞**取出数据。若缓冲区为空或上锁失败，则返回 `None`。
+    ```rust
+    type Key = /* your input type */;
 
-    *Note: 或许需要在这一过程中暂时关闭中断。*
+    lazy_static! {
+        static ref INPUT_BUF: ArrayQueue<Key> = ArrayQueue::new(128);
+    }
 
-5. 实现并暴露 `pop_key` 函数。
+    #[inline]
+    pub fn push_key(key: Key) {
+        if INPUT_BUF.push(key).is_err() {
+            warn!("Input buffer is full. Dropping key '{:?}'", key);
+        }
+    }
 
-    利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据。循环等待，直到缓冲区中有数据。
+    #[inline]
+    pub fn try_get_key() -> Option<Key> {
+        INPUT_BUF.pop()
+    }
+    ```
 
-6. 实现并暴露 `get_line` 函数。
+3. 实现并暴露 `pop_key` 函数。
+
+    利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据：循环等待，直到缓冲区中有数据，并返回获取到的数据。
+
+4. 实现并暴露 `get_line` 函数。
 
     从缓冲区中**阻塞**取出数据，并将其实时打印出来。直到遇到换行符 `\n`。将数据转换为 `String` 类型，并返回。
 
