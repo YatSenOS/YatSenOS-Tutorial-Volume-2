@@ -1,6 +1,6 @@
 # 实验四：用户程序与系统调用
 
-!!! tip "精巧的机械齿轮配合无声的引擎，构筑为处理万物而生的机械。<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
+!!! tip "精巧的机械齿轮配合无声的引擎，构筑为处理万物而生的机械。<br/>&nbsp;<span style="font-weight: bold; float: right">by ChatGPT</span>"
 
 ## 实验目的
 

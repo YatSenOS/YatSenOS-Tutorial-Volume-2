@@ -1,6 +1,6 @@
 # 实验五：fork 的实现、并发与锁机制
 
-!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
+!!! tip "在繁忙的十字路口指挥交通，需要一套精巧的规则，才能保证井然有序，避免冲突和事故。<br/>&nbsp;<span style="font-weight: bold; float: right">by Gemini</span>"
 
 ## 实验目的
 
