@@ -123,7 +123,7 @@ impl ProcessInner {
     }
 
     pub fn clone_page_table(&self) -> PageTableContext {
-        self.page_table.as_ref().unwrap().clone()
+        self.page_table.as_ref().unwrap().clone_l4()
     }
 
     pub fn is_ready(&self) -> bool {
@@ -140,7 +140,7 @@ impl ProcessInner {
     /// mark the process as running
     pub(super) fn restore(&mut self, context: &mut ProcessContext) {
         // FIXME: restore the process's context
-        
+
         // FIXME: restore the process's page table
     }
 
