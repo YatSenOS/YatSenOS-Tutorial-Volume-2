@@ -38,7 +38,7 @@ theme:
 nav:
   - 主页:
     - index.md
-    - 代码规范要求: general/coding_convention.md
+    - 代码与提交规范: general/specification.md
     - 寻求帮助: general/help.md
     - 常见问题及解答: general/faq.md
     - 使用 Typst 编写报告: general/typst.md
