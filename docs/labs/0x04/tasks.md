@@ -540,7 +540,7 @@ int _start() {
 
 在 `src/interrupt/syscall/mod.rs` 中，补全中断注册函数，**并在合适的地方调用它**：
 
-1. 在 `idt` 的初始化中，注册 `0x80` 号中断的处理函数为 `syscall_handler`。*`int 0x80` 并非 Irq 中断，直接使用 `consts::Interrupts::Syscall` 即可。*
+1. 在 `idt` 的初始化中，注册 `0x80` 号中断的处理函数为 `syscall_handler`。_`int 0x80` 并非 Irq 中断，直接使用 `consts::Interrupts::Syscall` 即可。_
 2. 与时钟中断类似，或许为系统调用准备一个独立的栈是个好主意？
 3. 使用 `set_privilege_level` 设置 `DPL` 为 `3`，以便用户态程序可以触发系统调用。
 
@@ -909,6 +909,19 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 2. 为什么需要克隆内核页表？在系统调用的内核态下使用的是哪一张页表？用户态程序尝试访问内核空间会被正确拦截吗？尝试验证你的实现是否正确。
 
 3. 为什么在使用 `still_alive` 函数判断进程是否存活时，需要关闭中断？在不关闭中断的情况下，会有什么问题？
+
+4. 对于如下程序，使用 `gcc` 直接编译：
+
+    ```c
+    #include <stdio.h>
+
+    int main() {
+        printf("Hello, World!\n");
+        return 0;
+    }
+    ```
+
+    从本次实验及先前实验的所学内容出发，结合进程的创建、链接、执行、退出的生命周期，参考系统调用的调用过程（可以仅以 Linux 为例），解释程序的运行。
 
 ## 加分项
 
