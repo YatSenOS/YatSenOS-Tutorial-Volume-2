@@ -931,9 +931,7 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 
 3. 🤔 基于帧回收器的实现，在 `elf` 中实现 `unmap_range` 函数，从页表中取消映射一段连续的页面，并使用帧回收器进行回收。利用它实现进程栈的回收（利用 `ProcessData` 中存储的页面信息）。**页表的回收将会在后续实现用实现，暂时不需要处理**
 
-4. 🤔 改进或重新设计进程返回值的相关内容，给予 `WaitPid` 更好的兼容性，描述你的设计和实现。
-
-5. 🤔 尝试利用 `UefiRuntime` 和 `chrono` crate，获取当前时间，并将其暴露给用户态，以实现 `sleep` 函数。
+4. 🤔 尝试利用 `UefiRuntime` 和 `chrono` crate，获取当前时间，并将其暴露给用户态，以实现 `sleep` 函数。
 
     `UefiRuntime` 的实现：
 
