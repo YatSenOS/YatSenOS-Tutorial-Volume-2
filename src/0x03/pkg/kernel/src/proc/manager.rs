@@ -4,10 +4,8 @@ use crate::memory::{
     allocator::{ALLOCATOR, HEAP_SIZE},
     get_frame_alloc_for_sure, PAGE_SIZE,
 };
-use alloc::collections::BTreeMap;
-use alloc::{collections::VecDeque, format, sync::Arc};
+use alloc::{collections::*, format};
 use spin::{Mutex, RwLock};
-use x86_64::VirtAddr;
 
 pub static PROCESS_MANAGER: spin::Once<ProcessManager> = spin::Once::new();
 

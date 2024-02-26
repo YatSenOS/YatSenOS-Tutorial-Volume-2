@@ -1,8 +1,8 @@
-use alloc::{collections::BTreeMap, string::String, sync::Arc};
+use alloc::{collections::BTreeMap, sync::Arc};
 use spin::RwLock;
-use x86_64::{
-    structures::paging::{page::PageRange, Page},
-    VirtAddr,
+use x86_64::structures::paging::{
+    page::{PageRange, PageRangeInclusive},
+    Page,
 };
 
 use super::*;
