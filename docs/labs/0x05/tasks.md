@@ -12,21 +12,23 @@
 
 ## fork 的实现
 
-在 UNIX 的操作系统设计中，进程的控制除了创建、终止等基本操作之外，还包括了进程的**复制**。
+在操作系统设计中，进程的控制除了创建、终止等基本操作之外，还包括了进程的**复制**。
 
 这种复制的操作可以用于创建**子进程**，被称为 `fork`，它可以使得用户进程具有控制多个进程的能力，从而实现并发执行。
 
 YSOS 的 `fork` 系统调用设计如下描述：
 
-!! note "为了实验内容考量，本实现与 Linux 中真实的 `fork` 有所不同，也采取了一些 `vfork` 的做法。"
+!!! note "出于实验设计考量：<br/>本实现与 Linux 或 [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/) 中所定义的 `fork` 有所不同，也结合了 Linux 中 `vfork` 的行为。"
 
 - `fork` 会创建一个新的进程，新进程称为子进程，原进程称为父进程。
 - 子进程在系统调用后将得到 `0` 的返回值，而父进程将得到子进程的 PID。如果创建失败，父进程将得到 `-1` 的返回值。
 - `fork` **不复制**父进程的内存空间，**不实现** Cow (Copy on Write) 机制，即父子进程的将持有一定的共享内存（代码段、数据段、堆、bss 段等）。
 - `fork` 子进程与父进程共享内存空间（页表），但**子进程拥有自己独立的寄存器和栈空间。**
-- **由于内存分配机制的限制，`fork` 系统调用必须在任何 Rust 内存分配（堆内存分配）之前进行。**
+- **由于上述内存分配机制的限制，`fork` 系统调用必须在任何 Rust 内存分配（堆内存分配）之前进行。**
 
-为了实现父子进程的资源共享，在先前的实验中，已经做了一些准备工作。比如 `pkg/kernel/src/proc/paging.rs` 中，`PageTableContext` 中的 `Cr3RegValue` 被 `Arc` 保护了起来；在 `pkg/kernel/src/proc/data.rs` 中，也存在 `Arc` 包装的共享数据的内容。
+为了实现父子进程的资源共享，在先前的实验中，已经做了一些准备工作：
+
+比如 `pkg/kernel/src/proc/paging.rs` 中，`PageTableContext` 中的 `Cr3RegValue` 被 `Arc` 保护了起来；在 `pkg/kernel/src/proc/data.rs` 中，也存在 `Arc` 包装的共享数据的内容。
 
 ??? note "忘了 `Arc` 是什么？"
 
@@ -128,21 +130,21 @@ impl ProcessInner {
 
 1. 将功能的具体实现委托至下一级进行，保持代码语义的简洁。
 
-    > - 系统调用静态函数，并将其委托给 `ProcessManager::fork`。
-    > - `ProcessManager::fork` 将具体实现委托给当前进程的 `Process::fork`。
-    > - `Process::fork` 将具体实现委托给 `ProcessInner::fork`。
-    >
-    > 每一层代码只关心自己层级的逻辑和数据，这样能更好的
+    - 系统调用静态函数，并将其委托给 `ProcessManager::fork`。
+    - `ProcessManager::fork` 将具体实现委托给当前进程的 `Process::fork`。
+    - `Process::fork` 将具体实现委托给 `ProcessInner::fork`。
+
+    每一层代码只关心自己层级的逻辑和数据，不关心持有自身的锁或其他外部数据的状态，进而提高代码可维护性。
 
 2. 使用先前实现的 `save_current` 和 `switch_next` 等函数，提高代码复用性。
 
-    > 如果失败了，很可能是你的代码过于耦合，尝试将逻辑进行分离，保证函数功能的单一性。
+    如果使用时遇到了问题，很可能是你的代码过于相互耦合，尝试将逻辑进行分离，保证函数功能的单一性。
 
 3. 利用好函数的返回值等机制，注意相关操作的执行顺序。
 
 4. 使用 `Arc::downgrade` 获取 `Weak` 引用，从而避免循环引用。
 
-    > 父进程持有子进程的强引用，子进程持有父进程的弱引用，这样可以避免循环引用导致的内存泄漏。
+    父进程持有子进程的强引用，子进程持有父进程的弱引用，这样可以避免循环引用导致的内存泄漏。
 
 5. 为了复制栈空间，你可以使用 `core::intrinsics::copy_nonoverlapping` 函数。
 
@@ -233,9 +235,6 @@ static mut M: u64 = 0xdeadbeef;
 fn main() -> usize {
     let mut c = 32;
 
-    // we won't copy the heap in `fork`
-    // do not alloc heap before it
-    // which may cause unexpected behavior (e.g. double free)
     let pid = sys_fork();
 
     if pid == 0 {
@@ -283,8 +282,281 @@ entry!(main);
 
 ## 并发与锁机制
 
+由于并发执行时，线程的调度顺序无法预知，进而造成的执行顺序不确定，**持有共享资源的进程之间的并发执行可能会导致数据的不一致**，最终导致相同的程序产生一系列不同的结果，这样的情况被称之为**竞态条件（race condition）**。
+
+!!! tip "条件竞争……？"
+
+    恶意程序利用类似的原理，通过不断地尝试，最终绕过检查，获得了一些不应该被访问的资源，这种对系统的攻击行为也被称为条件竞争。
+
+    > 它们的英文翻译都是 Race Condition，但在不同的领域内常用不同的翻译。
+
+    一个著名的例子是 Linux 内核权限提升漏洞 Dirty COW (CVE-2016-5195)，通过条件竞争使得普通用户可以写入原本只读的内存区域，从而提升权限。
+
+考虑如下的代码：
+
+```rust
+static mut COUNTER: usize = 0;
+
+fn main() {
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        handles.push(std::thread::spawn(|| {
+            for _ in 0..1000 {
+                unsafe {
+                    COUNTER += 1;
+                }
+            }
+        }));
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", unsafe { COUNTER });
+}
+```
+
+!!! tip "可以直接使用 `rustc main.rs` 进行编译"
+
+得到的结果如下：
+
+```bash
+$ for ((i = 0; i < 16; i++)); do ./main; done
+Result: 9595
+Result: 8838
+Result: 8315
+Result: 7602
+Result: 9120
+Result: 8485
+Result: 8831
+Result: 8717
+Result: 8812
+Result: 8955
+Result: 9266
+Result: 8168
+Result: 9159
+Result: 10000
+Result: 9664
+Result: 10000
+```
+
+可以看到，每次运行的结果都可能不一样，这是因为 `COUNTER += 1` 操作并不是原子的，它包含了读取、修改和写入三个步骤，而在多线程环境下，这三个步骤之间可能会被其他线程（通过操作系统的时钟中断或其他方式）打断，反汇编上述代码，可以看到 `COUNTER += 1` 的实际操作：
+
+```nasm
+mov rax, qword [obj.main::COUNTER::hfb966cd5c23908b7] # read COUNTER to rax
+add rax, 1                                            # rax += 1
+# ... overflow check by rustc ...
+mov qword [obj.main::COUNTER::hfb966cd5c23908b7], rax # write rax to COUNTER
+```
+
+考虑如下的执行顺序（实际执行的时钟中断会慢得多，所以上述代码使用循环来凸显这一问题）：
+
+```nasm
+# Thread 1
+mov rax, qword [obj.main::COUNTER::hfb966cd5c23908b7]
+add rax, 1
+
+# !!! Context Switch !!!
+
+# Thread 2
+mov rax, qword [obj.main::COUNTER::hfb966cd5c23908b7]
+
+# !!! Context Switch !!!
+
+# Thread 1
+mov qword [obj.main::COUNTER::hfb966cd5c23908b7], rax
+
+# !!! Context Switch !!!
+
+# Thread 2
+add rax, 1
+mov qword [obj.main::COUNTER::hfb966cd5c23908b7], rax
+```
+
+在这样的执行顺序下，`COUNTER` 的值会比预期少，几个线程可能会同时读取到相同的值，然后同时写入相同的值，这样的行为就会导致 `+=` 的语意被破坏。
+
+上面这种访问共享资源的代码片段被称为**临界区**，为了保证临界区的正确性，需要确保**每次只有一个线程可以进入临界区**，也即保证这部分指令序列是**互斥**的。
+
+### 原子指令
+
+一般而言，为了解决并发任务带来的问题，需要通过指令集中的原子操作来保证数据的一致性。在 Rust 中，这类原子指令被封装在 `core::sync::atomic` 模块中，作为架构无关的原子操作来提供并发安全性。
+
+以 `AtomicUsize` 为例，它提供了一系列的原子操作，如 `fetch_add`、`fetch_update`、`compare_exchange` 等，这些操作都是原子的，不会被其他线程打断，对于之前的例子：
+
+```rust
+static COUNTER: AtomicUsize = AtomicUsize::new(0);
+COUNTER.fetch_add(1, Ordering::SeqCst); // What is Ordering? Check reflection question 4
+```
+
+在编译器优化后将会被编译为：
+
+```nasm
+lock inc qword [obj.main::COUNTER::h2889e4585a2a2d30]
+```
+
+这就是一句原子的 `inc` 指令，中断或任务切换都不会打断这个指令的执行，从而保证了 `COUNTER` 的一致性。
+
+在了解了原子指令的基本概念后，可以利用它来为用户态程序提供两种简单的同步操作：自旋锁 `SpinLock` 和信号量 `Semaphore`。其中自旋锁的实现并不需要内核态的支持，而信号量则会涉及到进程调度等操作，需要内核态的支持。
+
+正因如此，在进行内核编写的过程中遇到的 `Mutex` 和 `RwLock` 等用于保障内核态数据一致性的锁机制**均是基于自旋锁实现的**，_你可能在之前的实验中遇到过系统因为自旋忙等待导致的异常情况_。
+
+#### 自旋锁
+
+自旋锁 `SpinLock` 是一种简单的锁机制，它通过不断地检查锁的状态来实现线程的阻塞，直到获取到锁为止。
+
+在 `pkg/lib/src/sync.rs` 中，关注 `SpinLock` 的实现：
+
+```rust
+pub struct SpinLock {
+    bolt: AtomicBool,
+}
+
+impl SpinLock {
+    pub const fn new() -> Self {
+        Self {
+            bolt: AtomicBool::new(false),
+        }
+    }
+
+    pub fn acquire(&mut self) {
+        // FIXME: acquire the lock, spin if the lock is not available
+    }
+
+    pub fn release(&mut self) {
+        // FIXME: release the lock
+    }
+}
+
+unsafe impl Sync for SpinLock {} // Why? Check reflection question 5
+```
+
+在实现 `acquire` 和 `release` 时，你需要使用 `AtomicBool` 的原子操作来保证锁的正确性：
+
+- `load` 函数用于读取当前值。
+- `store` 函数用于设置新值。
+- `compare_exchange` 函数用户原子得进行比较-交换，也即比较当前值是否为目标值，如果是则将其设置为新值，否则返回当前值。
+
+在进行循环等待时，可以使用 `core::hint::spin_loop` 提高性能，在 x86_64 架构中，它实际上会编译为 `pause` 指令。
+
+#### 信号量
+
+得利于 Rust 良好的底层封装，自旋锁的实现非常简单。但是也存在一定的问题：
+
+- 忙等待：自旋锁会一直占用 CPU 时间，直到获取到锁为止，这会导致 CPU 利用率的下降。
+- 饥饿：如果一个线程一直占用锁，其他线程可能会一直无法获取到锁。
+- 死锁：如果两个线程互相等待对方占有的锁，就会导致死锁。
+
+信号量 `Semaphore` 是一种更为复杂的同步机制，它可以用于控制对共享资源的访问，也可以用于控制对临界区的访问。通过与进程调度相关的操作，信号量还可以用于控制进程的执行顺序、提高 CPU 利用率等。
+
+信号量需要实现四种操作：
+
+- `new`：根据所给出的 `key` 创建一个新的信号量。
+- `remove`：根据所给出的 `key` 删除一个已经存在的信号量。
+- `siganl`：也叫做 `V` 操作，也可以被 `release/up/verhogen` 表示，它用于释放一个资源，使得等待的进程可以继续执行。
+- `wait`：也叫做 `P` 操作，也可以被 `acquire/down/proberen` 表示，它用于获取一个资源，如果资源不可用，则进程将会被阻塞。
+
+为了实现与内核的交互，信号量的操作将被实现为一个系统调用，它将使用到三个系统调用参数：
+
+```rust
+// op: u8, key: u32, val: usize -> ret: any
+Syscall::Sem => sys_sem(&args, context),
+```
+
+其中 `op` 为操作码，`key` 为信号量的键值，`val` 为信号量的值，`ret` 为返回值。根据先前的约定，`op` 被放置在 `rdi` 寄存器中，`key` 和 `val` 分别被放置在 `rsi` 和 `rdx` 寄存器中，可以通过 `args.arg0`、`args.arg1` 和 `args.arg2` 来进行访问。
+
+信号量相关内容在 `pkg/kernel/src/proc/sync.rs` 中进行实现：
+
+“资源” 被抽象为一个 `usize` 整数，它**并不需要使用 `AtomicUsize`**，为了存储等待的进程，需要在此整数外额外使用一个 `Vec` 来存储等待的进程。它们二者将会被一个自旋锁实现的互斥锁（在内核中直接使用 `spin::Mutex`）保护。
+
+```rust
+pub struct Semaphore {
+    count: usize,
+    wait_queue: Vec<ProcessId>,
+}
+```
+
+信号量操作的结果使用 `SemaphoreResult` 表示：
+
+```rust
+pub enum SemaphoreResult {
+    Ok,
+    NotExist,
+    Block(ProcessId),
+    WakeUp(ProcessId),
+}
+```
+
+- `Ok`：表示操作成功，且无需进行阻塞或唤醒。
+- `NotExist`：表示信号量不存在。
+- `Block(ProcessId)`：表示操作需要阻塞线程，一般是当前进程。
+- `WakeUp(ProcessId)`：表示操作需要唤醒线程。
+
+为了实现信号量的 KV 存储，使用 `SemaphoreSet` 定义信号量集合的操作：
+
+```rust
+pub struct SemaphoreSet {
+    sems: BTreeMap<SemaphoreId, Mutex<Semaphore>>,
+}
+```
+
+并在 `ProcessData` 中添加为线程共享资源：
+
+```rust
+pub struct ProcessData {
+    // ...
+    pub(super) semaphores: Arc<RwLock<SemaphoreSet>>,
+    // ...
+}
+```
+
+!!! note "关于这里的一堆锁……"
+
+    在本实验实现的单核处理器下，`Semaphore` 的实现似乎并不需要内部的 `Mutex` 进行保护，只需要外部的 `RwLock` 进行保护即可。
+
+    但在多核处理器下，`Semaphore` 的实现可能会涉及到多个核心的并发访问，因此需要使用 `Mutex` 来提供更细粒度的锁保护。在进行添加、删除操作时，对 `RwLock` 使用 `write` 获取写锁，而在进行 `signal`、`wait` 操作时，对 `RwLock` 使用 `read` 来获取更好的性能和控制。
+
+请参考实验代码给出的相关注释内容，完成信号量的实现。最后将 `Semaphore` 的操作层层向上传递（或者说自上向下层层委托具体实现），实现作为系统调用的 `sys_sem`：
+
+```rust
+pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
+    match args.arg0 {
+        0 => context.set_rax(new_sem(args.arg1 as u32, args.arg2)),
+        1 => context.set_rax(remove_sem(args.arg1 as u32)),
+        2 => sem_siganl(args.arg1 as u32, context),
+        3 => sem_wait(args.arg1 as u32, context),
+        _ => context.set_rax(usize::MAX),
+    }
+}
+```
+
+!!! tip "记得完善用户侧 `pkg/lib/src/sync.rs` 中对信号量的操作"
+
+### 测试
+
+在实现了 `SpinLock` 和 `Semaphore` 后，你需要完成如下的用户程序任务来测试你的实现：
+
+#### 偷吃汉堡的小孩
+
+#### 哲学家的晚饭
+
+#### 消息队列
+
 ## 思考题
 
 1. 在 Lab 2 中设计输入缓冲区时，如果不使用无锁队列实现，而选择使用 `Mutex` 对一个同步队列进行保护，在编写相关函数时需要注意什么问题？考虑在进行 `pop` 操作过程中遇到串口输入中断的情形，尝试描述遇到问题的场景，并提出解决方案。
 
 2. 在进行 `fork` 的复制内存的过程中，系统的当前页表、进程页表、子进程页表、内核页表等之间的关系是怎样的？在进行内存复制时，需要注意哪些问题？
+
+3. 为什么在实验的实现中，`fork` 系统调用必须在任何 Rust 内存分配（堆内存分配）之前进行？如果在堆内存分配之后进行 `fork`，会有什么问题？
+
+4. 进行原子操作时候的 `Ordering` 参数是什么？此处 Rust 声明的内容与 [C++20 规范](https://en.cppreference.com/w/cpp/atomic/memory_order) 中的一致，尝试搜索并简单了解相关内容，简单介绍该枚举的每个值对应于什么含义。
+
+5. 在实现 `SpinLock` 的时候，为什么需要实现 `Sync` trait？与之类似的 `Send` trait 又是什么含义？
+
+6. `core::hint::spin_loop` 使用的 `pause` 指令和 Lab 4 中的 `x86_64::instructions::hlt` 指令有什么区别？这里为什么不能使用 `hlt` 指令？
+
+## 加分项
+
+1. 🤔 参考信号量相关系统调用的实现，尝试修改 `waitpid` 系统调用，在进程等待另一个进程退出时进行阻塞，并在目标进程退出后携带返回值唤醒进程。

@@ -778,7 +778,7 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 pub fn wait(init: proc::ProcessId) {
     loop {
         if proc::still_alive(init) {
-            x86_64::instructions::hlt();
+            x86_64::instructions::hlt(); // Why? Check reflection question 5
         } else {
             break;
         }
@@ -922,6 +922,8 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
     ```
 
     从本次实验及先前实验的所学内容出发，结合进程的创建、链接、执行、退出的生命周期，参考系统调用的调用过程（可以仅以 Linux 为例），解释程序的运行。
+
+5. `x86_64::instructions::hlt` 做了什么？为什么这样使用？
 
 ## 加分项
 

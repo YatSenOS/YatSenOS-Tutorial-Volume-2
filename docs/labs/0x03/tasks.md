@@ -503,7 +503,7 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 
 ```rust
 pub fn new_test_thread(id: &str) -> ProcessId {
-    let proc_data = ProcessData::new();
+    let mut proc_data = ProcessData::new();
     proc_data.set_env("id", id);
 
     crate::proc::spawn_kernel_thread(

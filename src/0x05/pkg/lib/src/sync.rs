@@ -25,7 +25,7 @@ impl SpinLock {
     }
 }
 
-unsafe impl Sync for SpinLock {} // Why?
+unsafe impl Sync for SpinLock {} // Why? Check reflection question 5
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Semaphore {
