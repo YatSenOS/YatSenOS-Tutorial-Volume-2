@@ -517,6 +517,8 @@ pub struct ProcessData {
 
     但在多核处理器下，`Semaphore` 的实现可能会涉及到多个核心的并发访问，因此需要使用 `Mutex` 来提供更细粒度的锁保护。在进行添加、删除操作时，对 `RwLock` 使用 `write` 获取写锁，而在进行 `signal`、`wait` 操作时，对 `RwLock` 使用 `read` 来获取更好的性能和控制。
 
+    综上考量，这里就保留了 `Mutex` 的使用。
+
 请参考实验代码给出的相关注释内容，完成信号量的实现。最后将 `Semaphore` 的操作层层向上传递（或者说自上向下层层委托具体实现），实现作为系统调用的 `sys_sem`：
 
 ```rust
@@ -538,6 +540,31 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 在实现了 `SpinLock` 和 `Semaphore` 的基础上，你需要完成如下的用户程序任务来测试你的实现：
 
 #### 多线程计数器
+
+在所给代码的 `pkg/app/counter` 中实现了一个多线程计数器，多个线程对一个共享的计数器进行累加操作，最终输出计数器的值。
+
+为了提供足够大的可能性来触发竞态条件，该程序使用了一些手段来刻意构造一个临界区，这部分代码不应被修改。
+
+你需要通过上述**两种方式**，分别保护该临界区，使得计数器的值最终为 `800`。
+
+!!! note "尝试修改代码，使用**两组线程**分别测试 `SpinLock` 和 `Semaphore`"
+
+    一个参考代码行为如下，你可以在 `test_spin` 和 `test_semaphore` 中分别继续 `fork` 更多的进程用来实际测试：
+
+    ```rust
+    fn main() -> isize {
+        let pid = sys_fork();
+
+        if pid == 0 {
+            test_semaphore();
+        } else {
+            test_spin();
+            sys_wait_pid(pid);
+        }
+
+        0
+    }
+    ```
 
 #### 哲学家的晚饭
 
