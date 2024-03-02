@@ -387,8 +387,10 @@ mov qword [obj.main::COUNTER::hfb966cd5c23908b7], rax
 
 ```rust
 static COUNTER: AtomicUsize = AtomicUsize::new(0);
-COUNTER.fetch_add(1, Ordering::SeqCst); // What is Ordering? Check reflection question 4
+COUNTER.fetch_add(1, Ordering::SeqCst);
 ```
+
+其中 `Ordering` 用户控制内存顺序，在单核情况下，`Ordering` 的选择并不会影响程序的行为，可以简单了解，并尝试回答思考题 4 的内容。
 
 在编译器优化后将会被编译为：
 
@@ -429,7 +431,8 @@ impl SpinLock {
     }
 }
 
-unsafe impl Sync for SpinLock {} // Why? Check reflection question 5
+// Why? Check reflection question 5
+unsafe impl Sync for SpinLock {}
 ```
 
 在实现 `acquire` 和 `release` 时，你需要使用 `AtomicBool` 的原子操作来保证锁的正确性：
@@ -535,7 +538,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 !!! tip "记得完善用户侧 `pkg/lib/src/sync.rs` 中对信号量的操作"
 
-### 测试
+### 测试任务
 
 在实现了 `SpinLock` 和 `Semaphore` 的基础上，你需要完成如下的用户程序任务来测试你的实现：
 
@@ -566,9 +569,32 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     }
     ```
 
+#### 消息队列
+
+创建一个用户程序 `pkg/app/mq`，结合使用信号量，实现一个消息队列：
+
+- 父进程使用 fork 创建额外 16 个进程，其中一半为生产者，一半为消费者。
+- 生产者不断地向消息队列中写入消息，消费者不断地从消息队列中读取消息。
+- 每个线程处理的消息总量共 10 条（即生产者会产生 10 个消息，每个消费者只消费 10 个消息）。
+- 在每个线程生产或消费的时候，输出相关的信息。
+- 在生产者和消费者完成上述操作后，使用 `sys_exit(0)` 直接退出。
+- 最终使用父进程等待全部的子进程退出后，输出消息队列的消息数量。
+- 在父进程创建完成 16 个进程后，使用 `sys_stat` 输出当前的全部进程的信息。
+
+你需要保证最终消息队列中的消息数量为 0，你可以开启内核更加详细的日志，并使用输出的相关信息尝试证明队列的正常工作：
+
+- 在从队列取出消息时，消息为空吗？
+- 在向队列写入消息时，队列是否满了？
+- 在队列为空时，消费者是否被阻塞？
+- 在队列满时，生产者是否被阻塞？
+
 #### 哲学家的晚饭
 
-#### 消息队列
+假设有 5 个哲学家，他们的生活只是思考和吃饭。这些哲学家共用一个圆桌，每位都有一把椅子。在桌子中央有一碗米饭，在桌子上放着 5 根筷子。
+
+当一位哲学家思考时，他与其他同事不交流。时而，他会感到饥饿，并试图拿起与他相近的两根筷子（筷子在他和他的左或右邻居之间）。一个哲学家一次只能拿起一根筷子。显然，他不能从其他哲学家手里拿走筷子。当一个饥饿的哲学家同时拥有两根筷子时，他就能吃。在吃完后，他会放下两根筷子，并开始思考。
+
+创建一个用户程序 `pkg/app/dinner`，使用你课上学到的知识，实现并解决哲学家就餐问题。
 
 ## 思考题
 
@@ -587,3 +613,10 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 ## 加分项
 
 1. 🤔 参考信号量相关系统调用的实现，尝试修改 `waitpid` 系统调用，在进程等待另一个进程退出时进行阻塞，并在目标进程退出后携带返回值唤醒进程。
+
+2. 🤔 尝试实现如下程序任务：
+
+    - 创建三个子进程，让它们分别能输出且只能输出 `>`，`<` 和 `_`。
+    - 对这些子进程进行同步，使得打印出的序列总是 `<><_` 和 `><>_` 组合。
+
+    在完成这一任务的基础上，其他细节可以自行决定如何实现，包括输出长度等。
