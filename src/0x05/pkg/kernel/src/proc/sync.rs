@@ -1,5 +1,5 @@
 use super::ProcessId;
-use alloc::{collections::BTreeMap, vec::Vec};
+use alloc::collections::*;
 use spin::Mutex;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -15,7 +15,7 @@ impl SemaphoreId {
 #[derive(Debug, Clone)]
 pub struct Semaphore {
     count: usize,
-    wait_queue: Vec<ProcessId>,
+    wait_queue: VecDeque<ProcessId>,
 }
 
 /// Semaphore result
@@ -32,7 +32,7 @@ impl Semaphore {
     pub fn new(value: usize) -> Self {
         Self {
             count: value,
-            wait_queue: Vec::new(),
+            wait_queue: VecDeque::new(),
         }
     }
 

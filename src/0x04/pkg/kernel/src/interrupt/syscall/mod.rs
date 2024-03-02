@@ -1,7 +1,9 @@
 use crate::{memory::gdt, proc::*};
 use alloc::format;
-use syscall_def::Syscall;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+
+// NOTE: import `ysos_syscall` package as `syscall_def` in Cargo.toml
+use syscall_def::Syscall;
 
 mod service;
 use super::consts;
