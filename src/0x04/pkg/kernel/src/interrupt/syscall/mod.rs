@@ -45,6 +45,9 @@ pub fn dispatcher(context: &mut ProcessContext) {
         // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
         Syscall::Write => { /* FIXME: write to fd & return length */},
 
+        // None -> pid: u16
+        Syscall::GetPid => { /* FIXME: get current pid */ },
+
         // path: &str (ptr: arg0 as *const u8, len: arg1) -> pid: u16
         Syscall::Spawn => { /* FIXME: spawn process from name */},
         // ret: arg0 as isize

@@ -10,6 +10,8 @@ pub enum Syscall {
     Read = 0,
     Write = 1,
 
+    GetPid = 39,
+    
     Spawn = 59,
     Exit = 60,
     WaitPid = 61,

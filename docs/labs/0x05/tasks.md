@@ -535,9 +535,9 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 ### 测试
 
-在实现了 `SpinLock` 和 `Semaphore` 后，你需要完成如下的用户程序任务来测试你的实现：
+在实现了 `SpinLock` 和 `Semaphore` 的基础上，你需要完成如下的用户程序任务来测试你的实现：
 
-#### 偷吃汉堡的小孩
+#### 多线程计数器
 
 #### 哲学家的晚饭
 
