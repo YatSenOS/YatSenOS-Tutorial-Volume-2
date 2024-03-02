@@ -73,7 +73,9 @@ pub fn fork(context: &mut ProcessContext) {
         // FIXME: switch to next process
     })
 }
-// ...
+```
+
+```rust
 impl ProcessManager {
     pub fn fork(&self) {
         // FIXME: get current process
@@ -83,27 +85,32 @@ impl ProcessManager {
         // FOR DBG: maybe print the process ready queue?
     }
 }
-// ...
-pub struct ProcessInner {
-    // ...
-    parent: Option<Weak<Process>>,
-    children: Vec<Arc<Process>>,
-    // ...
-}
-// ...
+```
+
+```rust
 impl Process {
     pub fn fork(self: &Arc<Self>) -> Arc<Self> {
         // FIXME: lock inner as write
         // FIXME: inner fork with parent weak ref
 
-        // FOR DBG: maybe print the child process info (parent, name, pid, etc.)
+        // FOR DBG: maybe print the child process info
+        //          e.g. parent, name, pid, etc.
 
         // FIXME: make the arc of child
         // FIXME: add child to current process's children list
         // FIXME: mark the child as ready & return it
     }
 }
-// ...
+```
+
+```rust
+pub struct ProcessInner {
+    // ...
+    parent: Option<Weak<Process>>,
+    children: Vec<Arc<Process>>,
+    // ...
+}
+
 impl ProcessInner {
     pub fn fork(&mut self, parent: Weak<Process>) -> ProcessInner {
         // FIXME: get current process's stack info
@@ -115,7 +122,7 @@ impl ProcessInner {
         // FIXME: copy the *entire stack* from parent to child
 
         // FIXME: update child's stack frame with new *stack pointer*
-        //          > keep lower bits of rsp, set the higher bits to the new base
+        //          > keep lower bits of rsp, update the higher bits
         //          > also update the stack record in process data
         // FIXME: set the return value 0 for child with `context.set_rax`
 
@@ -194,8 +201,8 @@ impl ProcessInner {
     也可以补充一些相关的调试信息：
 
     ```rust
-    impl core::fmt::Debug for PageTableContext {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    impl Debug for PageTableContext {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             // ...
                 .field("refs", &self.using_count())
             // ...
@@ -522,7 +529,28 @@ pub struct ProcessData {
 
     综上考量，这里就保留了 `Mutex` 的使用。
 
-请参考实验代码给出的相关注释内容，完成信号量的实现。最后将 `Semaphore` 的操作层层向上传递（或者说自上向下层层委托具体实现），实现作为系统调用的 `sys_sem`：
+由于信号量会阻塞进程，所以需要在系统调用的处理中按照信号量的返回值进行相关进程操作，一个代码示例如下：
+
+```rust
+pub fn sem_wait(key: u32, context: &mut ProcessContext) {
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        let manager = get_process_manager();
+        let pid = processor::current_pid();
+        let ret = manager.current().write().sem_wait(key, pid);
+        match ret {
+            SemaphoreResult::Ok => context.set_rax(0),
+            SemaphoreResult::NotExist => context.set_rax(1),
+            SemaphoreResult::Block(pid) => {
+                // FIXME: save, block it, then switch to next
+                //        maybe use `save_current` and `switch_next`
+            }
+            _ => unreachable!(),
+        }
+    })
+}
+```
+
+请参考实验代码给出的相关注释内容，完成信号量的实现、不同操作的系统调用服务实现，最后完善作为系统调用的 `sys_sem`：
 
 ```rust
 pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
@@ -552,7 +580,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 !!! note "尝试修改代码，使用**两组线程**分别测试 `SpinLock` 和 `Semaphore`"
 
-    一个参考代码行为如下，你可以在 `test_spin` 和 `test_semaphore` 中分别继续 `fork` 更多的进程用来实际测试：
+    一个参考代码行为如下：
 
     ```rust
     fn main() -> isize {
@@ -569,16 +597,26 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     }
     ```
 
+    你可以在 `test_spin` 和 `test_semaphore` 中分别继续 `fork` 更多的进程用来实际测试。
+
 #### 消息队列
 
 创建一个用户程序 `pkg/app/mq`，结合使用信号量，实现一个消息队列：
 
 - 父进程使用 fork 创建额外 16 个进程，其中一半为生产者，一半为消费者。
+
 - 生产者不断地向消息队列中写入消息，消费者不断地从消息队列中读取消息。
-- 每个线程处理的消息总量共 10 条（即生产者会产生 10 个消息，每个消费者只消费 10 个消息）。
+
+- 每个线程处理的消息总量共 10 条。
+
+    即生产者会产生 10 个消息，每个消费者只消费 10 个消息。
+
 - 在每个线程生产或消费的时候，输出相关的信息。
+
 - 在生产者和消费者完成上述操作后，使用 `sys_exit(0)` 直接退出。
+
 - 最终使用父进程等待全部的子进程退出后，输出消息队列的消息数量。
+
 - 在父进程创建完成 16 个进程后，使用 `sys_stat` 输出当前的全部进程的信息。
 
 你需要保证最终消息队列中的消息数量为 0，你可以开启内核更加详细的日志，并使用输出的相关信息尝试证明队列的正常工作：
@@ -592,29 +630,75 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 假设有 5 个哲学家，他们的生活只是思考和吃饭。这些哲学家共用一个圆桌，每位都有一把椅子。在桌子中央有一碗米饭，在桌子上放着 5 根筷子。
 
-当一位哲学家思考时，他与其他同事不交流。时而，他会感到饥饿，并试图拿起与他相近的两根筷子（筷子在他和他的左或右邻居之间）。一个哲学家一次只能拿起一根筷子。显然，他不能从其他哲学家手里拿走筷子。当一个饥饿的哲学家同时拥有两根筷子时，他就能吃。在吃完后，他会放下两根筷子，并开始思考。
+当一位哲学家思考时，他与其他同事不交流。时而，他会感到饥饿，并试图拿起与他相近的两根筷子（筷子在他和他的左或右邻居之间）。
 
-创建一个用户程序 `pkg/app/dinner`，使用你课上学到的知识，实现并解决哲学家就餐问题。你可以参考以下思路：
+一个哲学家一次只能拿起一根筷子。显然，他不能从其他哲学家手里拿走筷子。当一个饥饿的哲学家同时拥有两根筷子时，他就能吃。在吃完后，他会放下两根筷子，并开始思考。
+
+创建一个用户程序 `pkg/app/dinner`，使用课上学到的知识，实现并解决哲学家就餐问题：
 
 - 创建一个程序，模拟五个哲学家的行为。
+
 - 每个哲学家都是一个独立的线程，可以同时进行思考和就餐。
+
 - 使用互斥锁来保护每个筷子，确保同一时间只有一个哲学家可以拿起一根筷子。
-- 使用 `sleep` 等操作调整哲学家的思考和就餐时间，以增加并发性和实际性。
+
+- 使用等待操作调整哲学家的思考和就餐时间，以增加并发性和实际性。
+
+    - 如果你实现了 `sys_time` 系统调用（Lab 4），可以使用它来构造 `sleep` 操作。
+    - 如果你并没有实现它，可以参考多线程计数器中的 `delay` 函数进行实现。
+
 - 当哲学家成功就餐时，输出相关信息，如哲学家编号、就餐时间等。
-- 在程序中引入一些随机性，例如在尝试拿筷子时引入一定的延迟，以模拟竞争条件和资源争用。
-- 可以设置等待时间或循环次数，以确保程序能够运行足够长的时间，从而观察到不同的情况，如死锁和饥饿。
 
-通过观察程序的输出和行为，请截图记录以下现象，并介绍你的解决思路：
+- 向程序中引入一些随机性，例如在尝试拿筷子时引入一定的延迟，模拟竞争条件和资源争用。
 
-- 哲学家是否能够成功就餐，即同时拿到左右两侧的筷子。
-- 是否存在死锁情况，即所有哲学家都无法同时拿到他们需要的筷子。
-- 是否存在饥饿情况，即某些哲学家无法获得足够的机会就餐。
+- 可以设置等待时间或循环次数，以确保程序能够运行足够长的时间，并尝试观察到不同的情况，如死锁和饥饿。
 
-!!! tip "可能的解决思路"
+??? tip "在用户态中引入伪随机数"
 
-    分布式系统中，常见的解决思路是引入一个“服务生”来协调哲学家的就餐。
+    Rust 提供了一些伪随机数生成器，你可以使用 `rand` 库来引入一些随机性，以模拟不同的情况。
 
-    这个服务生会控制筷子的分配，从而避免死锁和饥饿的情况。
+    ```toml
+    [dependencies]
+    rand = { version = "0.8", default-features = false }
+    rand_chacha = { version = "0.3", default-features = false }
+    ```
+
+    在无标准库的环境下，你需要为伪随机数生成器提供种子。
+
+    如果你实现了 `sys_time` 系统调用，这会是一个很方便的种子。
+
+    如果你没有实现，不妨试试使用 `sys_getpid` 或者 `fork` 顺序等数据作为种子来生成随机数。
+
+    以 `ChaCha20Rng` 伪随机数生成器为例，使用相关方法获取随机数：
+
+    ```rust
+    use rand::prelude::*;
+    use rand_chacha::ChaCha20Rng;
+
+    fn main() {
+        // ...
+        let time = lib::sys_time();
+        let mut rng = ChaCha20Rng::seed_from_u64(time.timestamp() as u64);
+        println!("Random number: {}", rng.gen::<u64>());
+        // ...
+    }
+    ```
+
+    相关文档请查阅：[The Rust Rand Book](https://rust-random.github.io/book/)
+
+通过观察程序的输出和行为，请尝试构造并截图记录以下现象：
+
+- 某些哲学家能够成功就餐，即同时拿到左右两侧的筷子。
+- 尝试构造死锁情况，即所有哲学家都无法同时拿到他们需要的筷子。
+- 尝试构造饥饿情况，即某些哲学家无法获得足够的机会就餐。
+
+尝试解决上述可能存在的问题，并介绍你的解决思路。
+
+??? tip "可能的解决思路……"
+
+    分布式系统中，常见的解决思路是引入一个**“服务生”**来协调哲学家的就餐。
+
+    这个服务生会**控制筷子的分配**，从而**避免死锁和饥饿的情况**。
 
 ## 思考题
 
@@ -626,7 +710,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 4. 进行原子操作时候的 `Ordering` 参数是什么？此处 Rust 声明的内容与 [C++20 规范](https://en.cppreference.com/w/cpp/atomic/memory_order) 中的一致，尝试搜索并简单了解相关内容，简单介绍该枚举的每个值对应于什么含义。
 
-5. 在实现 `SpinLock` 的时候，为什么需要实现 `Sync` trait？与之类似的 `Send` trait 又是什么含义？
+5. 在实现 `SpinLock` 的时候，为什么需要实现 `Sync` trait？类似的 `Send` trait 又是什么含义？
 
 6. `core::hint::spin_loop` 使用的 `pause` 指令和 Lab 4 中的 `x86_64::instructions::hlt` 指令有什么区别？这里为什么不能使用 `hlt` 指令？
 
@@ -634,11 +718,11 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 1. 🤔 参考信号量相关系统调用的实现，尝试修改 `waitpid` 系统调用，在进程等待另一个进程退出时进行阻塞，并在目标进程退出后携带返回值唤醒进程。
 
-2. 🤔 尝试实现如下程序任务：
+2. 🤔 尝试实现如下用户程序任务，完成用户程序 `fish`：
 
     - 创建三个子进程，让它们分别能输出且只能输出 `>`，`<` 和 `_`。
-    - 对这些子进程进行同步，使得打印出的序列总是 `<><_` 和 `><>_` 组合。
+    - 使用学到的方法对这些子进程进行同步，使得打印出的序列总是 `<><_` 和 `><>_` 的组合。
 
     在完成这一任务的基础上，其他细节可以自行决定如何实现，包括输出长度等。
 
-3. 🤔 尝试和前文不同的新方法解决哲学家就餐问题。请截图并简要介绍解决思路。
+3. 🤔 尝试和前文不同的其他方法解决哲学家就餐问题，并验证你的方法能够正确解决它，简要介绍你的方法，并给出程序代码和测试结果。
