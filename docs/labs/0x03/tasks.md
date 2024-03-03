@@ -123,13 +123,18 @@ as_handler!(teapot);
 
 ```rust
 #[repr(C)]
+pub struct ProcessContext {
+    value: ProcessContextValue,
+}
+
+#[repr(C)]
 pub struct ProcessContextValue {
     pub regs: RegistersValue,
     pub stack_frame: InterruptStackFrameValue,
 }
 ```
 
-这里的 `ProcessContextValue` 命名和相关的保护处理方法来自 `InterruptStackFrame` 的内部实现，用以防止意外的修改及其导致的非预期行为。
+`ProcessContext` 实现了内部 `value` 的 `Deref` trait，因此可以直接使用 `ProcessContextValue` 中的字段内容。而 `ProcessContextValue` 相关的保护处理方法参考并实现自 `InterruptStackFrame` 的内部实现，用以防止意外的修改及其导致的非预期行为。
 
 `repr(C)` 用于指定使用 C 语言的结构体布局，以便于在汇编代码中正确处理结构体的字段。
 
@@ -292,7 +297,7 @@ pub fn new(init: Arc<Process>) -> Self {
 
     内核栈的起始地址通过配置文件被定义在了 `0xFFFFFF0100000000`，距离内核起始地址 4GiB。默认大小为 512 个 4KiB 的页面，即 2MiB。
 
-    在虚拟内存的规划中，任意进程的栈地址空间大小为 4GiB。以内核为例，内核栈的起始地址为 `0xFFFFFF0100000000`，结束地址为 `0xFFFFFF0200000000`。
+    在虚拟内存的规划中，任意进程的栈地址空间大小为 4GiB。以内核为例，内核栈所对应的内存区域的起始地址为 `0xFFFFFF0100000000`，结束地址为 `0xFFFFFF0200000000`。
 
     !!! note "缺页异常？"
 
@@ -366,7 +371,7 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 +---------------------+
 ```
 
-!!! tip "**以 PID 2 为例：<br/>初始化分配的栈的页面为 `0x3FFEFFFFF000` 到 `0x3FFF00000000`<br/>默认栈顶地址为 `0x3FFEFFFFFFF8`**"
+!!! tip "**以 PID 2 为例：<br/>初始化分配的栈的页面为 `0x3FFEFFFFF000` 到 `0x3FFF00000000`（区间左闭右开）<br/>默认栈顶地址为 `0x3FFEFFFFFFF8`**"
 
 有关于用户进程的其他部分内存布局的说明，将在下一次实验中详细讨论。
 
