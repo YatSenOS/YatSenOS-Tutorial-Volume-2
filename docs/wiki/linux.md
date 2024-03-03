@@ -80,6 +80,8 @@ wsl --install -d Ubuntu
     source "$HOME/.cargo/env"
     ```
 
+    !!! tip "如果遇到了网络问题，请参考 [rsproxy.cn](https://rsproxy.cn/) 进行配置。"
+
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
 ```bash
