@@ -26,9 +26,26 @@ wsl --install -d Ubuntu
 
 关于其他的配置，可以在网上找到大量的参考资料，请自行搜索阅读，或寻求 LLM 的帮助。
 
-### 使用 VMware Workstation
+### 使用其他虚拟机软件
 
-参考 [VMware Workstation 安装 Ubuntu 22.04 LTS](https://zhuanlan.zhihu.com/p/569274366) 教程。
+如果你不想使用 WSL2，也可以使用其他虚拟机软件，如 VMware Workstation、VirtualBox 等，安装 Ubuntu 22.04，相关安装教程请自行搜索。
+
+!!! warning "使用须知"
+
+    请注意，你需要自行处理如下问题，以达到与 WSL 2 类似的能力：
+
+    - 与 Windows 之间的剪贴板共享（需要安装 VMware Tools 等辅助工具和 Guest 侧驱动）
+    - 与 Windows 之间的文件共享 (需要配置共享文件夹，或者使用网络共享协议)
+
+    如果有需要在 Windows 上使用 SSH 连接到虚拟机，你需要在虚拟机中安装 SSH 服务，并配置网络连接。
+
+    **以上内容都需要你具有一定的 Windows 和 Linux 系统的使用经验，如果你不确定自己是否能够完成这些操作，请使用 WSL 2。**
+
+### 使用实体机
+
+如果你已经拥有了一台 Linux 服务器或者台式机，笔者相信你的折腾能力。
+
+你可以使用任何你喜欢的发行版，但请注意内核版本、QEMU 版本都不应低于实验的参考标准。
 
 ## 安装项目开发环境
 
@@ -63,11 +80,13 @@ wsl --install -d Ubuntu
     source "$HOME/.cargo/env"
     ```
 
+    !!! tip "如果遇到了网络问题，请参考 [rsproxy.cn](https://rsproxy.cn/) 进行配置。"
+
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
 ```bash
 $ rustc --version
-rustc 1.77.0-nightly (11f32b73e 2024-01-31)
+rustc 1.76.0 (07dca489a 2024-02-04)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)

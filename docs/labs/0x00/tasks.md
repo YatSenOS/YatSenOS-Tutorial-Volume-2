@@ -14,9 +14,9 @@
 
 我们推荐在以下环境进行实验：
 
-- Windows 10/11
-- Ubuntu 22.04 LTS
-- Ubuntu 22.04 LTS on WSL 2
+- Ubuntu 22.04 LTS (jammy) on WSL 2 **(推荐 Windows 用户选择)**
+- Windows 10/11 **(Windows 原生备选，GDB 相关功能无法使用)**
+- Ubuntu 22.04 LTS (jammy)
 - macOS with Apple Silicon
 
 以上环境经过我们的测试和验证，可以正常进行实验。对于其他常用的 Linux 发行版，通常也可以正常进行实验，但我们不提供技术支持。
@@ -27,14 +27,15 @@
 
     本实验在 Windows 上进行项目开发是**完全可行的**，但是我们提供的各种工具的选项可能有所出入。
 
-    在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
+    在 Windows + WSL 2 平台上，建议使用 VSCode (Remote WSL) 连接到 WSL2 进行开发、调试。
 
     在 Linux 平台上我们建议通过 VSCode (Remote) + Python / make + GDB 结合 gef 进行开发、调试。
 
+    在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
+
+- 对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置，**文档包含 Linux 相关安装指南**。
 
 - 对于选择使用 Windows 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
-
-- 对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
 - 对于选择使用 macOS 的同学，请安装 `brew` 和相应工具，参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
@@ -166,7 +167,7 @@
     使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
 
     - 你可以在函数体中定义 `static` 变量来存储一些全局状态
-    - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证）
+    - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证，相关原理将在 Lab 5 介绍，此处不做要求）
     - 使得你的实现能够通过如下测试：
 
         ```rust

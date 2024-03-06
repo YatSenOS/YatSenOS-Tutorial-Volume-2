@@ -1,5 +1,29 @@
 # Windows 环境配置
 
+!!! warning "关于环境选择"
+
+    **如非特殊需要，强烈建议使用 WSL 2 在 Windows 上进行开发。**
+
+    **借助于 VSCode 和 Remote WSL 插件，可以实现更好的编写代码、编译、调试体验。**
+
+    **WSL 2 的安装和配置请参考 [WSL 2 官方文档](https://docs.microsoft.com/zh-cn/windows/wsl/install)。**
+
+    **TL;DR**
+
+    ```bash
+    wsl --install -d Ubuntu
+    ```
+
+    ---
+
+    **如果你选择使用 WSL 2，可以跳过此文档的内容，转至 [Linux 环境配置](./linux.md) 进行配置。**
+
+    **如果你继续选择使用 Windows 直接进行实验，请确保：**
+
+    - **你具有良好的 Windows 折腾能力，了解环境变量配置、Windows 目录权限等。**
+    - **通读下列文档，不要做一步看一步。**
+    - **你能够正确理解下列文档中所描述的步骤的含义和目的。**
+
 !!! tip "关于 Windows 10"
 
     本文主要面向 Windows 11 用户，在 Windows 10 上你可能需要补全一些额外的步骤，如：
@@ -29,7 +53,7 @@ rust 提供了两种 windows 上的工具链：`msvc` 和 `gnu`，详细信息�
     在安装 Visual Studio 时，需要选择如下组件：
 
     - `MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)`
-    - `Windows 11 SDK (10.0.22621.0)`
+    - `Windows 11 SDK`
 
     `msvc` 工具链可以提供更好的 Windows 应用兼容性，也是 Windows 上开发 rust 应用推荐的工具链。
 

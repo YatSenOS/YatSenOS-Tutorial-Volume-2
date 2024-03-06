@@ -1,7 +1,9 @@
 use crate::{memory::gdt, proc::*};
 use alloc::format;
-use syscall_def::Syscall;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+
+// NOTE: import `ysos_syscall` package as `syscall_def` in Cargo.toml
+use syscall_def::Syscall;
 
 mod service;
 use super::consts;
@@ -44,6 +46,9 @@ pub fn dispatcher(context: &mut ProcessContext) {
         Syscall::Read => { /* FIXME: read from fd & return length */},
         // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
         Syscall::Write => { /* FIXME: write to fd & return length */},
+
+        // None -> pid: u16
+        Syscall::GetPid => { /* FIXME: get current pid */ },
 
         // path: &str (ptr: arg0 as *const u8, len: arg1) -> pid: u16
         Syscall::Spawn => { /* FIXME: spawn process from name */},
