@@ -506,7 +506,7 @@ Syscall::Sem => sys_sem(&args, context),
 ```rust
 pub struct Semaphore {
     count: usize,
-    wait_queue: Vec<ProcessId>,
+    wait_queue: VecDeque<ProcessId>,
 }
 ```
 
