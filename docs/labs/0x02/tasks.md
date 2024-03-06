@@ -553,7 +553,7 @@ static int init_serial() {
     }
 
     #[inline]
-    pub fn try_get_key() -> Option<Key> {
+    pub fn try_pop_key() -> Option<Key> {
         INPUT_BUF.pop()
     }
     ```
