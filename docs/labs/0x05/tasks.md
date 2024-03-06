@@ -587,7 +587,11 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 }
 ```
 
-!!! tip "记得完善用户侧 `pkg/lib/src/sync.rs` 中对信号量的操作"
+??? tip "记得完善用户侧 `pkg/lib/src/sync.rs` 中对信号量的操作"
+
+    参考别的用户态函数，如 `pkg/lib/src/io.rs` 的构建。
+
+    使用 `op` 来分配信号量的用户态函数。
 
 ### 测试任务
 
