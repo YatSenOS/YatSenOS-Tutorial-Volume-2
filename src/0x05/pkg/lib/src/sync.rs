@@ -16,11 +16,11 @@ impl SpinLock {
         }
     }
 
-    pub fn acquire(&mut self) {
+    pub fn acquire(&self) {
         // FIXME: acquire the lock, spin if the lock is not available
     }
 
-    pub fn release(&mut self) {
+    pub fn release(&self) {
         // FIXME: release the lock
     }
 }
