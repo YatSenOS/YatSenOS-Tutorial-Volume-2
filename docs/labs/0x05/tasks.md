@@ -23,7 +23,7 @@ YSOS 的 `fork` 系统调用设计如下描述：
 - `fork` 会创建一个新的进程，新进程称为子进程，原进程称为父进程。
 - 子进程在系统调用后将得到 `0` 的返回值，而父进程将得到子进程的 PID。如果创建失败，父进程将得到 `-1` 的返回值。
 - `fork` **不复制**父进程的内存空间，**不实现** Cow (Copy on Write) 机制，即父子进程将持有一定的共享内存：代码段、数据段、堆、bss 段等。
-- `fork` 子进程与父进程共享内存空间（页表），但**子进程拥有自己独立的寄存器和栈空间。**
+- `fork` 子进程与父进程共享内存空间（页表），但**子进程拥有自己独立的寄存器和栈空间（在一个不同的栈的地址继承原来的数据)。**
 - **由于上述内存分配机制的限制，`fork` 系统调用必须在任何 Rust 内存分配（堆内存分配）之前进行。**
 
 为了实现父子进程的资源共享，在先前的实验中，已经做了一些准备工作：
@@ -98,6 +98,7 @@ impl Process {
 
         // FIXME: make the arc of child
         // FIXME: add child to current process's children list
+        // FIXME: set fork ret value for parent
         // FIXME: mark the child as ready & return it
     }
 }
@@ -121,7 +122,7 @@ impl ProcessInner {
         // FIXME: alloc & map new stack for child (see instructions)
         // FIXME: copy the *entire stack* from parent to child
 
-        // FIXME: update child's stack frame with new *stack pointer*
+        // FIXME: update child's stack frame(context) with new *stack pointer*
         //          > keep lower bits of rsp, update the higher bits
         //          > also update the stack record in process data
         // FIXME: set the return value 0 for child with `context.set_rax`
@@ -625,6 +626,8 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     ```
 
     你可以在 `test_spin` 和 `test_semaphore` 中分别继续 `fork` 更多的进程用来实际测试。
+
+!!! tip "想想这些锁机制该如何声明才能被正确利用？"
 
 #### 消息队列
 
