@@ -5,7 +5,7 @@ use lib::*;
 
 extern crate lib;
 
-fn main() -> usize {
+fn main() -> isize {
     println!("Hello, world!!!");
 
     233

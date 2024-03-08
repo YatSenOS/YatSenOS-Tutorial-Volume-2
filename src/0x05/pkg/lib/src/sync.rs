@@ -37,7 +37,12 @@ impl Semaphore {
         Semaphore { key }
     }
 
-    // FIXME: inline functions with syscall
+    #[inline(always)]
+    pub fn init(&self, value: usize) -> bool {
+        sys_new_sem(self.key, value)
+    }
+
+    /* FIXME: other functions with syscall... */
 }
 
 unsafe impl Sync for Semaphore {}

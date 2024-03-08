@@ -21,9 +21,9 @@ YSOS 的 `fork` 系统调用设计如下描述：
 !!! note "出于实验设计考量：<br/>本实现与 Linux 或 [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/) 中所定义的 `fork` 有所不同，也结合了 Linux 中 `vfork` 的行为。"
 
 - `fork` 会创建一个新的进程，新进程称为子进程，原进程称为父进程。
-- 子进程在系统调用后将得到 `0` 的返回值，而父进程将得到子进程的 PID。如果创建失败，父进程将得到 `-1` 的返回值。
+- **子进程在系统调用后将得到 `0` 的返回值，而父进程将得到子进程的 PID。** 如果创建失败，父进程将得到 `-1` 的返回值。
 - `fork` **不复制**父进程的内存空间，**不实现** Cow (Copy on Write) 机制，即父子进程将持有一定的共享内存：代码段、数据段、堆、bss 段等。
-- `fork` 子进程与父进程共享内存空间（页表），但**子进程拥有自己独立的寄存器和栈空间（在一个不同的栈的地址继承原来的数据)。**
+- `fork` 子进程与父进程共享内存空间（页表），但**子进程拥有自己独立的寄存器和栈空间，即在一个不同的栈的地址继承原来的数据。**
 - **由于上述内存分配机制的限制，`fork` 系统调用必须在任何 Rust 内存分配（堆内存分配）之前进行。**
 
 为了实现父子进程的资源共享，在先前的实验中，已经做了一些准备工作：
@@ -98,7 +98,7 @@ impl Process {
 
         // FIXME: make the arc of child
         // FIXME: add child to current process's children list
-        // FIXME: set fork ret value for parent
+        // FIXME: set fork ret value for parent with `context.set_rax`
         // FIXME: mark the child as ready & return it
     }
 }
@@ -122,9 +122,11 @@ impl ProcessInner {
         // FIXME: alloc & map new stack for child (see instructions)
         // FIXME: copy the *entire stack* from parent to child
 
-        // FIXME: update child's stack frame(context) with new *stack pointer*
-        //          > keep lower bits of rsp, update the higher bits
+        // FIXME: update child's context with new *stack pointer*
+        //          > update child's stack to new base
+        //          > keep lower bits of *rsp*, update the higher bits
         //          > also update the stack record in process data
+
         // FIXME: set the return value 0 for child with `context.set_rax`
 
         // FIXME: construct the child process inner
@@ -148,7 +150,13 @@ impl ProcessInner {
 
     如果使用时遇到了问题，很可能是你的代码过于相互耦合，尝试将逻辑进行分离，保证函数功能的单一性。
 
-3. 利用好函数的返回值等机制，注意相关操作的执行顺序。
+3. 分别为父子进程设置返回值。
+
+    进程调用系统调用后，会根据**恢复的寄存器的值**获取系统调用的返回值。
+
+    对于 `fork` 系统调用，需要为父进程和子进程设置不同的返回值，这意味着为他们不同的 `context` 设置 `rax` 寄存器。
+
+    设置子进程的 `context` 时，先根据父进程进行复制，并在复制后修改 `rax` 为 0。
 
 4. 使用 `Arc::downgrade` 获取 `Weak` 引用，从而避免循环引用。
 
@@ -588,11 +596,16 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 }
 ```
 
-??? tip "记得完善用户侧 `pkg/lib/src/sync.rs` 中对信号量的操作"
+!!! tip "完善用户库"
 
-    参考别的用户态函数，如 `pkg/lib/src/io.rs` 的构建。
+    完善 `pkg/lib/src/sync.rs` 中有关信号量的操作，使用不同的 `op` 参数来进行信号量的用户态函数的分配，系统调用宏需要将参数转换为 `usize` 类型，可以参考如下声明：
 
-    使用 `op` 来分配信号量的用户态函数。
+    ```rust
+    #[inline(always)]
+    pub fn sys_new_sem(key: u32, value: usize) -> bool {
+        syscall!(Syscall::Sem, 0, key as usize, value) == 0
+    }
+    ```
 
 ### 测试任务
 
@@ -606,9 +619,11 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 你需要通过上述**两种方式**，分别保护该临界区，使得计数器的值最终为 `800`。
 
+!!! question "如何声明锁变量才能让它在进程间共享？根据上文的实现和你的理解，让它们正确发挥作用。"
+
 !!! note "尝试修改代码，使用**两组线程**分别测试 `SpinLock` 和 `Semaphore`"
 
-    一个参考代码行为如下：
+    一个参考代码行为如下，你可以参考这种形式修改和编写测试程序，而无需分成两个用户程序：
 
     ```rust
     fn main() -> isize {
@@ -626,8 +641,6 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     ```
 
     你可以在 `test_spin` 和 `test_semaphore` 中分别继续 `fork` 更多的进程用来实际测试。
-
-!!! tip "想想这些锁机制该如何声明才能被正确利用？"
 
 #### 消息队列
 
@@ -699,6 +712,8 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
     如果你没有实现，不妨试试使用 `sys_getpid` 或者 `fork` 顺序等数据作为种子来生成随机数。
 
+    你可以将上述功能封装到用户库中，以便在用户程序中使用。
+
     以 `ChaCha20Rng` 伪随机数生成器为例，使用相关方法获取随机数：
 
     ```rust
@@ -723,6 +738,14 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 - 尝试构造饥饿情况，即某些哲学家无法获得足够的机会就餐。
 
 尝试解决上述可能存在的问题，并介绍你的解决思路。
+
+!!! note "声明一系列的信号量"
+
+    在 `pkg/lib/src/sync.rs` 中，提供了 `semaphore_array` 宏，可以用于快速声明一系列信号量：
+
+    ```rust
+    static CHOPSTICK: [Semaphore; 5] = semaphore_array![0, 1, 2, 3, 4];
+    ```
 
 ??? tip "可能的解决思路……"
 
