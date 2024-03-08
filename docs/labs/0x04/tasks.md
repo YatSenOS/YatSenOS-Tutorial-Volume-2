@@ -934,7 +934,7 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
     请查阅资料，了解特权级栈的作用，实验说明这一系列中断的触发过程，尝试解释这个现象。
 
     - 可以使用 `intdbg` 参数，或 `ysos.py -i` 进行数据捕获。
-    - 留意包含 `0x80` 系统调用、`0x0e` 缺页异常的某三次中断的信息。
+    - 留意 `0x0e` 缺页异常和缺页之前的中断的信息。
     - 注意到一个不应当存在的地址……？
 
     或许你可以重新复习一下 Lab 2 的相关内容：[double-fault-exceptions](https://os.phil-opp.com/double-fault-exceptions/)
