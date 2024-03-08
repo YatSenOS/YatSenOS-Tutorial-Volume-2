@@ -70,6 +70,10 @@ typedef __s64	Elf64_Sxword;
   #include <stdio.h>
   #include <stdint.h>
   #include <stdlib.h>
+  #include <assert.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <elf.h>
 
   #define	EI_MAG0		0		/* e_ident[] indexes */
   #define	EI_MAG1		1
@@ -94,7 +98,7 @@ typedef __s64	Elf64_Sxword;
     read(fd, &ident, 0x10);
 
     // the first 4 bytes
-    uint32_t magic = *(uint32_t *)ident;
+    uint8_t *magic = (uint8_t *)ident;
 
     // identify the ELF file
     assert(
