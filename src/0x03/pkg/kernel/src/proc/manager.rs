@@ -83,7 +83,7 @@ impl ProcessManager {
 
         // FIXME: update processor's current pid
 
-        KERNEL_PID
+        // FIXME: return next process's pid
     }
 
     pub fn spawn_kernel_thread(
@@ -105,7 +105,7 @@ impl ProcessManager {
 
         // FIXME: push to ready queue
 
-        KERNEL_PID
+        // FIXME: return new process pid
     }
 
     pub fn kill_current(&self, ret: isize) {
