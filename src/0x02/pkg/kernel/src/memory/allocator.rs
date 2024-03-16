@@ -25,7 +25,7 @@ pub fn init() {
         heap_end.as_u64()
     );
 
-    let (size, unit) = super::humanized_size(HEAP_SIZE as u64);
+    let (size, unit) = crate::humanized_size(HEAP_SIZE as u64);
     info!("Kernel Heap Size : {:>7.*} {}", 3, size, unit);
 
     info!("Kernel Heap Initialized.");
