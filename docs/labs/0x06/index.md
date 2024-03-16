@@ -1,6 +1,6 @@
 # 实验六：硬盘驱动与文件系统
 
-!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
+!!! tip "作为一座巨大的图书馆的守护者，你需要确保每一本书都被正确地归类、保护和维护，以便访客在任何时候都能找到他们需要的知识。<br/>&nbsp;<span style="font-weight: bold; float: right">by ChatGLM</span>"
 
 ## 实验目的
 
@@ -23,6 +23,7 @@
 
 对于本次实验内容，你需要参考学习如下实验资料：
 
+- [用户空间](../../wiki/userspace.md)
 
 ## 实验任务与要求
 
