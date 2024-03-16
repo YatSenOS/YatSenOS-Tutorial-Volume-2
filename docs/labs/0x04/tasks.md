@@ -581,35 +581,36 @@ int _start() {
 在 `src/proc/data.rs` 中，修改 `ProcessData` 结构体，类似于环境变量的定义，添加一个“文件描述符表”：
 
 ```rust
-pub(super) file_handles: Arc<RwLock<BTreeMap<u8, Resource>>>
+pub(super) resources: Arc<RwLock<ResourceSet>>,
 ```
 
-在 `ProcessData` 的 `default` 函数中，初始化此表，并添加标准输入输出的资源：
+在 `ProcessData` 的 `default` 函数中初始化，添加默认的资源：
 
 ```rust
-let mut file_handles = BTreeMap::new();
-
-// stdin, stdout, stderr
-file_handles.insert(0, Resource::Console(StdIO::Stdin));
-file_handles.insert(1, Resource::Console(StdIO::Stdout));
-file_handles.insert(2, Resource::Console(StdIO::Stderr));
+resources: Arc::new(RwLock::new(ResourceSet::default()))
 ```
 
-之后添加 `handle` 函数，用于在系统调用中根据文件描述符获取资源：
+之后添加 `read` 和 `write` 函数，用于在系统调用中根据文件描述符进行读写：
 
 ```rust
-pub fn handle(&self, fd: u8) -> Option<Resource> {
-    self.file_handles.read().get(&fd).cloned()
+pub fn read(&self, fd: u8, buf: &mut [u8]) -> isize {
+    self.resources.read().read(fd, buf)
+}
+
+pub fn write(&self, fd: u8, buf: &[u8]) -> isize {
+    self.resources.read().write(fd, buf)
 }
 ```
 
-系统调用总是为当前进程提供服务，因此可以在 `proc/mod.rs` 中对一些操作进行封装，封装获取当前进程、上锁等操作。以获取当前进程的文件描述符表为例：
+系统调用总是为当前进程提供服务，因此可以在 `proc/mod.rs` 中对一些操作进行封装，封装获取当前进程、上锁等操作：
 
 ```rust
-pub fn handle(fd: u8) -> Option<Resource> {
-    x86_64::instructions::interrupts::without_interrupts(|| {
-        get_process_manager().current().read().handle(fd)
-    })
+pub fn read(fd: u8, buf: &mut [u8]) -> isize {
+    x86_64::instructions::interrupts::without_interrupts(|| get_process_manager().read(fd, buf))
+}
+
+pub fn write(fd: u8, buf: &[u8]) -> isize {
+    x86_64::instructions::interrupts::without_interrupts(|| get_process_manager().write(fd, buf))
 }
 ```
 
@@ -653,6 +654,7 @@ pub fn sys_write(fd: u8, buf: &[u8]) -> Option<usize> {
         buf.as_ptr() as usize,
         buf.len() as usize
     ) as isize;
+
     if ret.is_negative() {
         None
     } else {
@@ -693,10 +695,9 @@ pub fn syscall3(n: Syscall, arg0: usize, arg1: usize, arg2: usize) -> usize {
 
 在 `interrupt/syscall/service.rs` 中，你需要实现 `sys_write` 函数，用于处理 `write` 系统调用，使得用户程序得以进程输出：
 
-1. 使用上述 `proc::handle` 获取文件描述符，并处理 `Option`。
-2. 使用 `core::slice::from_raw_parts` 将用户程序的缓冲区转换为 `&[u8]`。
-3. 将缓冲区传入资源的 `write` 方法中，并返回写入的字节数。
-4. 在分发函数中使用 `context.set_rax` 设置返回值，并调用 `sys_write` 函数。
+1. 使用 `core::slice::from_raw_parts` 将用户程序的缓冲区转换为 `&[u8]`。
+2. 将缓冲区传入资源的 `write` 方法中，并返回写入的字节数。
+3. 在分发函数中使用 `context.set_rax` 设置返回值，并调用 `sys_write` 函数。
 
 !!! tip "参考 `sys_allocate` 的实现和相关用户侧代码进行实现"
 
