@@ -1,0 +1,13 @@
+[package]
+name = "ysos_storage"
+version = "0.6.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4"
+spin = "0.9"
+paste = "1.0"
+bitflags = "2.0"
+hex-literal = "0.4"
+num_enum = { version = "0.7", default-features = false }
+chrono = { version = "0.4", default-features = false, features = ["alloc"] }
