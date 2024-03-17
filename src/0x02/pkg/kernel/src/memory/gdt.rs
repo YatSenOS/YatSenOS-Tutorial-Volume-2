@@ -83,7 +83,7 @@ pub fn init() {
         size += s;
     }
 
-    let (size, unit) = super::humanized_size(size as u64);
+    let (size, unit) = crate::humanized_size(size as u64);
     info!("Kernel IST Size  : {:>7.*} {}", 3, size, unit);
 
     info!("GDT Initialized.");

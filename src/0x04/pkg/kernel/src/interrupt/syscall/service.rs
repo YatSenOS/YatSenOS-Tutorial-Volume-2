@@ -17,10 +17,10 @@ pub fn spawn_process(args: &SyscallArgs) -> usize {
 }
 
 pub fn sys_write(args: &SyscallArgs) -> usize {
-    // FIXME: get handle by fd
-    // FIXME: handle read from fd & return length
+    // FIXME: get buffer and fd by args
     //       - core::slice::from_raw_parts
-    // FIXME: return 0 if failed
+    // FIXME: call proc::write -> isize
+    // FIXME: return the result as usize
 
     0
 }
