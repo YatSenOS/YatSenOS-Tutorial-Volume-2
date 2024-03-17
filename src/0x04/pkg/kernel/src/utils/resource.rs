@@ -54,6 +54,7 @@ impl ResourceSet {
     }
 }
 
+#[derive(Debug)]
 pub enum Resource {
     Console(StdIO),
     Null,
@@ -63,7 +64,7 @@ impl Resource {
     pub fn read(&mut self, buf: &mut [u8]) -> Option<usize> {
         match self {
             Resource::Console(stdio) => match stdio {
-                &StdIO::Stdin => {
+                StdIO::Stdin => {
                     // FIXME: just read from kernel input buffer
                     Some(0)
                 }
