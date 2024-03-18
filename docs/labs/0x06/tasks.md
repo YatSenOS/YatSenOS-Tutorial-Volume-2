@@ -106,10 +106,36 @@ impl MbrPartition {
 
 ## 磁盘驱动
 
+在实现了 MBR 分区表解析后，笔者预计你对现有的代码结构已经有了一定的认知。现在，我们来实现 ATA 磁盘驱动，使得内核能够通过它访问“真实”的虚拟磁盘，并读取并解析其中的数据。
+
+为了在内核中使用 `storage` 包的内容，需要对 `Cargo.toml` 进行修改，添加引用：
+
+```toml
+[dependencies]
+storage = { package = "ysos_storage", path = "../storage" }
+```
+
+!!! note "明确概念：实验将实现 PATA 的 PIO 模式驱动，参考 [ATA PIO Mode - OSDev](https://wiki.osdev.org/ATA_PIO_Mode)"
+
+回顾一下之前编写串口驱动的过程，它与即将实现的驱动类似，都是 PIO 来进行数据传输：
+
+- 根据规范定义端口，使用端口进行读写操作控制外设寄存器
+- 按照规定修改外设寄存器，使得设备按照预期的方式运行
+- 通过数据和状态寄存器，实现数据的发送和接收
+- 通过启用设备的中断，实现异步的数据传输（与轮询方式相对）
+
+在 [ATA 硬盘简介](../../wiki/ata.md) 中，介绍了 ATA 硬盘的基本工作原理，以及相关概念。
+
+在 `kernel/src/drivers/ata/bus.rs` 中，定义了 `AtaBus` 结构体，它扮演了实际与 CPU 进行数据交换的角色，而在 `mod.rs` 中定义的 `AtaDrive` 则扮演了磁盘的抽象。
+
+这种设计类似于过往的实现中将 `serial` 与 `uart16550` 分开，不过磁盘会有自己的 `model` 等信息，需要获取并存储在 `AtaDrive` 中。
+
 ## FAT16 文件系统
 
 ## 思考题
 
 1. 为什么在 `pkg/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？
+
+2. 留意 `MbrTable` 的类型声明，为什么需要泛型参数 `T` 满足 `BlockDevice<B> + Clone`？为什么需要 `PhantomData<B>` 作为 `MbrTable` 的成员？在 `PartitionTable` trait 中，为什么需要 `Self: Sized` 约束？
 
 ## 加分项
