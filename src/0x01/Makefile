@@ -33,7 +33,8 @@ launch:
 		-net none \
 		$(QEMU_ARGS) \
 		$(QEMU_OUTPUT) \
-		-drive format=raw,file=fat:rw:${ESP}
+		-drive format=raw,file=fat:${ESP} \
+		-snapshot
 
 intdbg:
 	@qemu-system-x86_64 \
@@ -41,7 +42,8 @@ intdbg:
 		-net none \
 		$(QEMU_ARGS) \
 		$(QEMU_OUTPUT) \
-		-drive format=raw,file=fat:rw:${ESP} \
+		-drive format=raw,file=fat:${ESP} \
+		-snapshot \
 		-no-reboot -d int,cpu_reset
 
 debug:
@@ -50,7 +52,8 @@ debug:
 		-net none \
 		$(QEMU_ARGS) \
 		$(QEMU_OUTPUT) \
-		-drive format=raw,file=fat:rw:${ESP} \
+		-drive format=raw,file=fat:${ESP} \
+		-snapshot \
 		-s -S
 
 clean:
