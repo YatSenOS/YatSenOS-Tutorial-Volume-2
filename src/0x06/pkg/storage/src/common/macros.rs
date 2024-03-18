@@ -2,7 +2,7 @@
 ///
 /// # Example
 ///
-/// ```rust
+/// ```rust, ignore
 /// struct Example {
 ///     data: [u8; 10],
 /// }

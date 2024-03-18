@@ -8,15 +8,15 @@ mod bus;
 mod consts;
 
 use alloc::{boxed::Box, string::String};
-use bus::Bus;
+use bus::AtaBus;
 use consts::AtaDeviceType;
 use spin::Mutex;
 
 lazy_static! {
-    pub static ref BUSES: [Mutex<Bus>; 2] = {
+    pub static ref BUSES: [Mutex<AtaBus>; 2] = {
         let buses = [
-            Mutex::new(Bus::new(0, 14, 0x1F0, 0x3F6)),
-            Mutex::new(Bus::new(1, 15, 0x170, 0x376)),
+            Mutex::new(AtaBus::new(0, 14, 0x1F0, 0x3F6)),
+            Mutex::new(AtaBus::new(1, 15, 0x170, 0x376)),
         ];
 
         info!("Initialized ATA Buses.");

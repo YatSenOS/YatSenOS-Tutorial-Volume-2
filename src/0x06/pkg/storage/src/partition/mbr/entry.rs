@@ -10,7 +10,7 @@ pub struct MbrPartition {
 }
 
 impl MbrPartition {
-    /// Attempt to parse a Boot Parameter Block from a 512 byte sector.
+    /// Parse a partition entry from the given data.
     pub fn parse(data: &[u8; 16]) -> MbrPartition {
         MbrPartition {
             data: data.to_owned(),
@@ -48,8 +48,8 @@ impl core::fmt::Debug for MbrPartition {
                 &format!("0x{:04x}", self.begin_cylinder()),
             )
             .field(
-                "Filesystem Flag",
-                &format!("0x{:02x}", self.filesystem_flag()),
+                "Partition Type",
+                &format!("0x{:02x}", self.partition_type()),
             )
             .field("End Head", &format!("0x{:02x}", self.end_head()))
             .field("End Sector", &format!("0x{:04x}", self.end_sector()))
@@ -70,13 +70,13 @@ mod tests {
 
         let meta = MbrPartition::parse(&data);
 
-        println!("{:?}", meta);
+        println!("{:#?}", meta);
 
         assert!(meta.is_active());
         assert_eq!(meta.begin_head(), 1);
         assert_eq!(meta.begin_sector(), 1);
         assert_eq!(meta.begin_cylinder(), 0);
-        assert_eq!(meta.filesystem_flag(), 0x0b);
+        assert_eq!(meta.partition_type(), 0x0b);
         assert_eq!(meta.end_head(), 254);
         assert_eq!(meta.end_sector(), 63);
         assert_eq!(meta.end_cylinder(), 764);
