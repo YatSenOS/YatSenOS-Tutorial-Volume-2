@@ -7,7 +7,7 @@ pub mod mbr;
 /// Partition table trait
 pub trait PartitionTable<T, B>
 where
-    T: BlockDevice<B> + Clone,
+    T: BlockDevice<B>,
     B: BlockTrait,
     Self: Sized,
 {
@@ -22,7 +22,7 @@ where
 #[derive(Clone, Copy)]
 pub struct Partition<T, B>
 where
-    T: BlockDevice<B> + Clone,
+    T: BlockDevice<B>,
     B: BlockTrait,
 {
     inner: T,
@@ -33,7 +33,7 @@ where
 
 impl<T, B> Partition<T, B>
 where
-    T: BlockDevice<B> + Clone,
+    T: BlockDevice<B>,
     B: BlockTrait,
 {
     pub fn new(inner: T, offset: usize, size: usize) -> Self {
@@ -48,7 +48,7 @@ where
 
 impl<T, B> core::fmt::Debug for Partition<T, B>
 where
-    T: BlockDevice<B> + Clone,
+    T: BlockDevice<B>,
     B: BlockTrait,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -61,7 +61,7 @@ where
 
 impl<T, B> BlockDevice<B> for Partition<T, B>
 where
-    T: BlockDevice<B> + Clone,
+    T: BlockDevice<B>,
     B: BlockTrait,
 {
     fn block_count(&self) -> Result<usize> {
