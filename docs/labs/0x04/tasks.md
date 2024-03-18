@@ -614,13 +614,13 @@ pub fn write(fd: u8, buf: &[u8]) -> isize {
 }
 ```
 
-对于 `write` 系统调用，用户程序需要将数据写入到资源中，对此系统调用进行如下约定：
+对于 `write` 系统调用，用户程序需要将数据写入到资源中，在 `syscall::dispatcher` 中对此系统调用的相关参数进行如下约定：
 
 ```
 fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
 ```
 
-为了便于理解，给出了用户侧进行调用时的示例代码，从 `print!` 的实现开始：
+为了便于理解，给出了用户侧进行调用时的相关调用过程，从 `print!` 的实现开始：
 
 ```rust
 #[macro_export]
@@ -644,7 +644,7 @@ impl Stdout {
 }
 ```
 
-传递给 `sys_write`，由此函数对传入的参数进行处理，并调用系统调用：
+从而传递给 `sys_write`，由此函数对传入的参数进行处理，并调用系统调用：
 
 ```rust
 pub fn sys_write(fd: u8, buf: &[u8]) -> Option<usize> {
@@ -763,7 +763,7 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 
     尝试修改用户态库中的 `entry!` 和 `panic` 函数，在用户程序中调用 `exit` 系统调用，并传递一个返回值，以验证用户程序的退出功能。
 
-    值此为止，你应当可以生成用户程序、输出 `Hello, world!!!`，并正确退出。
+    至此为止，你应当可以生成用户程序、输出 `Hello, world!!!`，并正确退出。
 
 ### 进程的创建与等待
 
