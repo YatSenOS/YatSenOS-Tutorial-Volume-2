@@ -454,7 +454,7 @@ impl XApic {
 use super::consts::*;
 
 pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
-    idt[Interrupts::IrqBase as usize + Irq::Timer as usize]
+    idt[Interrupts::IrqBase as u8 + Irq::Timer as u8]
         .set_handler_fn(clock_handler);
 }
 
@@ -578,7 +578,7 @@ static int init_serial() {
 use super::consts::*;
 
 pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
-    idt[Interrupts::IrqBase as usize + Irq::Serial0 as usize]
+    idt[Interrupts::IrqBase as u8 + Irq::Serial0 as u8]
         .set_handler_fn(serial_handler);
 }
 
