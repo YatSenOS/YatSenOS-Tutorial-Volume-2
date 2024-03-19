@@ -37,7 +37,7 @@ pub extern "x86-interrupt" fn page_fault_handler(
     panic!(
         "EXCEPTION: PAGE FAULT, ERROR_CODE: {:?}\n\nTrying to access: {:#x}\n{:#?}",
         err_code,
-        Cr2::read(),
+        Cr2::read().unwrap_or(0xdeadbeef),
         stack_frame
     );
 }

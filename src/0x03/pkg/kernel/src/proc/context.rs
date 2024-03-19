@@ -46,11 +46,11 @@ impl ProcessContext {
         self.value.stack_frame.stack_pointer = stack_top;
         self.value.stack_frame.instruction_pointer = entry;
         self.value.stack_frame.cpu_flags =
-            (RFlags::IOPL_HIGH | RFlags::IOPL_LOW | RFlags::INTERRUPT_FLAG).bits();
+            RFlags::IOPL_HIGH | RFlags::IOPL_LOW | RFlags::INTERRUPT_FLAG;
 
         let selector = get_selector();
-        self.value.stack_frame.code_segment = selector.code_selector.0 as u64;
-        self.value.stack_frame.stack_segment = selector.data_selector.0 as u64;
+        self.value.stack_frame.code_segment = selector.code_selector;
+        self.value.stack_frame.stack_segment = selector.data_selector;
 
         trace!("Init stack frame: {:#?}", &self.stack_frame);
     }
@@ -60,13 +60,13 @@ impl Default for ProcessContextValue {
     fn default() -> Self {
         Self {
             regs: RegistersValue::default(),
-            stack_frame: InterruptStackFrameValue {
-                instruction_pointer: VirtAddr::new_truncate(0),
-                code_segment: 8,
-                cpu_flags: 0,
-                stack_pointer: VirtAddr::new_truncate(0),
-                stack_segment: 0,
-            },
+            stack_frame: InterruptStackFrameValue::new(
+                VirtAddr::new(0x1000),
+                SegmentSelector(0),
+                RFlags::empty(),
+                VirtAddr::new(0x2000),
+                SegmentSelector(0),
+            ),
         }
     }
 }

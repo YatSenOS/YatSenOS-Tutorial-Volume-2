@@ -6,5 +6,5 @@ edition = "2021"
 
 [dependencies]
 log = "0.4"
-x86_64 = "0.14"
+x86_64 = "0.15"
 xmas-elf = "0.9"

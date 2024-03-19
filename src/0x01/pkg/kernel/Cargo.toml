@@ -10,7 +10,7 @@ lazy_static = { version = "1.4", features = ["spin_no_std"] }
 paste = "1.0"
 spin = "0.9"
 x86 = "0.52"
-x86_64 = "0.14"
+x86_64 = "0.15"
 log = "0.4"
 bitflags = "2.3"
 libm = "0.2"
