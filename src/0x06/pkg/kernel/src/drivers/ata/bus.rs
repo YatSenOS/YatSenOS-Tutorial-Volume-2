@@ -128,29 +128,10 @@ impl AtaBus {
         warn!("ATA status register : {:?}", self.status());
     }
 
-    /// Selects the given drive (0 or 1) by writing to the `drive` port.
-    ///
-    /// - 0: Master
-    /// - 1: Slave
-    fn select_drive(&mut self, drive: u8) {
-        debug_assert!(drive < 2);
-        self.poll(AtaStatus::BUSY, false);
-        self.poll(AtaStatus::DATA_REQUEST_READY, false);
-
-        unsafe {
-            // FIXME: select the drive
-        }
-
-        self.poll(AtaStatus::BUSY, false);
-        self.poll(AtaStatus::DATA_REQUEST_READY, false);
-    }
-
-    /// Sets up the PIO mode for the given drive and block.
+    /// Writes the given command
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO
-    fn setup_pio(&mut self, drive: u8, block: u32, cmd: AtaCommand) {
-        self.select_drive(drive);
-
+    fn write_command(&mut self, drive: u8, block: u32, cmd: AtaCommand) -> storage::Result<()> {
         let bytes = block.to_le_bytes(); // a trick to convert u32 to [u8; 4]
         unsafe {
             // just 1 sector for current implementation
@@ -161,14 +142,9 @@ impl AtaBus {
             // FIXME: enable LBA28 mode
             // FIXME: write the command register (cmd as u8)
         }
-    }
-
-    /// Writes the given command
-    fn write_command(&mut self, drive: u8, block: u32, cmd: AtaCommand) -> storage::Result<()> {
-        self.setup_pio(drive, block, cmd);
 
         if self.status().is_empty() {
-            // drive does not exist
+            // unknown drive
             return Err(storage::DeviceError::UnknownDevice.into());
         }
 
@@ -187,14 +163,14 @@ impl AtaBus {
 
     /// Identifies the drive at the given `drive` number (0 or 1).
     ///
-    /// reference: <https://wiki.osdev.org/ATA_PIO_Mode#IDENTIFY_command>
+    /// reference: https://wiki.osdev.org/ATA_PIO_Mode#IDENTIFY_command
     pub(super) fn identify_drive(&mut self, drive: u8) -> storage::Result<AtaDeviceType> {
         info!("Identifying drive {}", drive);
 
         // FIXME: use `AtaCommand::IdentifyDevice` to identify the drive
         //      - call `write_command` with `drive` and `0` as the block number
         //      - if the status is empty, return `AtaDeviceType::None`
-        //      - else return `DeviceError::UnknownDevice` as `FsError`
+        //      - else return `DeviceError::Unknown` as `FsError`
 
         // FIXME: poll for the status to be not BUSY
 

@@ -130,6 +130,74 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 这种设计类似于过往的实现中将 `serial` 与 `uart16550` 分开，不过磁盘会有自己的 `model` 等信息，需要获取并存储在 `AtaDrive` 中。
 
+### 发送命令
+
+为了与磁盘进行交互，需要向磁盘发送命令，在 `drivers/ata/consts.rs` 中，定义了 `AtaCommand` 枚举，它表示了一系列的命令。
+
+在本实验中，你需要实现 28-bit 模式下的 LBA 读写命令，并且还会使用到 `IdentifyDevice` 命令，用于获取磁盘的信息。
+
+上述三个命令的调用过程比较类似，因此可以把发送命令并等待设备就绪的过程封装为一个函数，它被定义在 `drivers/ata/bus.rs` 中，可以参考 [x86 28-bit PIO - OSDev](https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO) 的内容，这里给出发送命令的过程：
+
+1. 将当前块的 LBA 偏移分别存入四个寄存器中
+2. 同时使用 `drive` 寄存器选择磁盘
+3. 发送命令
+4. 等待设备就绪，判断是否出错
+5. 等待数据请求就绪
+
+28-bit 的 LBA 地址应当按照如下方式存入寄存器，最高四位被放置在 `drive` 寄存器的低四位：
+
+<table class="inst">
+<tr>
+    <td class="inst-numnodel">28</td>
+    <td class="inst-numnode" colspan="2"></td>
+    <td class="inst-numnoder">24</td>
+    <td class="inst-numnode" colspan="6"></td>
+    <td class="inst-numnoder">16</td>
+    <td class="inst-numnode" colspan="6"></td>
+    <td class="inst-numnoder">8</td>
+    <td class="inst-numnode" colspan="6"></td>
+    <td class="inst-numnoder">0</td>
+</tr>
+<tr>
+    <td colspan="4" class="inst-node-little">drive</td>
+    <td colspan="7" class="inst-node-little">lba_high</td>
+    <td colspan="7" class="inst-node-little">lba_mid</td>
+    <td colspan="7" class="inst-node-little">lba_low</td>
+</tr>
+</table>
+
+而 `drive` 寄存器的高四位则用来进行磁盘及寻址方式的选择，具体定义如下：
+
+<table border="2" cellpadding="4" cellspacing="0" class="wikitable"><tbody><tr><th> Bit</th><th> Abbreviation</th><th> Function</th></tr><tr><td> 0 - 3</td><td></td><td> In CHS addressing, bits 0 to 3 of the head. In LBA addressing, bits 24 to 27 of the block number.</td></tr><tr><td> 4</td><td> DRV</td><td> Selects the drive number.</td></tr><tr><td> 5</td><td> 1</td><td> Always set.</td></tr><tr><td> 6</td><td> LBA</td><td> Uses CHS addressing if clear or LBA addressing if set.</td></tr><tr><td> 7</td><td> 1</td><td> Always set.</td></tr></tbody></table>
+
+### 磁盘识别
+
+在完成命令发送部分后，尝试补全 `identify_drive` 函数。可以直接调用上文实现好的 `write_command` 函数，根据规范，`block` 参数使用 `0` 进行传递。
+
+对于识别出的磁盘，会带有一个 512 字节的数据块，你需要根据 ATA 规范中的定义，参考 [IDE - OSDev](https://wiki.osdev.org/IDE)，将这些数据解析为 `AtaDrive` 的相关信息，这里给出部分会用于补全 `drivers/ata/mod.rs` 的信息。
+
+```c
+#define ATA_IDENT_DEVICETYPE   0
+#define ATA_IDENT_CYLINDERS    2
+#define ATA_IDENT_HEADS        6
+#define ATA_IDENT_SECTORS      12
+#define ATA_IDENT_SERIAL       20   // 20 bytes
+#define ATA_IDENT_MODEL        54   // 40 bytes
+#define ATA_IDENT_CAPABILITIES 98
+#define ATA_IDENT_FIELDVALID   106
+#define ATA_IDENT_MAX_LBA      120  // 4 bytes (unsigned int)
+#define ATA_IDENT_COMMANDSETS  164
+#define ATA_IDENT_MAX_LBA_EXT  200
+```
+
+!!! success "阶段性成果"
+
+    在完成命令发送，并按照注释补全 `identify_drive` 函数后，你可以自行修改相关函数，测试 `AtaDrive` 的 `open` 函数。
+
+    在操作系统初始化结束后，使用 `AtaDrive::open(0, 0)` 获取磁盘信息并打印出来。为了确保通过编译，可以先不用关心 `filesystem.rs` 中的内容。
+
+### 读写数据
+
 ## FAT16 文件系统
 
 ## 思考题
