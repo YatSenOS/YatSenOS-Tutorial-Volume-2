@@ -96,7 +96,7 @@ impl MbrPartition {
 
 对于后续的磁盘访问，更多通过 LBA 字段进行寻址，实际上并不会用到 CHS 的相关内容。
 
-!!! note "运行单元测试"
+!!! tip "运行单元测试"
 
     在 Lab 0 中已经简单设计了如何运行单元测试。你可以在 `partition/mbr/entry.rs` 中找到 `tests` 模块，其中包含了测试用例，你可以通过 `cargo test` 来运行它们。
 
@@ -176,18 +176,10 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 对于识别出的磁盘，会带有一个 512 字节的数据块，你需要根据 ATA 规范中的定义，参考 [IDE - OSDev](https://wiki.osdev.org/IDE)，将这些数据解析为 `AtaDrive` 的相关信息，这里给出部分会用于补全 `drivers/ata/mod.rs` 的信息。
 
-```c
-#define ATA_IDENT_DEVICETYPE   0
-#define ATA_IDENT_CYLINDERS    2
-#define ATA_IDENT_HEADS        6
-#define ATA_IDENT_SECTORS      12
+```cpp
 #define ATA_IDENT_SERIAL       20   // 20 bytes
 #define ATA_IDENT_MODEL        54   // 40 bytes
-#define ATA_IDENT_CAPABILITIES 98
-#define ATA_IDENT_FIELDVALID   106
 #define ATA_IDENT_MAX_LBA      120  // 4 bytes (unsigned int)
-#define ATA_IDENT_COMMANDSETS  164
-#define ATA_IDENT_MAX_LBA_EXT  200
 ```
 
 !!! success "阶段性成果"
@@ -200,6 +192,24 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 ### 读写数据
 
+在编写 `write_command` 函数时，你或许会注意到 `sector_count` 寄存器直接被设置为了 1。
+
+虽然 ATA 驱动支持一次读取多个扇区，但从抽象和实现角度，本实验还是采取了每次写指令只读一块的方式。由于 ATA 本身的速度就很慢，并且作为实验实现，这样能够更加灵活和便捷。
+
+经过上述函数的统一，读写磁盘的操作变得十分简单：在使用 `write_command` 指明需要进行的操作后，从 `data` 寄存器中每次 16 位地与 `buf` 进行数据交互。
+
+!!! tip "注意数据的端序"
+
+在为 `Bus` 实现了 `read_pio` 和 `write_pio` 之后，你还需要在 `drivers/ata/mod.rs` 中补全块设备的实现。
+
+`AtaDrive` 通过 `bus` 和 `drive` 字段存储了对应的磁盘信息，`BUSES` 的定义已经为大家定义完善，你需要借助这些内容，补全 `impl BlockDevice for AtaDrive` 中对应的 `FIXME` 的内容。
+
+!!! success "阶段性成果"
+
+    在为 `AtaDrive` 实现了块设备的 trait 之后，尝试使用 `MbrTable::parse(drive)` 解析磁盘的分区表。
+
+    如果顺利，你应当能够正确获取首个分区的相关信息，包括其类型、起始 LBA 和大小。尝试添加日志来记录这些信息，并补充在报告中。
+
 ## FAT16 文件系统
 
 ## 思考题
@@ -207,5 +217,7 @@ storage = { package = "ysos_storage", path = "../storage" }
 1. 为什么在 `pkg/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？
 
 2. 留意 `MbrTable` 的类型声明，为什么需要泛型参数 `T` 满足 `BlockDevice<B> + Clone`？为什么需要 `PhantomData<B>` 作为 `MbrTable` 的成员？在 `PartitionTable` trait 中，为什么需要 `Self: Sized` 约束？
+
+3. `AtaDrive` 为了实现 `MbrTable`，如何保证了自身可以实现 `Clone`？对于分离 `AtaBus` 和 `AtaDrive` 的实现，你认为这样的设计有什么好处？
 
 ## 加分项
