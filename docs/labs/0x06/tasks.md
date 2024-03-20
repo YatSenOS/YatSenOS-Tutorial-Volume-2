@@ -212,6 +212,14 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 ## FAT16 文件系统
 
+!!! warning "阅读提示"
+
+    请认真阅读 [FAT 文件系统](../../wiki/fat.md) 的内容，它将帮助你更好地理解 FAT 文件系统的结构和实现。
+
+### BPB
+
+在 `pkg/storage/src/fs/fat16/mod.rs` 中，定义了 `Fat16Impl` 结构体，它是 FAT16 文件系统的抽象。
+
 ## 思考题
 
 1. 为什么在 `pkg/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？

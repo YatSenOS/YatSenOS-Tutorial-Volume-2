@@ -6,11 +6,13 @@ use super::*;
 
 #[derive(Debug, Clone)]
 pub struct File {
-    /// The current offset in the file.
+    /// The current offset in the file
     pub offset: usize,
+    /// The current cluster of this file
+    cluster: Cluster,
     /// DirEntry of this file
     entry: DirEntry,
-    /// The file system handle that contains this file.
+    /// The file system handle that contains this file
     handle: Fat16Handle,
 }
 
@@ -38,6 +40,7 @@ impl Read for File {
         //      - use `self.entry` to get the file's cluster
         //      - use `self.handle.cluster_to_sector` to convert cluster to sector
         //      - update `self.offset` after reading
+        //      - update `self.cluster` with FAT if necessary
     }
 }
 
