@@ -206,7 +206,7 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 !!! success "阶段性成果"
 
-    在为 `AtaDrive` 实现了块设备的 trait 之后，尝试使用 `MbrTable::parse(drive)` 解析磁盘的分区表。
+    在为 `AtaDrive` 实现了块设备的 trait 后，尝试使用 `MbrTable::parse(drive)` 解析磁盘分区表。
 
     如果顺利，你应当能够正确获取首个分区的相关信息，包括其类型、起始 LBA 和大小。尝试添加日志来记录这些信息，并补充在报告中。
 
