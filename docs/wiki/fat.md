@@ -12,13 +12,23 @@
 
 可见，文件由两个关键的部分组成，一个是文件的数据，也就是一系列二进制数据块，另一个则是文件的信息，它用来区分不同的文件并在硬盘上定位到文件数据的位置。
 
-![file-structure](assets/fat/file-structure.png)
+![file-structure](assets/fat/file-structure.jpg)
 
 在文件系统组织文件的时候，其实际上就是在建立索引文件的数据结构，由于文件是由两部分构成的，文件系统中也就存在着两种主要的数据结构，分别用来索引文件的这两个组成部分。
 
 其中一个数据结构用来索引文件的信息，这部分数据结构一般呈现树形的结构，文件系统中的文件目录就是由这个数据结构所维护的，树中每个节点都存储着一个文件或是目录的信息。
 
-![directory-tree](assets/fat/directory-tree.png)
+```text
+root/
+    ├── system/
+    │       └── kernel.elf
+    └── home/
+            ├── main.cpp
+            └── folder/
+                    ├── boo/
+                    ├── baz
+                    └── bar/
+```
 
 另一个数据结构则用于通过文件的信息来索引文件的数据，由于一个文件可能跨越数个甚至数十、数百个扇区，由于文件时时刻刻都可能会被更改，所以没有办法预先给文件分配一段固定的、连续的、大小适当的空间，因此文件的数据往往分散在磁盘的各个位置，这时就需要一个数据结构来将这些游离的数据块串接起来。说到这里，可能大家就已经能猜到，这部分数据结构一般以链表的形式出现。每一个文件块都对应着一个下一文件块的位置信息，而第一个文件块的位置信息则存储于文件的信息中。
 
@@ -31,7 +41,7 @@
 `boo.baz` 首文件块为 `#10`，后续文件块依次为 `#12`、`#5`。因此 `#10`, `#12`, `#5` 共同构成 `boo.baz` 文件的数据
 `bar` 首文件块指向 `#18`，后续文件块为 `#11`，因此 `#18`, `#11` 共同构成了目录树中的 `/home/bar/` 节点的子树信息
 
-![directory-structure](assets/fat/directory-structure.png)
+![directory-structure](assets/fat/directory-structure.jpg)
 
 由上图可以看出，目录树的遍历方式是要与数据结构中树的遍历方式有很大不同的。每一个节点实际上都对应着一个存储着其子节点的文件的信息的数组，通过这个数组，可以获得子节点对应文件的首块信息，再依据链表就能够获得全部的文件数据。只有当取得了全部的文件数据，才可以进入下一层的节点。
 
@@ -56,7 +66,7 @@
 
 为此，工程师们将所有文件块中关于下一个块的信息独立出来，存放在磁盘中的一个连续的空间内，这个空间也被称作文件分配表 (File Allocation Table)，也就是 FAT 实际的意义。这样，只需要提前把这一部分空间读取到内存中，就可以很快地定位到文件任意个块的信息了。
 
-![fat-sector](assets/fat/fat-sector.png)
+![fat-sector](assets/fat/fat-sector.jpg)
 
 同时，这样做还有一个好处，一个 512 字节或是其整数倍的块需要分配几个字节给下一个块的块号，导致每个文件块实际数据大小不是 2 的幂，现在由于将这部分信息独立出来，所以每一个文件块都是完整的 512 字节或是 512 字节的倍数。
 
@@ -70,7 +80,7 @@
 
 但是细细一想又会发现很多问题，例如：根目录存储在磁盘的哪个位置、如何知道一个簇有多大、文件名是如何存储的、怎样才代表当前的簇是文件的最后一个簇等等
 
-这便是因为文件系统很多具体的细节还没有落实，程序还无法从现有的文件系统中获得需要的数据。而这就是本节的目的，通过阅读 [微软关于 FAT 文件系统的规范文档](<assets/fat/FAT32 Spec.pdf>)，对 FAT 文件系统进行抽象，并且提供接口来解决上面提到的种种问题。
+这便是因为文件系统很多具体的细节还没有落实，程序还无法从现有的文件系统中获得需要的数据。而这就是本节的目的，通过阅读 [微软关于 FAT 文件系统的规范文档](https://academy.cba.mit.edu/classes/networking_communications/SD/FAT.pdf)，对 FAT 文件系统进行抽象，并且提供接口来解决上面提到的种种问题。
 
 ### 定义与注解
 
@@ -86,7 +96,7 @@
 
 一个 FAT 格式的卷结构大概长得就像下面这样
 
-![fat-structure](assets/fat/fat-structure.png)
+![fat-structure](assets/fat/fat-structure.jpg)
 
 !!! note "小端模式"
 
@@ -104,193 +114,193 @@
 
 对于 FAT12/16 和 FAT32，它们的 BPB 结构在首 36 字节上完全一致：
 
-<table>
+<table class="wikitable">
     <thead>
         <tr>
-            <th style="text-align:center">域名称</th>
-            <th style="text-align:center">偏移</th>
-            <th style="text-align:center">大小</th>
-            <th style="text-align:center">描述</th>
-            <th style="text-align:center">限制</th>
+            <th>域名称</th>
+            <th>偏移</th>
+            <th>大小</th>
+            <th>描述</th>
+            <th>限制</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align:center">BS_jmpBoot</td>
-            <td style="text-align:center">0</td>
-            <td style="text-align:center">3</td>
-            <td style="text-align:center">跳转到启动代码处执行的指令<br/>由于实验中启动代码位于MBR，不会从这里进行启动，因此可以不用关心这个域实际的内容</td>
-            <td style="text-align:center">一般为<code>0x90**EB</code>或是<code>0x****E9</code></td>
+            <td>BS_jmpBoot</td>
+            <td>0</td>
+            <td>3</td>
+            <td>跳转到启动代码处执行的指令<br/>由于实验中启动代码位于MBR，不会从这里进行启动，因此可以不用关心这个域实际的内容</td>
+            <td>一般为<code>0x90**EB</code>或是<code>0x****E9</code></td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_OEMName</td>
-            <td style="text-align:center">3</td>
-            <td style="text-align:center">8</td>
-            <td style="text-align:center">OEM厂商的名称，同样与实验无关，不需要关心</td>
-            <td style="text-align:center">-</td>
+            <td>BS_OEMName</td>
+            <td>3</td>
+            <td>8</td>
+            <td>OEM厂商的名称，同样与实验无关，不需要关心</td>
+            <td>-</td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_BytsPerSec</strong></td>
-            <td style="text-align:center">11</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center"><strong>每个扇区的字节数</strong></td>
-            <td style="text-align:center"><strong>只能是512、1024、2048或4096</strong></td>
+            <td><strong>BPB_BytsPerSec</strong></td>
+            <td>11</td>
+            <td>2</td>
+            <td><strong>每个扇区的字节数</strong></td>
+            <td><strong>只能是512、1024、2048或4096</strong></td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_SecPerClus</strong></td>
-            <td style="text-align:center">13</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center"><strong>每个簇的扇区数量</strong></td>
-            <td style="text-align:center"><strong>只能是1、2、4、8、16、32、64和128</strong></td>
+            <td><strong>BPB_SecPerClus</strong></td>
+            <td>13</td>
+            <td>1</td>
+            <td><strong>每个簇的扇区数量</strong></td>
+            <td><strong>只能是1、2、4、8、16、32、64和128</strong></td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_RsvdSecCnt</strong></td>
-            <td style="text-align:center">14</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center"><strong>保留区域的扇区数量</strong><br/>可以用来计算FAT区域的首扇区位置</td>
-            <td style="text-align:center"><strong>不能为0，可以为任意非0值</strong><br/>可以用来将将数据区域与簇大小对齐（使数据区域的起始偏移位于簇大小的整数倍处）</td>
+            <td><strong>BPB_RsvdSecCnt</strong></td>
+            <td>14</td>
+            <td>2</td>
+            <td><strong>保留区域的扇区数量</strong><br/>可以用来计算FAT区域的首扇区位置</td>
+            <td><strong>不能为0，可以为任意非0值</strong><br/>可以用来将将数据区域与簇大小对齐（使数据区域的起始偏移位于簇大小的整数倍处）</td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_NumFATs</strong></td>
-            <td style="text-align:center">16</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center"><strong>FAT表数量</strong></td>
-            <td style="text-align:center">一般为2，也可以为1</td>
+            <td><strong>BPB_NumFATs</strong></td>
+            <td>16</td>
+            <td>1</td>
+            <td><strong>FAT表数量</strong></td>
+            <td>一般为2，也可以为1</td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_RootEntCnt</strong></td>
-            <td style="text-align:center">17</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center"><strong>根目录中的条目数</strong><br/>指根目录中包含的所有的条目数量，包括有效的、空的和无效的条目<br/>可以用来计算根目录区所占用的字节数</td>
-            <td style="text-align:center"><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 必须满足<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>B</mi><mi>P</mi><mi>B</mi><mi mathvariant="normal">_</mi><mi>R</mi><mi>o</mi><mi>o</mi><mi>t</mi><mi>E</mi><mi>n</mi><mi>t</mi><mi>C</mi><mi>n</mi><mi>t</mi><mo>×</mo><mn>32</mn><mo stretchy="false">)</mo><mo>≡</mo><mn>0</mn><mtext>  </mtext><mo stretchy="false">(</mo><mi>m</mi><mi>o</mi><mi>d</mi><mtext>  </mtext><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(BPB\_RootEntCnt \times 32) \equiv 0\;(mod\;2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.06em;vertical-align:-0.31em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05017em;">BPB</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">oo</span><span class="mord mathnormal" style="margin-right:0.05764em;">tE</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.07153em;">tC</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">32</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≡</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord mathnormal">o</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">2</span><span class="mclose">)</span></span></span></span></td>
+            <td><strong>BPB_RootEntCnt</strong></td>
+            <td>17</td>
+            <td>2</td>
+            <td><strong>根目录中的条目数</strong><br/>指根目录中包含的所有的条目数量，包括有效的、空的和无效的条目<br/>可以用来计算根目录区所占用的字节数</td>
+            <td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 必须满足<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>B</mi><mi>P</mi><mi>B</mi><mi mathvariant="normal">_</mi><mi>R</mi><mi>o</mi><mi>o</mi><mi>t</mi><mi>E</mi><mi>n</mi><mi>t</mi><mi>C</mi><mi>n</mi><mi>t</mi><mo>×</mo><mn>32</mn><mo stretchy="false">)</mo><mo>≡</mo><mn>0</mn><mtext>  </mtext><mo stretchy="false">(</mo><mi>m</mi><mi>o</mi><mi>d</mi><mtext>  </mtext><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(BPB\_RootEntCnt \times 32) \equiv 0\;(mod\;2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.06em;vertical-align:-0.31em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05017em;">BPB</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">oo</span><span class="mord mathnormal" style="margin-right:0.05764em;">tE</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.07153em;">tC</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">32</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≡</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord mathnormal">o</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">2</span><span class="mclose">)</span></span></span></span></td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_TotSec16</strong></td>
-            <td style="text-align:center">19</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center"><strong>16位长度卷的总扇区数</strong><br/>对于FAT32和更大容量的存储设备有额外的BPB_TotSec32域<br/>应当是为了维持BPB结构的一致性而仍然保留了这个域</td>
-            <td style="text-align:center"><strong>FAT32：</strong> 必须位0<br/><strong>FAT12/16：</strong> 如果总扇区数小于0x10000（也就是能用16位表示）则使用此域表示，否则也使用BPB_TotSec32域</td>
+            <td><strong>BPB_TotSec16</strong></td>
+            <td>19</td>
+            <td>2</td>
+            <td><strong>16位长度卷的总扇区数</strong><br/>对于FAT32和更大容量的存储设备有额外的BPB_TotSec32域<br/>应当是为了维持BPB结构的一致性而仍然保留了这个域</td>
+            <td><strong>FAT32：</strong> 必须位0<br/><strong>FAT12/16：</strong> 如果总扇区数小于0x10000（也就是能用16位表示）则使用此域表示，否则也使用BPB_TotSec32域</td>
         </tr>
         <tr>
-            <td style="text-align:center">BPB_Media</td>
-            <td style="text-align:center">21</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">似乎是设备的类型<br/>与实验无关，所以可以不用特别关心</td>
-            <td style="text-align:center">合法取值包括<code>0xF0</code>、<code>0xF8</code>、<code>0xF9</code>、<code>0xFA</code>、<code>0xFB</code>、<code>0xFC</code>、<code>0xFD</code>、<code>0xFE</code>和<code>0xFF</code><br/>本地磁盘（不可移动）的规定值为<code>0xF8</code><br/>可移动磁盘的往往使用<code>0xF0</code></td>
+            <td>BPB_Media</td>
+            <td>21</td>
+            <td>1</td>
+            <td>似乎是设备的类型<br/>与实验无关，所以可以不用特别关心</td>
+            <td>合法取值包括<code>0xF0</code>、<code>0xF8</code>、<code>0xF9</code>、<code>0xFA</code>、<code>0xFB</code>、<code>0xFC</code>、<code>0xFD</code>、<code>0xFE</code>和<code>0xFF</code><br/>本地磁盘（不可移动）的规定值为<code>0xF8</code><br/>可移动磁盘的往往使用<code>0xF0</code></td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_FATSz16</strong></td>
-            <td style="text-align:center">22</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center"><strong>单个FAT表占用的扇区数</strong><br/>只用于FAT12/16格式的文件系统</td>
-            <td style="text-align:center"><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 正整数值</td>
+            <td><strong>BPB_FATSz16</strong></td>
+            <td>22</td>
+            <td>2</td>
+            <td><strong>单个FAT表占用的扇区数</strong><br/>只用于FAT12/16格式的文件系统</td>
+            <td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 正整数值</td>
         </tr>
         <tr>
-            <td style="text-align:center">BPB_SecPerTrk</td>
-            <td style="text-align:center">24</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">每个扇区的磁道数<br/>与<code>0x13</code>中断相关<br/>只与具有物理结构（如磁道、磁盘等）并且对<code>0x13</code>中断可见的存储介质有关<br/>与实验无关，可以不用关心</td>
-            <td style="text-align:center">-</td>
+            <td>BPB_SecPerTrk</td>
+            <td>24</td>
+            <td>2</td>
+            <td>每个扇区的磁道数<br/>与<code>0x13</code>中断相关<br/>只与具有物理结构（如磁道、磁盘等）并且对<code>0x13</code>中断可见的存储介质有关<br/>与实验无关，可以不用关心</td>
+            <td>-</td>
         </tr>
         <tr>
-            <td style="text-align:center">BPB_NumHeads</td>
-            <td style="text-align:center">26</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">磁头数量<br/>同样与<code>0x13</code>中断相关，实验不会使用，所以可以不用关心</td>
-            <td style="text-align:center">-</td>
+            <td>BPB_NumHeads</td>
+            <td>26</td>
+            <td>2</td>
+            <td>磁头数量<br/>同样与<code>0x13</code>中断相关，实验不会使用，所以可以不用关心</td>
+            <td>-</td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_HiddSec</strong></td>
-            <td style="text-align:center">28</td>
-            <td style="text-align:center">4</td>
-            <td style="text-align:center"><strong>分区前隐藏的扇区数</strong><br/>在文档中描述这个域为同样只与对<code>0x13</code>中断可见的存储介质有关，但在实验过程中发现对于一个多分区的磁盘，这个域对应了<strong>分区首扇区在整个磁盘中的扇区号</strong>，例如首扇区位于磁盘2048扇区（从0开始计算分区号）的分区，其BPB_HiddSec域值就为2048</td>
-            <td style="text-align:center">-</td>
+            <td><strong>BPB_HiddSec</strong></td>
+            <td>28</td>
+            <td>4</td>
+            <td><strong>分区前隐藏的扇区数</strong><br/>在文档中描述这个域为同样只与对<code>0x13</code>中断可见的存储介质有关，但在实验过程中发现对于一个多分区的磁盘，这个域对应了<strong>分区首扇区在整个磁盘中的扇区号</strong>，例如首扇区位于磁盘2048扇区（从0开始计算分区号）的分区，其BPB_HiddSec域值就为2048</td>
+            <td>-</td>
         </tr>
         <tr>
-            <td style="text-align:center"><strong>BPB_TotSec32</strong></td>
-            <td style="text-align:center">32</td>
-            <td style="text-align:center">4</td>
-            <td style="text-align:center"><strong>32位长度卷的总扇区数</strong><br/>用来描述FAT32卷中的总扇区数或是扇区数多于0x10000的FAT12/16卷中的总扇区数</td>
-            <td style="text-align:center"><strong>FAT32：</strong> 必须为非零整数值<br/><strong>FAT12/16：</strong> 如果扇区数大于0x10000，则为扇区数，否则必须为0</td>
+            <td><strong>BPB_TotSec32</strong></td>
+            <td>32</td>
+            <td>4</td>
+            <td><strong>32位长度卷的总扇区数</strong><br/>用来描述FAT32卷中的总扇区数或是扇区数多于0x10000的FAT12/16卷中的总扇区数</td>
+            <td><strong>FAT32：</strong> 必须为非零整数值<br/><strong>FAT12/16：</strong> 如果扇区数大于0x10000，则为扇区数，否则必须为0</td>
         </tr>
     </tbody>
 </table>
 
 从第 37 字节开始，FAT12 和 FAT16 卷上的 BPB 结构如下：
 
-<table>
+<table class="wikitable">
     <thead>
         <tr>
-            <th style="text-align:center">域名称</th>
-            <th style="text-align:center">偏移</th>
-            <th style="text-align:center">大小</th>
-            <th style="text-align:center">描述</th>
-            <th style="text-align:center">限制</th>
+            <th>域名称</th>
+            <th>偏移</th>
+            <th>大小</th>
+            <th>描述</th>
+            <th>限制</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align:center">BS_DrvNum</td>
-            <td style="text-align:center">36</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">用于<code>0x13</code>中断的驱动器号，可以不用关心</td>
-            <td style="text-align:center">应当设置为<code>0x80</code>或是<code>0x00</code></td>
+            <td>BS_DrvNum</td>
+            <td>36</td>
+            <td>1</td>
+            <td>用于<code>0x13</code>中断的驱动器号，可以不用关心</td>
+            <td>应当设置为<code>0x80</code>或是<code>0x00</code></td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_Reserved1</td>
-            <td style="text-align:center">37</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">保留位</td>
-            <td style="text-align:center">必须为0</td>
+            <td>BS_Reserved1</td>
+            <td>37</td>
+            <td>1</td>
+            <td>保留位</td>
+            <td>必须为0</td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_BootSig</td>
-            <td style="text-align:center">38</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">用来检验启动扇区的完整性的签名，可以不用关心</td>
-            <td style="text-align:center">如果BS_VolID、BS_VolLab和BS_FilSysType三个域都存在有效的值 <em>(present)</em>，则置为<code>0x29</code></td>
+            <td>BS_BootSig</td>
+            <td>38</td>
+            <td>1</td>
+            <td>用来检验启动扇区的完整性的签名，可以不用关心</td>
+            <td>如果BS_VolID、BS_VolLab和BS_FilSysType三个域都存在有效的值 <em>(present)</em>，则置为<code>0x29</code></td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_VolID</td>
-            <td style="text-align:center">39</td>
-            <td style="text-align:center">4</td>
-            <td style="text-align:center">卷的序列号，可以不用关心</td>
-            <td style="text-align:center">-</td>
+            <td>BS_VolID</td>
+            <td>39</td>
+            <td>4</td>
+            <td>卷的序列号，可以不用关心</td>
+            <td>-</td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_VolLab</td>
-            <td style="text-align:center">43</td>
-            <td style="text-align:center">11</td>
-            <td style="text-align:center">卷标，可以不用关心<br/>在文档中，要求与根目录下的卷标描述文件保持内容一致，但实际上在测试中往往卷标描述文件中存储的是真实的卷标而这个域的内容仍为缺省值&quot;No NAME&quot;</td>
-            <td style="text-align:center">缺省值为&quot;NO NAME&quot;</td>
+            <td>BS_VolLab</td>
+            <td>43</td>
+            <td>11</td>
+            <td>卷标，可以不用关心<br/>在文档中，要求与根目录下的卷标描述文件保持内容一致，但实际上在测试中往往卷标描述文件中存储的是真实的卷标而这个域的内容仍为缺省值&quot;No NAME&quot;</td>
+            <td>缺省值为&quot;NO NAME&quot;</td>
         </tr>
         <tr>
-            <td style="text-align:center">BS_FilSysType</td>
-            <td style="text-align:center">54</td>
-            <td style="text-align:center">8</td>
-            <td style="text-align:center">用来描述文件系统类型，但<strong>不能用来作为判断文件系统类型的依据</strong></td>
-            <td style="text-align:center">“FAT12”、“FAT16&quot;或是&quot;FAT32”</td>
+            <td>BS_FilSysType</td>
+            <td>54</td>
+            <td>8</td>
+            <td>用来描述文件系统类型，但<strong>不能用来作为判断文件系统类型的依据</strong></td>
+            <td>“FAT12”、“FAT16&quot;或是&quot;FAT32”</td>
         </tr>
         <tr>
-            <td style="text-align:center">-</td>
-            <td style="text-align:center">62</td>
-            <td style="text-align:center">448</td>
-            <td style="text-align:center">空余，置零</td>
-            <td style="text-align:center">必须为0</td>
+            <td>-</td>
+            <td>62</td>
+            <td>448</td>
+            <td>空余，置零</td>
+            <td>必须为0</td>
         </tr>
         <tr>
-            <td style="text-align:center">Signature_word</td>
-            <td style="text-align:center">510</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">校验位</td>
-            <td style="text-align:center">设置为<code>0xAA55</code></td>
+            <td>Signature_word</td>
+            <td>510</td>
+            <td>2</td>
+            <td>校验位</td>
+            <td>设置为<code>0xAA55</code></td>
         </tr>
         <tr>
-            <td style="text-align:center">-</td>
-            <td style="text-align:center">512</td>
-            <td style="text-align:center">*</td>
-            <td style="text-align:center">如果<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>P</mi><mi>B</mi><mi mathvariant="normal">_</mi><mi>B</mi><mi>y</mi><mi>t</mi><mi>s</mi><mi>P</mi><mi>e</mi><mi>r</mi><mi>S</mi><mi>e</mi><mi>c</mi><mo>&gt;</mo><mn>512</mn></mrow><annotation encoding="application/x-tex">BPB\_BytsPerSec \gt 512</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9933em;vertical-align:-0.31em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">BPB</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mord mathnormal">t</span><span class="mord mathnormal">s</span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord mathnormal" style="margin-right:0.02778em;">er</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ec</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">512</span></span></span></span>则存在此域，全部置零</td>
-            <td style="text-align:center">必须为0</td>
+            <td>-</td>
+            <td>512</td>
+            <td>*</td>
+            <td>如果<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>P</mi><mi>B</mi><mi mathvariant="normal">_</mi><mi>B</mi><mi>y</mi><mi>t</mi><mi>s</mi><mi>P</mi><mi>e</mi><mi>r</mi><mi>S</mi><mi>e</mi><mi>c</mi><mo>&gt;</mo><mn>512</mn></mrow><annotation encoding="application/x-tex">BPB\_BytsPerSec \gt 512</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9933em;vertical-align:-0.31em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">BPB</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mord mathnormal">t</span><span class="mord mathnormal">s</span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord mathnormal" style="margin-right:0.02778em;">er</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">ec</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">512</span></span></span></span>则存在此域，全部置零</td>
+            <td>必须为0</td>
         </tr>
     </tbody>
 </table>
@@ -334,51 +344,44 @@ if(CountofClusters < 4085) {
 
 FAT 条目中可能的存储值及其含义如下，其中 MAX 指代磁盘中合法的最大的簇号：
 
-<table>
+<table class="wikitable">
     <thead>
         <tr>
-        <th style="text-align:center">FAT12</th>
-        <th style="text-align:center">FAT16</th>
-        <th style="text-align:center">FAT32</th>
-        <th style="text-align:center">含义</th>
+        <th>FAT16</th>
+        <th>FAT32</th>
+        <th>含义</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align:center">0x000</td>
-            <td style="text-align:center">0x0000</td>
-            <td style="text-align:center">0x0000000</td>
-            <td style="text-align:center">当前条目所对应的簇空闲</td>
+            <td>0x0000</td>
+            <td>0x0000000</td>
+            <td>当前条目所对应的簇空闲</td>
         </tr>
         <tr>
-            <td style="text-align:center">0x000 ~ MAX</td>
-            <td style="text-align:center">0x0002 ~ MAX</td>
-            <td style="text-align:center">0x0000002 ~ MAX</td>
-            <td style="text-align:center">当前条目所对应的簇存在内容，并且条目的值就是下一个簇的簇号</td>
+            <td>0x0002 ~ MAX</td>
+            <td>0x0000002 ~ MAX</td>
+            <td>当前条目所对应的簇存在内容，并且条目的值就是下一个簇的簇号</td>
         </tr>
         <tr>
-            <td style="text-align:center">(MAX + 1) ~ 0xFF6</td>
-            <td style="text-align:center">(MAX + 1) ~ 0xFFF6</td>
-            <td style="text-align:center">(MAX + 1) ~ 0xFFFFFF6</td>
-            <td style="text-align:center">保留的值，不能够使用</td>
+            <td>(MAX + 1) ~ 0xFFF6</td>
+            <td>(MAX + 1) ~ 0xFFFFFF6</td>
+            <td>保留的值，不能够使用</td>
         </tr>
         <tr>
-            <td style="text-align:center">0xFF7</td>
-            <td style="text-align:center">0xFFF7</td>
-            <td style="text-align:center">0xFFFFFF7</td>
-            <td style="text-align:center">当前条目所对应的簇是损坏的簇</td>
+            <td>0xFFF7</td>
+            <td>0xFFFFFF7</td>
+            <td>当前条目所对应的簇是损坏的簇</td>
         </tr>
         <tr>
-            <td style="text-align:center">0xFF8 ~ 0xFFE</td>
-            <td style="text-align:center">0xFFF8 ~ 0xFFFE</td>
-            <td style="text-align:center">0xFFFFFF8 ~ 0xFFFFFFE</td>
-            <td style="text-align:center">保留的值，有时也作为指示当前条目所对应的簇是文件的最后一个簇</td>
+            <td>0xFFF8 ~ 0xFFFE</td>
+            <td>0xFFFFFF8 ~ 0xFFFFFFE</td>
+            <td>保留的值，有时也作为指示当前条目所对应的簇是文件的最后一个簇</td>
         </tr>
         <tr>
-            <td style="text-align:center">0xFFF</td>
-            <td style="text-align:center">0xFFFF</td>
-            <td style="text-align:center">0xFFFFFFF</td>
-            <td style="text-align:center">当前条目所对应的簇是文件的最后一个簇</td>
+            <td>0xFFFF</td>
+            <td>0xFFFFFFF</td>
+            <td>当前条目所对应的簇是文件的最后一个簇</td>
         </tr>
     </tbody>
 </table>
@@ -406,87 +409,87 @@ FAT 表中第一个保留的条目（`FAT [0]`）包含了 `BPB_Media` 域中的
 
 实际上，目录同样是一个由目录条目构成的数组，其中每一个目录条目都是一个 32 字节长度的数据结构，而正是这个数据结构中存储的数据描述了一个目录中存储的文件或是一个子目录的详细信息，例如它的创建日期和时间、名称或是最重要的首簇簇号等等。它的完整结构如下：
 
-<table>
+<table class="wikitable">
     <thead>
         <tr>
-            <th style="text-align:center">域名称</th>
-            <th style="text-align:center">偏移</th>
-            <th style="text-align:center">大小</th>
-            <th style="text-align:center">描述</th>
+            <th>域名称</th>
+            <th>偏移</th>
+            <th>大小</th>
+            <th>描述</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align:center">DIR_Name</td>
-            <td style="text-align:center">0</td>
-            <td style="text-align:center">11</td>
-            <td style="text-align:center">短名称格式的文件名</td>
+            <td>DIR_Name</td>
+            <td>0</td>
+            <td>11</td>
+            <td>短名称格式的文件名</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_Attr</td>
-            <td style="text-align:center">11</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">文件的属性标记</td>
+            <td>DIR_Attr</td>
+            <td>11</td>
+            <td>1</td>
+            <td>文件的属性标记</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_NTRes</td>
-            <td style="text-align:center">12</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">保留位，必须为0</td>
+            <td>DIR_NTRes</td>
+            <td>12</td>
+            <td>1</td>
+            <td>保留位，必须为0</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_CrtTimeTenth</td>
-            <td style="text-align:center">13</td>
-            <td style="text-align:center">1</td>
-            <td style="text-align:center">文件创建时间，单位为10ms</td>
+            <td>DIR_CrtTimeTenth</td>
+            <td>13</td>
+            <td>1</td>
+            <td>文件创建时间，单位为10ms</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_CrtTime</td>
-            <td style="text-align:center">14</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">文件创建时间</td>
+            <td>DIR_CrtTime</td>
+            <td>14</td>
+            <td>2</td>
+            <td>文件创建时间</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_CrtDate</td>
-            <td style="text-align:center">16</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">文件创建日期</td>
+            <td>DIR_CrtDate</td>
+            <td>16</td>
+            <td>2</td>
+            <td>文件创建日期</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_LstAccDate</td>
-            <td style="text-align:center">18</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">文件最近访问日期</td>
+            <td>DIR_LstAccDate</td>
+            <td>18</td>
+            <td>2</td>
+            <td>文件最近访问日期</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_FstClusHI</td>
-            <td style="text-align:center">20</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">首簇簇号高16位</td>
+            <td>DIR_FstClusHI</td>
+            <td>20</td>
+            <td>2</td>
+            <td>首簇簇号高16位</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_WrtTime</td>
-            <td style="text-align:center">22</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">文件修改时间</td>
+            <td>DIR_WrtTime</td>
+            <td>22</td>
+            <td>2</td>
+            <td>文件修改时间</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_WrtDate</td>
-            <td style="text-align:center">24</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">文件修改日期</td>
+            <td>DIR_WrtDate</td>
+            <td>24</td>
+            <td>2</td>
+            <td>文件修改日期</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_FstClusLO</td>
-            <td style="text-align:center">26</td>
-            <td style="text-align:center">2</td>
-            <td style="text-align:center">首簇簇号低16位</td>
+            <td>DIR_FstClusLO</td>
+            <td>26</td>
+            <td>2</td>
+            <td>首簇簇号低16位</td>
         </tr>
         <tr>
-            <td style="text-align:center">DIR_FileSize</td>
-            <td style="text-align:center">28</td>
-            <td style="text-align:center">4</td>
-            <td style="text-align:center">文件的大小，单位为字节</td>
+            <td>DIR_FileSize</td>
+            <td>28</td>
+            <td>4</td>
+            <td>文件的大小，单位为字节</td>
         </tr>
     </tbody>
 </table>
@@ -524,44 +527,44 @@ FAT 表中第一个保留的条目（`FAT [0]`）包含了 `BPB_Media` 域中的
 
 文件的属性使用按位枚举的方式表示，其中的六个二进制位分别如下：
 
-<table>
+<table class="wikitable">
     <thead>
         <tr>
-            <th style="text-align:center">属性</th>
-            <th style="text-align:center">位</th>
-            <th style="text-align:center">描述</th>
+            <th>属性</th>
+            <th>位</th>
+            <th>描述</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align:center">ATTR_READ_ONLY</td>
-            <td style="text-align:center">1 &lt;&lt; 0</td>
-            <td style="text-align:center">文件只读</td>
+            <td>ATTR_READ_ONLY</td>
+            <td>1 &lt;&lt; 0</td>
+            <td>文件只读</td>
         </tr>
         <tr>
-            <td style="text-align:center">ATTR_HIDDEN</td>
-            <td style="text-align:center">1 &lt;&lt; 1</td>
-            <td style="text-align:center">文件隐藏<br/>除非用户或程序显式声明要求访问隐藏的文件，否则不应当在文件列表中被列出</td>
+            <td>ATTR_HIDDEN</td>
+            <td>1 &lt;&lt; 1</td>
+            <td>文件隐藏<br/>除非用户或程序显式声明要求访问隐藏的文件，否则不应当在文件列表中被列出</td>
         </tr>
         <tr>
-            <td style="text-align:center">ATTR_SYSTEM</td>
-            <td style="text-align:center">1 &lt;&lt; 2</td>
-            <td style="text-align:center">文件为系统文件<br/>除非用户或程序显式声明要求访问系统文件，否则不应当在文件列表中被列出</td>
+            <td>ATTR_SYSTEM</td>
+            <td>1 &lt;&lt; 2</td>
+            <td>文件为系统文件<br/>除非用户或程序显式声明要求访问系统文件，否则不应当在文件列表中被列出</td>
         </tr>
         <tr>
-            <td style="text-align:center">ATTR_VOLUME_ID</td>
-            <td style="text-align:center">1 &lt;&lt; 3</td>
-            <td style="text-align:center">文件用来描述卷标</td>
+            <td>ATTR_VOLUME_ID</td>
+            <td>1 &lt;&lt; 3</td>
+            <td>文件用来描述卷标</td>
         </tr>
         <tr>
-            <td style="text-align:center">ATTR_DIRECTORY</td>
-            <td style="text-align:center">1 &lt;&lt; 4</td>
-            <td style="text-align:center">文件实际上是一个目录</td>
+            <td>ATTR_DIRECTORY</td>
+            <td>1 &lt;&lt; 4</td>
+            <td>文件实际上是一个目录</td>
         </tr>
         <tr>
-            <td style="text-align:center">ATTR_ARCHIVE</td>
-            <td style="text-align:center">1 &lt;&lt; 5</td>
-            <td style="text-align:center">当文件被创建、重命名或修改时置位，指示文件是否被修改过</td>
+            <td>ATTR_ARCHIVE</td>
+            <td>1 &lt;&lt; 5</td>
+            <td>当文件被创建、重命名或修改时置位，指示文件是否被修改过</td>
         </tr>
     </tbody>
 </table>
