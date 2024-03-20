@@ -194,7 +194,9 @@ storage = { package = "ysos_storage", path = "../storage" }
 
     在完成命令发送，并按照注释补全 `identify_drive` 函数后，你可以自行修改相关函数，测试 `AtaDrive` 的 `open` 函数。
 
-    在操作系统初始化结束后，使用 `AtaDrive::open(0, 0)` 获取磁盘信息并打印出来。为了确保通过编译，可以先不用关心 `filesystem.rs` 中的内容。
+    在操作系统初始化结束后，使用 `AtaDrive::open(0, 0)` 获取磁盘信息，为了确保通过编译，可以先忽略 `filesystem.rs`。
+
+    如果顺利，你应该会看到 `Drive QEMU HARDDISK QM00001 (504 MiB) opened` 的日志字样。
 
 ### 读写数据
 
