@@ -380,8 +380,8 @@ lazy_static! {
     static ref GDT: /* your type */ = {
         let mut gdt = GlobalDescriptorTable::new();
         // ...
-        let user_code_selector = gdt.add_entry(Descriptor::user_code_segment());
-        let user_data_selector = gdt.add_entry(Descriptor::user_data_segment());
+        let user_code_selector = gdt.append(Descriptor::user_code_segment());
+        let user_data_selector = gdt.append(Descriptor::user_data_segment());
         // ...
     };
 }
@@ -394,8 +394,8 @@ pub fn init_stack_frame(&mut self, entry: VirtAddr, stack_top: VirtAddr) {
     // ...
     let selector = get_user_selector(); // FIXME: implement this function
 
-    self.value.stack_frame.code_segment = selector.user_code_selector.0 as u64;
-    self.value.stack_frame.stack_segment = selector.user_data_selector.0 as u64;
+    self.value.stack_frame.code_segment = selector.user_code_selector;
+    self.value.stack_frame.stack_segment = selector.user_data_selector;
     // ...
 }
 ```
@@ -724,7 +724,8 @@ pub fn syscall3(n: Syscall, arg0: usize, arg1: usize, arg2: usize) -> usize {
 pub fn exit(ret: isize, context: &mut ProcessContext) {
     x86_64::instructions::interrupts::without_interrupts(|| {
         let manager = get_process_manager();
-        manager.kill_self(ret); // FIXME: implement this for ProcessManager
+        // FIXME: implement this for ProcessManager
+        manager.kill_self(ret);
         manager.switch_next(context);
     })
 }
@@ -779,7 +780,8 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 pub fn wait(init: proc::ProcessId) {
     loop {
         if proc::still_alive(init) {
-            x86_64::instructions::hlt(); // Why? Check reflection question 5
+            // Why? Check reflection question 5
+            x86_64::instructions::hlt();
         } else {
             break;
         }
@@ -815,7 +817,9 @@ Syscall::WaitPid => { /* ... */},
 
 !!! note "关于 `waitpid` 的问题"
 
-    在这里的简单实现下，`waitpid` 不进行阻塞，应当立刻返回进程的当前状态。从而本次实验中，在用户态使用忙等待的方式判断进程是否退出。
+    在这里的简单实现下，`waitpid` 不进行阻塞，应当立刻返回进程的当前状态。从而本次实验中，在用户态使用**忙等待**的方式判断进程是否退出。
+
+    > 你的实现遇到了 GPF？尝试解决思考题 5？
 
     但是`waitpid` 需要返回特殊状态，以区分进程正在运行还是已经退出。这非常糟糕，当前进程的返回值也是一个 `isize` 类型的值，这意味着如果按照现在的设计，势必存在一些返回值和“正在运行”的状态冲突。不过在本次实验中，这并不会造成太大的问题。
 
@@ -924,7 +928,7 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 
     从本次实验及先前实验的所学内容出发，结合进程的创建、链接、执行、退出的生命周期，参考系统调用的调用过程（可以仅以 Linux 为例），解释程序的运行。
 
-5. `x86_64::instructions::hlt` 做了什么？为什么这样使用？
+5. `x86_64::instructions::hlt` 做了什么？为什么这样使用？为什么不可以在用户态中的 `wait_pid` 实现中使用？
 
 6. 有同学在某个回南天迷蒙的深夜遇到了奇怪的问题：
 
