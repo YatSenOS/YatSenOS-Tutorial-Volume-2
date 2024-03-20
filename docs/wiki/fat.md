@@ -588,6 +588,8 @@ FAT 表中第一个保留的条目（`FAT [0]`）包含了 `BPB_Media` 域中的
 
 在了解了目录的结构之后，就可以着手对目录进行抽象了。由于目录本身还是相当于关于目录条目的数组，所以根本在于对目录条目进行抽象。
 
+<!-- 这里补充一些 implementation-specific 教程 -->
+
 ## 参考
 
 [Bilibili 上南京大学操作系统课程中关于 FAT 和 UNIX 文件系统知识的讲解](https://www.bilibili.com/video/BV1oZ4y1t7ce)
