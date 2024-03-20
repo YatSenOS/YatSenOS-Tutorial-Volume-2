@@ -1,5 +1,11 @@
 # FAT 文件系统
 
+<style>
+[data-md-color-scheme="default"] .transparent-img {
+    filter: invert(1) hue-rotate(180deg)
+}
+</style>
+
 ## 导读：文件、目录和文件系统
 
 文件系统是对文件的一种组织形式，所以文件固然也就是文件系统中至关重要的部分，了解文件系统首先就要了解文件的构成。
@@ -12,7 +18,7 @@
 
 可见，文件由两个关键的部分组成，一个是文件的数据，也就是一系列二进制数据块，另一个则是文件的信息，它用来区分不同的文件并在硬盘上定位到文件数据的位置。
 
-![file-structure](assets/fat/file-structure.jpg)
+<img src="../assets/fat/file-structure.png" class="transparent-img" alt="file-structure" />
 
 在文件系统组织文件的时候，其实际上就是在建立索引文件的数据结构，由于文件是由两部分构成的，文件系统中也就存在着两种主要的数据结构，分别用来索引文件的这两个组成部分。
 
@@ -41,7 +47,7 @@ root/
 `boo.baz` 首文件块为 `#10`，后续文件块依次为 `#12`、`#5`。因此 `#10`, `#12`, `#5` 共同构成 `boo.baz` 文件的数据
 `bar` 首文件块指向 `#18`，后续文件块为 `#11`，因此 `#18`, `#11` 共同构成了目录树中的 `/home/bar/` 节点的子树信息
 
-![directory-structure](assets/fat/directory-structure.jpg)
+<img src="../assets/fat/directory-structure.png" class="transparent-img" alt="directory-structure" />
 
 由上图可以看出，目录树的遍历方式是要与数据结构中树的遍历方式有很大不同的。每一个节点实际上都对应着一个存储着其子节点的文件的信息的数组，通过这个数组，可以获得子节点对应文件的首块信息，再依据链表就能够获得全部的文件数据。只有当取得了全部的文件数据，才可以进入下一层的节点。
 
@@ -66,7 +72,7 @@ root/
 
 为此，工程师们将所有文件块中关于下一个块的信息独立出来，存放在磁盘中的一个连续的空间内，这个空间也被称作文件分配表 (File Allocation Table)，也就是 FAT 实际的意义。这样，只需要提前把这一部分空间读取到内存中，就可以很快地定位到文件任意个块的信息了。
 
-![fat-sector](assets/fat/fat-sector.jpg)
+<img src="../assets/fat/fat-sector.png" class="transparent-img" alt="fat-sector" />
 
 同时，这样做还有一个好处，一个 512 字节或是其整数倍的块需要分配几个字节给下一个块的块号，导致每个文件块实际数据大小不是 2 的幂，现在由于将这部分信息独立出来，所以每一个文件块都是完整的 512 字节或是 512 字节的倍数。
 
@@ -96,7 +102,7 @@ root/
 
 一个 FAT 格式的卷结构大概长得就像下面这样
 
-![fat-structure](assets/fat/fat-structure.jpg)
+<img src="../assets/fat/fat-structure.png" class="transparent-img" alt="fat-structure" />
 
 !!! note "小端模式"
 
