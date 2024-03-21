@@ -26,7 +26,7 @@ fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status 
     let bs = system_table.boot_services();
 
     // 1. Load config
-    let config = { /* FIXME: Load config file */ };
+    let config = { /* FIXME: Load config file as Config */ };
 
     info!("Config: {:#x?}", config);
 

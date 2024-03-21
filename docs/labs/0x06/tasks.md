@@ -214,11 +214,114 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 !!! warning "阅读提示"
 
-    请认真阅读 [FAT 文件系统](../../wiki/fat.md) 的内容，它将帮助你更好地理解 FAT 文件系统的结构和实现。
+    请认真阅读 [FAT 文件系统](../../wiki/fat.md) 的内容，它将解释 FAT 文件系统的结构和实现。
+
+    本教程后续内容将重点关注代码层面的实现内容，不再解释相关的专有名词。
+
+在 `pkg/storage/src/fs/fat16/mod.rs` 中，定义了 `Fat16Impl` 结构体，它是 FAT16 文件系统的主要抽象。
+
+而实现 `FileSystem` trait 的 `Fat16` 结构体则持有一个 `handle: Arc<Fat16Impl>`，这样设计的原因是为了将文件系统的信息可以共享给 `File` 结构体，从而给予 `File` 查询 FAT 表、读写块设备的能力。
+
+!!! info "关于实验要求"
+
+    需要注意的是，虽然保留了足够的灵活性和兼容性，**本实验并不要求实现 FAT16 全部的功能，而是实现能够满足目的的最小化子集**。对于实验目标来说，只需要为文件系统实现只读访问、加载并列出目录的能力即可。其余内容作为不重要的功能，不作实验要求。
+
+!!! warning "本实验**不要求**对 FAT 32 文件系统进行兼容！"
 
 ### BPB
 
-在 `pkg/storage/src/fs/fat16/mod.rs` 中，定义了 `Fat16Impl` 结构体，它是 FAT16 文件系统的抽象。
+首先，你需要在 `fs/fat16/bpb.rs` 中实现 `Fat16Bpb` 中内容的定义，BPB 作为存储整个 FAT 文件系统的关键信息的数据结构，可以让我们了解当前磁盘上文件系统的基本信息。
+
+与 MBR 的内容类似，你需要使用 `define_field` 宏来定义 `Fat16Bpb` 的字段，字段的定义请参照 [FAT 文件系统](../../wiki/fat.md) 中的描述，同时根据 `Debug` trait 的内容，确保补全对应的函数。
+
+??? quote "一些趣事"
+
+    在笔者几年前的第一次实现中，由于 MBR 与 BPB 的尾部 magic number 都是 `0xAA55`，导致了持续了一定时间的混淆。
+
+    本实验的教程带领大家梳理完成 MBR 和 BPB 的作用和所属后，同学们大概率不会再因为文件系统层次结构的混淆造成困惑了。
+
+同时，实验为大家准备了两份测试用例，你可以在 `fs/fat16/bpb.rs` 中找到 `tests` 模块，参考 MBR 部分的测试方法，通过 `cargo test` 来运行它们。
+
+### DirEntry
+
+在 `fs/fat16/direntry.rs` 中，你需要实现和补全 `DirEntry` 的内容，它是 FAT16 文件系统中的目录项，用于存储文件的元信息。
+
+`parse` 函数接受了一个 `&[u8]` 类型的数据块，你需要根据 FAT 文件系统的规范，将这些数据解析为 `DirEntry` 结构体。
+
+与先前的 MBR 和 BPB 不同，这里的 `DirEntry` 并不持有 `data` 数据作为自身的字段，而是通过 `parse` 函数直接解析 `&[u8]`，并返回一个 `DirEntry` 的实例。
+
+而对于 `ShortFileName` 类型，你则需要实现从日常使用的文件名到磁盘数据的转化函数，具体来说，你需要实现 `parse` 函数，将一个 `&str` 类型的文件名 `foo.bar` （忽略大小写）转化为 `ShortFileName` 类型，并存储 `FOO     BAR`。
+
+!!! note "**作为最小实现子集，在本实验中，你不需要考虑长文件名功能的支持。**"
+
+`DirEntry` 也为大家准备了一份测试用例，通过 `cargo test` 来运行并尝试通过它。
+
+### Fat16Impl
+
+在实现了上述文件系统的数据格式之后，你需要在 `fs/fat16/impls.rs` 中实现你需要的一系列函数，包括但不限于：
+
+- 将 `cluster: &Cluster` 转换为 `sector`
+- 根据当前 `cluster: &Cluster`，利用 FAT 表，获取下一个 `cluster`
+- 根据当前文件夹 `dir: &Directory` 信息，获取名字为 `name: &str` 的 `DirEntry`
+- 遍历文件夹 `dir: &Directory`，获取其中文件信息
+- 其他你可能需要的帮助函数
+
+在实现了一系列函数后，为 `impl FileSystem for Fat16` 补全实现：
+
+- `Iterator<Item = Metadata>` 可以简单利用 `Vec::into_iter` 作为返回值，不需要考虑懒求值。
+- `FileHandle` 的 `file` 部分直接使用 `fs/fat16/file.rs` 中定义的 `File` 结构体，并使用 `Box` 包装。
+
+最后，为 `File` 实现 `Read` trait，需要注意：
+
+- `cluster` 链需要使用上述函数读取 FAT 表进行获取。
+- `offset` 用于记录当前文件读取到了什么位置，需要实时更新。
+- 一个 `cluster` 中存在多个 `sector`，你需要根据 `bpb` 信息进行读取操作。
+- `buf` 参数是不定长的，你需要考虑文件长度、块长度以及缓冲区长度，来决定什么时候终止读取。
+
+除此之外，本部分的实现不作任何要求，阅读并理解给出的 [FAT 文件系统](../../wiki/fat.md) 内容，尝试实现文件系统的功能。
+
+同时，由于文件系统的实现相对较为严格，笔者鼓励大家多多查找相关已有实现，参考完善自己的文件系统，下面给出几个可供参考的仓库：
+
+- [embedded-sdmmc-rs](https://github.com/rust-embedded-community/embedded-sdmmc-rs)
+- [rust-fatfs](https://github.com/rafalh/rust-fatfs)
+
+## 接入操作系统
+
+在实现了上述内容后，相信你已经迫不及待想要去进行调试你的文件系统是否能够正确运行了。
+
+参考给出的 `kernel/src/drivers/filesystem.rs`，结合你的 `AtaDrive`，将 `Partition` 作为参数，初始化一个 `Fat16` 结构体，并使用 `Mount` 将其存放在 `ROOTFS` 变量中。
+
+### 列出目录
+
+之后，补全 `ls` 函数，根据 `read_dir` 返回的迭代器，列出并打印文件夹内的文件信息。
+
+为了实现的便利，可以定义添加如下的系统调用，专用于**在内核态直接打印文件夹信息**，而不是将这些数据传递给用户态处理：
+
+```rust
+// path: &str (arg0 as *const u8, arg1 as len)
+Syscall::ListDir => list_dir(&args),
+```
+
+同时，补全你的用户态库，接入此系统调用。
+
+### 读取文件
+
+为了读取一个文件，约定一个用户态程序需要遵循 `open` - `read` - `close` 过程。
+
+在 `utils/resources.rs` 中扩展 `Resource` 枚举：
+
+```rust
+pub enum Resource {
+    File(FileHandle),
+    // ...
+}
+```
+
+在实现中，直接使用 `file.read(buf)` 进行读取操作。对于写入操作，由于不做要求，可以直接忽略。
+
+!!! note "测试？"
+
+    为你的 Shell 添加 `ls` 和 `cat` 指令吧！
 
 ## 思考题
 
@@ -229,3 +332,12 @@ storage = { package = "ysos_storage", path = "../storage" }
 3. `AtaDrive` 为了实现 `MbrTable`，如何保证了自身可以实现 `Clone`？对于分离 `AtaBus` 和 `AtaDrive` 的实现，你认为这样的设计有什么好处？
 
 ## 加分项
+
+1. 😋 你的操作系统拥有了直接读取文件系统的能力，不妨将加载用户态应用的工作从 bootloader 手中接过：
+
+    - 重新修改 `spawn` 函数的实现，接受一个文件路径。
+    - 使用 `read_all` 加载对应的文件。
+    - 将文件内容传入 `elf_spawn`。
+    - 在操作系统初始化后，使用文件路径生成 Shell 程序。
+    - 修改对应的系统调用，将 `Spawn` 调用的参数从应用名称改为路径。
+    - 赋予你的 Shell 从磁盘启动用户程序的能力！

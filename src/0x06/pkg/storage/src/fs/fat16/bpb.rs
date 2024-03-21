@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn test_fat16_bpb_2() {
-        // Taken from a Raspberry Pi bootable SD-Card
+        // Taken from QEMU VVFAT
         const DATA: [u8; 64] = hex_literal::hex!(
             "EB 3E 90 4D 53 57 49 4E 34 2E 31 00 02 10 01 00
         02 00 02 00 00 F8 FC 00 3F 00 10 00 3F 00 00 00
