@@ -323,6 +323,57 @@ pub enum Resource {
 
     为你的 Shell 添加 `ls` 和 `cat` 指令吧！
 
+## 探索 Linux 文件系统
+
+在 Linux 下拥有 “一切皆文件” 的思想，文件系统的设计和实现是 Linux 内核中的一个重要部分。在实现了基本的用于文件访问的文件系统后，通过下列的小实验来接触、理解 Linux 文件系统的设计：
+
+!!! tip "为了进行以下的内容，你需要准备一个基于 Linux 的操作系统。"
+
+1. procfs
+
+    在 `/proc` 中，你可以找到一系列的文件和文件夹，探索他们并回答如下问题：
+
+    - 解释 `/proc` 下的数字目录代表什么，其内部存在什么内容？
+    - `/proc/cpuinfo` 和 `/proc/meminfo` 存储了哪些信息？
+    - `/proc/loadavg` 和 `/proc/uptime` 存储了哪些信息？
+    - 尝试读取 `/proc/interrupts` 文件，你能够从中获取到什么信息？
+    - 尝试读取 `/proc/self/status` 文件，你能够从中获取到什么信息？
+    - 尝试读取 `/proc/self/smaps` 文件，你能够从中获取到什么信息？
+    - 结合搜索，回答 `echo 1 > /proc/sys/net/ipv4/ip_forward` 有什么用？尝试据此命令，从系统调用角度，解释 “一切皆文件” 的优势。
+
+2. devfs
+
+    Linux 将设备也作为“文件”，默认挂载于 `/dev` 目录下，探索他们并回答如下问题：
+
+    - `/dev/null`、`/dev/zero`、`/dev/random` 和 `/dev/urandom` 分别有什么作用？
+    - 尝试运行 `head /dev/kmsg` 并观察输出，结合搜索引擎，解释这一文件的作用。
+    - `/dev/sdX` 和 `/dev/sdX1` 是什么？有什么区别？（X 为一个字母，1 为数字）
+    - `/dev/ttyX`、`/dev/loopX`、`/dev/srX` 分别代表什么设备？
+    - 列出 `/dev/disk` 下的目录，尝试列出其中的“软连接”，这样的设计有什么好处？
+    - 尝试运行 `lsblk` 命令，根据你的输出，解释其中的内容。
+
+3. tmpfs
+
+    在 Linux 中 `/dev/shm`、`/run` 或者 `/var/run` 目录下，存储了一个特殊的文件系统，它是一个内存文件系统，探索它并回答如下问题：
+
+    - 列出这些目录，尝试找到 `.pid` 文件，应用程序如何利用它们确保**某个程序只运行一个实例**？
+    - 列出这些目录，尝试找到 `.lock` 文件，应用程序如何利用它们确保**某个资源只被一个程序访问**？
+    - 列出这些目录，尝试找到 `.sock` 或 `.socket` 文件，应用程序如何利用它们实现**进程间通信**？
+    - `tmpfs` 的存在对于操作系统有什么作用？尝试从性能、安全性、系统稳定性几方面进行回答。
+
+4. 在完全手动去安装一个 Linux 操作系统时，我们常常会使用 `mount` 将待安装的磁盘格式化后，挂载于 `/mnt` 目录下，而后使用 `chroot` 切换根目录后在“新的操作系统”中进行安装工作。
+
+    然而在 `chroot` 之前，还需要进行一些额外的挂载操作：
+
+    ```bash
+    mount proc /mnt/proc -t proc -o nosuid,noexec,nodev
+    mount sys /mnt/sys -t sysfs -o nosuid,noexec,nodev,ro
+    mount udev /mnt/dev -t devtmpfs -o mode=0755,nosuid
+    ...
+    ```
+
+    为什么需要这样的挂载操作？如果不进行这些操作，在 `chroot` 之后会失去哪些能力？
+
 ## 思考题
 
 1. 为什么在 `pkg/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？
@@ -344,59 +395,9 @@ pub enum Resource {
         - `struct S<T: Foo> { f: T }`
         - `struct S { f: Box<dyn Foo> }`
 
-5. 探索 Linux 文件系统：
+5. 文件系统硬链接和软链接的区别是什么？Windows 中的 “快捷方式” 和 Linux 中的软链接有什么异同？
 
-    在 Linux 下拥有 “一切皆文件” 的思想，文件系统的设计和实现是 Linux 内核中的一个重要部分。在 Linux 中，有一类特殊的文件系统，它们不存储在磁盘上，而是由内核动态生成的。
-
-    在实现了基本的用于文件访问的文件系统后，通过下列的小实验来接触、理解 Linux 文件系统的设计：
-
-    !!! note "为了进行以下的内容，你需要准备一个基于 Linux 的操作系统。"
-
-    1. procfs
-
-        在 `/proc` 中，你可以找到一系列的文件和文件夹，探索他们并回答如下问题：
-
-        - 解释 `/proc` 下的数字目录代表什么，其内部存在什么内容？
-        - `/proc/cpuinfo` 和 `/proc/meminfo` 存储了哪些信息？
-        - `/proc/loadavg` 和 `/proc/uptime` 存储了哪些信息？
-        - 尝试读取 `/proc/interrupts` 文件，你能够从中获取到什么信息？
-        - 尝试读取 `/proc/self/status` 文件，你能够从中获取到什么信息？
-        - 尝试读取 `/proc/self/smaps` 文件，你能够从中获取到什么信息？
-        - 结合搜索，回答 `echo 1 > /proc/sys/net/ipv4/ip_forward` 有什么用？尝试据此命令，从系统调用角度，解释 “一切皆文件” 的优势。
-
-    2. devfs
-
-        Linux 将设备也作为“文件”，默认挂载于 `/dev` 目录下，探索他们并回答如下问题：
-
-        - `/dev/null`、`/dev/zero`、`/dev/random` 和 `/dev/urandom` 分别有什么作用？
-        - 尝试运行 `head /dev/kmsg` 并观察输出，结合搜索引擎，解释这一文件的作用。
-        - `/dev/sdX` 和 `/dev/sdX1` 是什么？有什么区别？（X 为一个字母，1 为数字）
-        - `/dev/ttyX`、`/dev/loopX`、`/dev/srX` 分别代表什么设备？
-        - 列出 `/dev/disk` 下的目录，尝试列出其中的“软连接”，这样的设计有什么好处？
-        - 尝试运行 `lsblk` 命令，根据你的输出，解释其中的内容。
-
-    3. tmpfs
-
-        在 Linux 中 `/dev/shm`、`/run` 或者 `/var/run` 目录下，存储了一个特殊的文件系统，它是一个内存文件系统，探索它并回答如下问题：
-
-        - 列出这些目录，尝试找到 `.pid` 文件，应用程序如何利用它们确保**某个程序只运行一个实例**？
-        - 列出这些目录，尝试找到 `.lock` 文件，应用程序如何利用它们确保**某个资源只被一个程序访问**？
-        - 列出这些目录，尝试找到 `.sock` 或 `.socket` 文件，应用程序如何利用它们实现**进程间通信**？
-        - `tmpfs` 的存在对于操作系统有什么作用？尝试从性能、安全性、系统稳定性几方面进行回答。
-
-    4. 在完全手动去安装一个 Linux 操作系统时，我们常常会使用 `mount` 将待安装的磁盘格式化后，挂载于 `/mnt` 目录下，而后使用 `chroot` 切换根目录后在“新的操作系统”中进行安装工作。
-
-        然而在 `chroot` 之前，还需要进行一些额外的挂载操作：
-
-        ```bash
-        mount proc /mnt/proc -t proc -o nosuid,noexec,nodev
-        mount sys /mnt/sys -t sysfs -o nosuid,noexec,nodev,ro
-        mount udev /mnt/dev -t devtmpfs -o mode=0755,nosuid
-        ...
-        ```
-
-        为什么需要这样的挂载操作？如果不进行这些操作，在 `chroot` 之后会失去哪些能力？
-
+6. 日志文件系统（如 NTFS）与传统的非日志文件系统（如FAT）在设计和实现上有哪些不同？在系统异常崩溃后，它的恢复机制、恢复速度有什么区别？
 
 ## 加分项
 
