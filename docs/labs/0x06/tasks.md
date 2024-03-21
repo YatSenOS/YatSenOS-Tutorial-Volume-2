@@ -317,9 +317,9 @@ pub enum Resource {
 }
 ```
 
-在实现中，直接使用 `file.read(buf)` 进行读取操作。对于写入操作，由于不做要求，可以直接忽略。
+在对 `Resource` 的实现中，可以直接使用 `file.read(buf)` 进行读取，而对于写入操作，由于不做要求，你可以直接忽略。
 
-!!! note "测试？"
+!!! success "阶段性成果"
 
     为你的 Shell 添加 `ls` 和 `cat` 指令吧！
 
