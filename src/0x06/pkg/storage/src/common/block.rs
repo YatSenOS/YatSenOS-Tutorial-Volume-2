@@ -66,14 +66,14 @@ impl<const SIZE: usize> SizedBlock for Block<SIZE> {
 impl<const SIZE: usize> core::fmt::Debug for Block<SIZE> {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         writeln!(f, "Block:")?;
-        for i in 0..16 {
+        for chunk in self.contents.chunks(32) {
             writeln!(
                 f,
                 "    {:016x} {:016x} {:016x} {:016x}",
-                u64::from_be_bytes(self.contents[i * 32..i * 32 + 8].try_into().unwrap()),
-                u64::from_be_bytes(self.contents[i * 32 + 8..i * 32 + 16].try_into().unwrap()),
-                u64::from_be_bytes(self.contents[i * 32 + 16..i * 32 + 24].try_into().unwrap()),
-                u64::from_be_bytes(self.contents[i * 32 + 24..i * 32 + 32].try_into().unwrap()),
+                u64::from_be_bytes(chunk[0..8].try_into().unwrap()),
+                u64::from_be_bytes(chunk[8..16].try_into().unwrap()),
+                u64::from_be_bytes(chunk[16..24].try_into().unwrap()),
+                u64::from_be_bytes(chunk[24..32].try_into().unwrap()),
             )?;
         }
         Ok(())
