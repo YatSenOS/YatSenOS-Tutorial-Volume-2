@@ -447,9 +447,37 @@ char read_serial() {
 
 #### 串口驱动的测试
 
-在 `pkg/kernel/src/utils/macros.rs` 中，你可以找到 `print!` 和 `println!` 宏面向串口输出的实现。
+在 `pkg/kernel/src/utils/macros.rs` 中，你可以找到 `print!` 和 `println!` 宏面向串口输出的实现：
 
-在调用 `drivers::serial::init()` 后，如果能够正常看到 `[+] Serial Initialized.` 的输出，说明串口驱动已经成功初始化。
+```rust
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => (
+        $crate::utils::print_internal(format_args!($($arg)*))
+    );
+}
+
+#[doc(hidden)]
+pub fn print_internal(args: Arguments) {
+    interrupts::without_interrupts(|| {
+        if let Some(mut serial) = get_serial() {
+            serial.write_fmt(args).unwrap();
+        }
+    });
+}
+```
+
+因此，按照预期，在调用 `drivers::serial::init()` 后，如果能够正常看到 `[+] Serial Initialized.` 的输出，说明串口驱动已经成功初始化。
+
+!!! question "为什么在输出时使用 `get_serial()` 获取串口？"
+
+    在内核中，为了确保串口不会同时被多方“一起访问”，需要用互斥锁来保护串口的访问。
+
+    `get_serial()` 函数尝试获取串口的互斥锁，如果获取成功，则返回一个 `MutexGuard`，这个 `MutexGuard` 将会在离开作用域时自动释放互斥锁。
+
+    然而，与 `get_serial_for_sure()` 更加强势，如果无法获取直接 panic，不留余地，这通常用于“必须获取到，否则是异常”的情况。
+
+    **对于前者的情况，如果在已经获取了串口的互斥锁之后，依然尝试进行 `print!` 输出，将会导致对应的输出内容被忽略，因为串口已经被占用。**
 
 ### 日志输出
 
