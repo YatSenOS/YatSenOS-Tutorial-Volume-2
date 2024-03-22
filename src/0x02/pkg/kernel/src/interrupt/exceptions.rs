@@ -12,7 +12,7 @@ pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
         .set_stack_index(gdt::PAGE_FAULT_IST_INDEX);
 
     // TODO: you should handle more exceptions here
-    // especially gerneral protection fault (GPF)
+    // especially general protection fault (GPF)
     // see: https://wiki.osdev.org/Exceptions
 }
 
