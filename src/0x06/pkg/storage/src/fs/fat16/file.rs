@@ -20,6 +20,7 @@ impl File {
     pub fn new(handle: Fat16Handle, entry: DirEntry) -> Self {
         Self {
             offset: 0,
+            current_cluster: entry.cluster,
             entry,
             handle,
         }
