@@ -164,7 +164,7 @@ pub struct ProcessContextValue {
 
 在 PID 的设计中，**本实验使用 `0` 表示当前没有进程在运行**，因此在 `Processor` 结构体初始化时，将其初始化为 `0`。
 
-为了支持*实际上不计划支持的*多处理器，实验设计把 `Processor` 结构体放在一个静态数组之中，数组的长度为 `MAX_CPU_COUNT`。
+为了给扩展实验的多处理器支持预留可行性，实验设计把 `Processor` 结构体放在一个静态数组之中，数组的长度为 `MAX_CPU_COUNT`：
 
 ```rust
 const MAX_CPU_COUNT: usize = 8;
