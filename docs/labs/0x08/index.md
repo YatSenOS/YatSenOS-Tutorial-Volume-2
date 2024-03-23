@@ -1,6 +1,6 @@
 # 实验八：扩展实验
 
-!!! tip "<br/>&nbsp;<span style="font-weight: bold; float: right">by</span>"
+!!! tip "海阔凭鱼跃，天高任鸟飞。<br/>&nbsp;<span style="font-weight: bold; float: right">——《古今贤文》</span>"
 
 ## 实验任务与要求
 
@@ -10,7 +10,7 @@
 
 在这个实验中，你需要在这个基础上，**自主实现一些更加有趣的功能**，例如图形输出、文件系统、内存分配、块设备缓存层等。
 
-请从下列任务中，选择一到两个目标进行实现：
+请从下列任务中，**选择一到两个目标进行实现**：
 
 ### VGA 显示输出
 
