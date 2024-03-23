@@ -323,6 +323,10 @@ pub enum Resource {
 
     为你的 Shell 添加 `ls` 和 `cat` 指令吧！
 
+    为了进行一些测试，你可以在系统启动前在 `esp` 目录下放置一些文件，然后在 Shell 中使用 `ls` 和 `cat` 来查看文件信息和内容。
+
+    请在报告中展示：一个包含有 `Hello filesystem from <Your Student Number>!` 的 `/hello.txt` 文件能够被正确读取。
+
 ## 探索 Linux 文件系统
 
 在 Linux 下拥有 “一切皆文件” 的思想，文件系统的设计和实现是 Linux 内核中的一个重要部分。在实现了基本的用于文件访问的文件系统后，通过下列的小实验来接触、理解 Linux 文件系统的设计：
