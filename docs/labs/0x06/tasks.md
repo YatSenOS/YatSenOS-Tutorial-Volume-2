@@ -236,9 +236,9 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 ??? quote "一些趣事"
 
-    在笔者几年前的第一次实现中，由于 MBR 与 BPB 的尾部 magic number 都是 `0xAA55`，导致了持续了一定时间的混淆。
+    在笔者几年前进行实验时，由于 MBR 与 BPB 的尾部 magic number 都是 `0xAA55`，导致了一段时间的概念混淆。
 
-    本实验的教程带领大家梳理完成 MBR 和 BPB 的作用和所属后，同学们大概率不会再因为文件系统层次结构的混淆造成困惑了。
+    本实验的教程带领大家梳理完成 MBR 和 BPB 的作用和所属后，同学们大概率不会再混淆文件系统的层次结构了。
 
 同时，实验为大家准备了两份测试用例，你可以在 `fs/fat16/bpb.rs` 中找到 `tests` 模块，参考 MBR 部分的测试方法，通过 `cargo test` 来运行它们。
 
