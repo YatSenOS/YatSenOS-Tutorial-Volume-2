@@ -7,9 +7,9 @@ use super::*;
 #[derive(Debug, Clone)]
 pub struct File {
     /// The current offset in the file
-    pub offset: usize,
+    offset: usize,
     /// The current cluster of this file
-    cluster: Cluster,
+    current_cluster: Cluster,
     /// DirEntry of this file
     entry: DirEntry,
     /// The file system handle that contains this file
