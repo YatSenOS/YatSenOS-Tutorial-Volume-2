@@ -63,7 +63,7 @@ pub fn dispatcher(context: &mut ProcessContext) {
         // None
         Syscall::Stat => { /* FIXME: list processes */ },
         // None
-        Syscall::ListApp => { /* FIXME: list avaliable apps */},
+        Syscall::ListApp => { /* FIXME: list available apps */},
 
         // ----------------------------------------------------
         // NOTE: following syscall examples are implemented

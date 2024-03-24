@@ -513,9 +513,19 @@ static int init_serial() {
 }
 ```
 
+同时，为了能够接收到 IO 设备的对应中断，你需要为 IOAPIC 启用对应的 IRQ：
+
+```rust
+enable_irq(Irq::Serial0 as u8, 0); // enable IRQ4 for CPU0
+```
+
+!!! warning "请勿配置错误"
+
+    在实践中，有大量同学将 IRQ (Interrupt Request) 和 IRQ 对应的中断向量号 (Interrupt Vector) 混淆，导致串口中断无法正常工作。
+
 为了承接全部（可能的）用户输入数据，并将它们统一在标准输入，需要为输入准备缓冲区，并将其封装为一个驱动，创建 `src/drivers/input.rs` 文件，使用 `crossbeam_queue` crate 实现一个无锁输入缓冲区。
 
-!!! tip "在 memory 初始化的过程中，你已经有了内核堆分配的能力，可以动态分配内存。"
+!!! tip "在 memory 初始化的过程后，你已经有了内核堆分配的能力，可以动态分配内存。"
 
 按照下列描述，补全 `src/drivers/input.rs` 驱动代码：
 
@@ -572,7 +582,7 @@ static int init_serial() {
 
     *Note: `String::with_capacity` 可以帮助你预先分配足够的内存。*
 
-串口的输入中断与时钟中断类似，在 `src/interrupt/serial.rs` 中补全代码，为 IRQ4 Serial0 设置中断处理程序：
+串口的输入中断与时钟中断类似，在 `src/interrupt/serial.rs` 中补全代码，为 **IRQ4 Serial0** 设置中断处理程序：
 
 ```rust
 use super::consts::*;
@@ -594,7 +604,15 @@ fn receive() {
 }
 ```
 
-你需要补全 `receive` 函数，利用刚刚完成的 `input` 驱动，将接收到的字符放入缓冲区。
+最后，你需要补全 `receive` 函数，利用刚刚完成的 `input` 驱动，将接收到的字符放入缓冲区。
+
+!!! warning "中断导致的“并发访问”"
+
+    或许你会困惑：只有一个 CPU，为什么会导致并发访问，进而导致死锁的产生？就算暂时无法获取锁，等待一会也能获取到吧？
+
+    这里需要区分一些概念，与常见的用户态“多线程”的并发不同，中断所导致的“并发访问”是**强制性**的，并且需要**主动恢复**，循环等待的过程**并不存在抢占**。
+
+    **基于上述信息，结合思考题 3 给出的例子，尝试描述锁操作、中断的相关过程，完成该思考题。**
 
 ## 用户交互
 

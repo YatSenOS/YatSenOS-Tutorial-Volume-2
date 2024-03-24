@@ -97,3 +97,7 @@ table.wikitable {
 .wikitable caption {
   font-weight: bold;
 }
+
+[data-md-color-scheme="default"] .transparent-img {
+  filter: invert(1) hue-rotate(180deg)
+}

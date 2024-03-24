@@ -6,8 +6,8 @@ edition = "2021"
 
 [dependencies]
 arrayvec = { version = "0.7", default-features = false }
-uefi = "0.26"
-uefi-services = { version = "0.23", optional = true}
+uefi = "0.27"
+uefi-services = { version = "0.24", optional = true }
 log = "0.4"
 x86_64 = "0.15"
 xmas-elf = "0.9"

@@ -52,7 +52,7 @@
 
 通常而言，用户程序并不直接自行处理系统调用，而是由用户态库提供的函数进行调用。
 
-在编写 C 语言时 `printf`、`scanf` 等函数并不是直接调用系统调用，以 gcc on Linux 的一般行为为例，这些函数被定义在 `glibc` 中，而 `glibc` 会处理系统调用。相对应的，在 Windows 上，也会存在 `msvcrt` (Microsoft Visual C Run-time) 等库。
+在编写 C 语言时 `printf`、`scanf` 等函数并不是直接调用系统调用。以一般的 GNU/Linux 程序为例，这些函数被定义在 `glibc` (GNU C Library) 中，而 `glibc` 会处理系统调用。相对应的，在 Windows 上，也会存在 `msvcrt` (Microsoft Visual C Run-time) 和 `ucrt` (Universal C Runtime) 等库。
 
 为了让用户态程序更好地与 YSOS 进行交互，处理程序的生命周期，便于编写用户程序等，需要提供用户态库，以便用户程序调用。
 
@@ -950,7 +950,7 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 
 2. 😋 尝试在 `kernel/src/memory/frames.rs` 中实现帧分配器的回收功能 `FrameDeallocator`，作为一个最小化的实现，你可以在 `Allocator` 使用一个 `Vec` 存储被释放的页面，并在分配时从中取出。
 
-3. 🤔 基于帧回收器的实现，在 `elf` 中实现 `unmap_range` 函数，从页表中取消映射一段连续的页面，并使用帧回收器进行回收。利用它实现进程栈的回收（利用 `ProcessData` 中存储的页面信息），页表的回收将会在后续实现用实现，暂时不需要处理。
+3. 🤔 基于帧回收器的实现，在 `elf` 中实现 `unmap_range` 函数，从页表中取消映射一段连续的页面，并使用帧回收器进行回收。之后，在合适的地方，结合 `ProcessData` 中存储的页面信息，利用这个函数实现进程栈的回收。其他进程资源（如页表、代码段、数据段等）的回收将会在后续实验中实现，目前暂时不需要考虑。
 
 4. 🤔 尝试利用 `UefiRuntime` 和 `chrono` crate，获取当前时间，并将其暴露给用户态，以实现 `sleep` 函数。
 

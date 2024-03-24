@@ -287,6 +287,16 @@ targets = [ "x86_64-unknown-uefi" ]
 
 在配置好的工作区中执行编译时，Rust 会自动下载并安装对应的工具链。
 
+!!! note "rust-analyzer 在非 x86 平台上总是提示错误？"
+
+    可以通过 VSCode 配置项：`rust-analyzer.cargo.target` 来指定目标平台：
+
+    ```json
+    {
+        "rust-analyzer.cargo.target": "x86_64-unknown-uefi"
+    }
+    ```
+
 ### 运行第一个 UEFI 程序
 
 编译一个 UEFI 程序时，我们没有操作系统所提供的标准库，也没有操作系统提供的 Interpreter，因此我们需要使用 `#![no_std]` 来声明我们的程序不依赖标准库，使用 `#![no_main]` 来声明我们的程序不依赖操作系统的入口函数。
