@@ -139,7 +139,7 @@ impl AtaBus {
 
             // FIXME: store the LBA28 address into four 8-bit registers
             //      - read the documentation for more information
-            // FIXME: enable LBA28 mode
+            //      - enable LBA28 mode by setting the drive register
             // FIXME: write the command register (cmd as u8)
         }
 
