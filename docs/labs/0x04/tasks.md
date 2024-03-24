@@ -52,7 +52,7 @@
 
 通常而言，用户程序并不直接自行处理系统调用，而是由用户态库提供的函数进行调用。
 
-在编写 C 语言时 `printf`、`scanf` 等函数并不是直接调用系统调用，以 gcc on Linux 的一般行为为例，这些函数被定义在 `glibc` 中，而 `glibc` 会处理系统调用。相对应的，在 Windows 上，也会存在 `msvcrt` (Microsoft Visual C Run-time) 等库。
+在编写 C 语言时 `printf`、`scanf` 等函数并不是直接调用系统调用。以一般的 GNU/Linux 程序为例，这些函数被定义在 `glibc` (GNU C Library) 中，而 `glibc` 会处理系统调用。相对应的，在 Windows 上，也会存在 `msvcrt` (Microsoft Visual C Run-time) 和 `ucrt` (Universal C Runtime) 等库。
 
 为了让用户态程序更好地与 YSOS 进行交互，处理程序的生命周期，便于编写用户程序等，需要提供用户态库，以便用户程序调用。
 
