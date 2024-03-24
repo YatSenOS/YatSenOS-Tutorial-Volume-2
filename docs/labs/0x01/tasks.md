@@ -312,7 +312,7 @@ pub fn get_serial_for_sure<'a>() -> spin::MutexGuard<'a, SerialPort> {
 
 `spin::Mutex` 是一个基于自旋锁实现的互斥锁，它的 `try_lock` 方法尝试获取互斥锁的所有权，如果获取成功，则返回一个 `MutexGuard`，这个 `MutexGuard` 将会在离开作用域时自动释放互斥锁。
 
-部分有关于“自选锁”和“互斥锁”的实现代码如下所示：
+部分有关于“自旋锁”和“互斥锁”的实现代码如下所示：
 
 ```rust
 pub fn lock(&self) -> SpinMutexGuard<T> {
