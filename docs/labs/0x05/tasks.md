@@ -496,7 +496,7 @@ unsafe impl Sync for SpinLock {}
 
 - `new`：根据所给出的 `key` 创建一个新的信号量。
 - `remove`：根据所给出的 `key` 删除一个已经存在的信号量。
-- `siganl`：也叫做 `V` 操作，也可以被 `release/up/verhogen` 表示，它用于释放一个资源，使得等待的进程可以继续执行。
+- `signal`：也叫做 `V` 操作，也可以被 `release/up/verhogen` 表示，它用于释放一个资源，使得等待的进程可以继续执行。
 - `wait`：也叫做 `P` 操作，也可以被 `acquire/down/proberen` 表示，它用于获取一个资源，如果资源不可用，则进程将会被阻塞。
 
 为了实现与内核的交互，信号量的操作将被实现为一个系统调用，它将使用到三个系统调用参数：
@@ -589,7 +589,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     match args.arg0 {
         0 => context.set_rax(new_sem(args.arg1 as u32, args.arg2)),
         1 => context.set_rax(remove_sem(args.arg1 as u32)),
-        2 => sem_siganl(args.arg1 as u32, context),
+        2 => sem_signal(args.arg1 as u32, context),
         3 => sem_wait(args.arg1 as u32, context),
         _ => context.set_rax(usize::MAX),
     }
