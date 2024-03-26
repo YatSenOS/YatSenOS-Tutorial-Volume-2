@@ -67,6 +67,9 @@ pub fn init() {
 pub fn switch(context: &mut ProcessContext) {
     x86_64::instructions::interrupts::without_interrupts(|| {
         // FIXME: switch to the next process
+        //      - save current process's context
+        //      - handle ready queue update
+        //      - restore next process's context
     });
 }
 

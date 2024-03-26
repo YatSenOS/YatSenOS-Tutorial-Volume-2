@@ -67,9 +67,7 @@ impl ProcessManager {
     pub fn save_current(&self, context: &ProcessContext) {
         // FIXME: update current process's tick count
 
-        // FIXME: update current process's context
-
-        // FIXME: push current process to ready queue if still alive
+        // FIXME: save current process's context
     }
 
     pub fn switch_next(&self, context: &mut ProcessContext) -> ProcessId {
