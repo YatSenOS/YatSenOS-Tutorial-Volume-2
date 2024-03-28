@@ -139,11 +139,11 @@ impl ProcessManager {
     pub fn print_process_list(&self) {
         let mut output = String::from("  PID | PPID | Process Name |  Ticks  | Status\n");
 
-        for (_, p) in self.processes.read().iter() {
-            if p.read().status() != ProgramStatus::Dead {
-                output += format!("{}\n", p).as_str();
-            }
-        }
+        self.processes
+            .read()
+            .values()
+            .filter(|p| p.read().status() != ProgramStatus::Dead)
+            .for_each(|p| output += format!("{}\n", p).as_str());
 
         // TODO: print memory usage of kernel heap
 
