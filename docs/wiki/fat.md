@@ -76,7 +76,7 @@ root/
 
 但是，如果每个数据块只占据 1 个扇区的话，对于大磁盘来说，需要的块号还是太多了，于是工程师就提出了簇 (cluster) 的概念，一簇由许多个扇区组成，而这个簇就相当于前文中的数据块。
 
-这样，在 FAT 中存储簇号就大大减少了 FAT 的大小，虽然增加了碎片，但提升了文件读写的效率。
+在 FAT 中存储簇号而不是块号就大大减少了 FAT 的大小。这样虽然增加了碎片，但提升了文件读写的效率。
 
 ## 文件系统的实现
 
@@ -90,7 +90,7 @@ root/
 
 第一章大体可以略过，其中较为重要的概念如下：
 
-- 簇 (cluster)： 文件分配的单元 (A unit of allocation)，其中包括了一组逻辑连续的扇区。卷内的每个簇都可以通过一个簇号 N 指代 (referred to)。给任何一个文件所分配的全部空间的大小 _(All allocation for a file)_ 必须是簇的整数倍。
+- 簇 (cluster)： 一组逻辑连续的扇区。卷内的每个簇都可以通过一个簇号 N 指代 (referred to)。簇是文件分配的最小单元 (A unit of allocation)，给任何一个文件所分配的全部空间的大小 _(All allocation for a file)_ 必须是簇的整数倍。
 - 分区 (partition)： 在一个卷内的一系列扇区
 - 卷 (volume)： 一个逻辑上的连续的扇区地址空间
 
@@ -116,7 +116,7 @@ root/
 
 对于 FAT12/16 和 FAT32，它们的 BPB 结构在首 36 字节上完全一致：
 
-<table class="wikitable"><thead><tr><th>域名称</th><th>偏移</th><th>大小</th><th>描述</th><th>限制</th></tr></thead><tbody><tr><td>BS_jmpBoot</td><td>0</td><td>3</td><td>跳转到启动代码处执行的指令<br/>由于实验中启动代码位于MBR，不会从这里进行启动，因此可以不用关心这个域实际的内容</td><td>一般为<code>0x90**EB</code>或是<code>0x****E9</code></td></tr><tr><td>BS_OEMName</td><td>3</td><td>8</td><td>OEM厂商的名称，同样与实验无关，不需要关心</td><td>-</td></tr><tr><td><strong>BPB_BytsPerSec</strong></td><td>11</td><td>2</td><td><strong>每个扇区的字节数</strong></td><td><strong>只能是512、1024、2048或4096</strong></td></tr><tr><td><strong>BPB_SecPerClus</strong></td><td>13</td><td>1</td><td><strong>每个簇的扇区数量</strong></td><td><strong>只能是1、2、4、8、16、32、64和128</strong></td></tr><tr><td><strong>BPB_RsvdSecCnt</strong></td><td>14</td><td>2</td><td><strong>保留区域的扇区数量</strong><br/>可以用来计算FAT区域的首扇区位置</td><td><strong>不能为0，可以为任意非0值</strong><br/>可以用来将将数据区域与簇大小对齐（使数据区域的起始偏移位于簇大小的整数倍处）</td></tr><tr><td><strong>BPB_NumFATs</strong></td><td>16</td><td>1</td><td><strong>FAT表数量</strong></td><td>一般为2，也可以为1</td></tr><tr><td><strong>BPB_RootEntCnt</strong></td><td>17</td><td>2</td><td><strong>根目录中的条目数</strong><br/>指根目录中包含的所有的条目数量，包括有效的、空的和无效的条目<br/>可以用来计算根目录区所占用的字节数</td><td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 必须满足 <code>32 * BPB_RootEntCnt % 2 == 0</code></td></tr><tr><td><strong>BPB_TotSec16</strong></td><td>19</td><td>2</td><td><strong>16位长度卷的总扇区数</strong><br/>对于FAT32和更大容量的存储设备有额外的BPB_TotSec32域<br/>应当是为了维持BPB结构的一致性而仍然保留了这个域</td><td><strong>FAT32：</strong> 必须位0<br/><strong>FAT12/16：</strong> 如果总扇区数小于0x10000（也就是能用16位表示）则使用此域表示，否则也使用BPB_TotSec32域</td></tr><tr><td>BPB_Media</td><td>21</td><td>1</td><td>似乎是设备的类型<br/>与实验无关，所以可以不用特别关心</td><td>合法取值包括<code>0xF0</code>、<code>0xF8</code>、<code>0xF9</code>、<code>0xFA</code>、<code>0xFB</code>、<code>0xFC</code>、<code>0xFD</code>、<code>0xFE</code>和<code>0xFF</code><br/>本地磁盘（不可移动）的规定值为<code>0xF8</code><br/>可移动磁盘的往往使用<code>0xF0</code></td></tr><tr><td><strong>BPB_FATSz16</strong></td><td>22</td><td>2</td><td><strong>单个FAT表占用的扇区数</strong><br/>只用于FAT12/16格式的文件系统</td><td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 正整数值</td></tr><tr><td>BPB_SecPerTrk</td><td>24</td><td>2</td><td>每个扇区的磁道数<br/>与<code>0x13</code>中断相关<br/>只与具有物理结构（如磁道、磁盘等）并且对<code>0x13</code>中断可见的存储介质有关<br/>与实验无关，可以不用关心</td><td>-</td></tr><tr><td>BPB_NumHeads</td><td>26</td><td>2</td><td>磁头数量<br/>同样与<code>0x13</code>中断相关，实验不会使用，所以可以不用关心</td><td>-</td></tr><tr><td><strong>BPB_HiddSec</strong></td><td>28</td><td>4</td><td><strong>分区前隐藏的扇区数</strong><br/>在文档中描述这个域为同样只与对<code>0x13</code>中断可见的存储介质有关，但在实验过程中发现对于一个多分区的磁盘，这个域对应了<strong>分区首扇区在整个磁盘中的扇区号</strong>，例如首扇区位于磁盘2048扇区（从0开始计算分区号）的分区，其 BPB_HiddSec 域值就为2048</td><td>-</td></tr><tr><td><strong>BPB_TotSec32</strong></td><td>32</td><td>4</td><td><strong>32位长度卷的总扇区数</strong><br/>用来描述FAT32卷中的总扇区数或是扇区数多于0x10000的FAT12/16卷中的总扇区数</td><td><strong>FAT32：</strong> 必须为非零整数值<br/><strong>FAT12/16：</strong> 如果扇区数大于0x10000，则为扇区数，否则必须为0</td></tr></tbody></table>
+<table class="wikitable"><thead><tr><th>域名称</th><th>偏移</th><th>大小</th><th>描述</th><th>限制</th></tr></thead><tbody><tr><td>BS_jmpBoot</td><td>0</td><td>3</td><td>跳转到启动代码处执行的指令<br/>由于实验中启动代码位于MBR，不会从这里进行启动，因此可以不用关心这个域实际的内容</td><td>一般为<code>0x90**EB</code>或是<code>0x****E9</code></td></tr><tr><td>BS_OEMName</td><td>3</td><td>8</td><td>OEM厂商的名称，同样与实验无关，不需要关心</td><td>-</td></tr><tr><td><strong>BPB_BytsPerSec</strong></td><td>11</td><td>2</td><td><strong>每个扇区的字节数</strong></td><td><strong>只能是512、1024、2048或4096</strong></td></tr><tr><td><strong>BPB_SecPerClus</strong></td><td>13</td><td>1</td><td><strong>每个簇的扇区数量</strong></td><td><strong>只能是1、2、4、8、16、32、64和128</strong></td></tr><tr><td><strong>BPB_RsvdSecCnt</strong></td><td>14</td><td>2</td><td><strong>保留区域的扇区数量</strong><br/>可以用来计算FAT区域的首扇区位置</td><td><strong>不能为0，可以为任意非0值</strong><br/>可以用来将将数据区域与簇大小对齐（使数据区域的起始偏移位于簇大小的整数倍处）</td></tr><tr><td><strong>BPB_NumFATs</strong></td><td>16</td><td>1</td><td><strong>FAT表数量</strong></td><td>一般为2，也可以为1</td></tr><tr><td><strong>BPB_RootEntCnt</strong></td><td>17</td><td>2</td><td><strong>根目录中的条目数</strong><br/>指根目录中包含的所有的条目数量，包括有效的、空的和无效的条目<br/>可以用来计算根目录区所占用的字节数</td><td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 必须满足 <code>32 * BPB_RootEntCnt % 2 == 0</code></td></tr><tr><td><strong>BPB_TotSec16</strong></td><td>19</td><td>2</td><td><strong>16位长度卷的总扇区数</strong><br/>对于FAT32和更大容量的存储设备有额外的BPB_TotSec32域<br/>应当是为了维持BPB结构的一致性而仍然保留了这个域</td><td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 如果总扇区数小于0x10000（也就是能用16位表示）则使用此域表示，否则也使用BPB_TotSec32域</td></tr><tr><td>BPB_Media</td><td>21</td><td>1</td><td>似乎是设备的类型<br/>与实验无关，所以可以不用特别关心</td><td>合法取值包括<code>0xF0</code>、<code>0xF8</code>、<code>0xF9</code>、<code>0xFA</code>、<code>0xFB</code>、<code>0xFC</code>、<code>0xFD</code>、<code>0xFE</code>和<code>0xFF</code><br/>本地磁盘（不可移动）的规定值为<code>0xF8</code><br/>可移动磁盘的往往使用<code>0xF0</code></td></tr><tr><td><strong>BPB_FATSz16</strong></td><td>22</td><td>2</td><td><strong>单个FAT表占用的扇区数</strong><br/>只用于FAT12/16格式的文件系统</td><td><strong>FAT32：</strong> 必须为0<br/><strong>FAT12/16：</strong> 正整数值</td></tr><tr><td>BPB_SecPerTrk</td><td>24</td><td>2</td><td>每个扇区的磁道数<br/>与<code>0x13</code>中断相关<br/>只与具有物理结构（如磁道、磁盘等）并且对<code>0x13</code>中断可见的存储介质有关<br/>与实验无关，可以不用关心</td><td>-</td></tr><tr><td>BPB_NumHeads</td><td>26</td><td>2</td><td>磁头数量<br/>同样与<code>0x13</code>中断相关，实验不会使用，所以可以不用关心</td><td>-</td></tr><tr><td><strong>BPB_HiddSec</strong></td><td>28</td><td>4</td><td><strong>分区前隐藏的扇区数</strong><br/>在文档中描述这个域为同样只与对<code>0x13</code>中断可见的存储介质有关，但在实验过程中发现对于一个多分区的磁盘，这个域对应了<strong>分区首扇区在整个磁盘中的扇区号</strong>，例如首扇区位于磁盘2048扇区（从0开始计算分区号）的分区，其 BPB_HiddSec 域值就为2048</td><td>-</td></tr><tr><td><strong>BPB_TotSec32</strong></td><td>32</td><td>4</td><td><strong>32位长度卷的总扇区数</strong><br/>用来描述FAT32卷中的总扇区数或是扇区数多于0x10000的FAT12/16卷中的总扇区数</td><td><strong>FAT32：</strong> 必须为非零整数值<br/><strong>FAT12/16：</strong> 如果扇区数大于0x10000，则为扇区数，否则必须为0</td></tr></tbody></table>
 
 从第 37 字节开始，FAT12 和 FAT16 卷上的 BPB 结构如下：
 
@@ -136,7 +136,7 @@ if(CountofClusters < 4085) {
 }
 ```
 
-也就是说，FAT 的类型只与簇的数量有关，而与磁盘的大小、扇区数量，包括 BPB 中的 BPB_FilSysType 域都无关，其中
+也就是说，FAT 的类型只与簇的数量有关，而与磁盘的大小、扇区数量以及 BPB 中的 BS_FilSysType 域都无关，其中
 
 - FAT12 不能有超过 4084 个簇
 - FAT16 不能有超过 65524 个簇，也不能少于 4085 个簇
@@ -193,20 +193,20 @@ FAT 表中第一个保留的条目 `FAT [0]` 包含了 `BPB_Media` 域中的内�
 
 短名称为一种表示文件名称的格式，其 11 字节长度的域被分为 8 字节和 3 字节的空间，其中 11 字节用来存储文件不含扩展名的部分，而后 3 字节用来存储文件的扩展名，在存储名字的时候，所有的字母都会以大写字母的形式存储。
 
-同时，短名称的存储方式会在文件名长度小于最大长度时在其后面填补空格，例如 `FOO.BAR` 在存储时由于文件名为三字节，所以会在其后填补 5 个空格，存储为 `FOO     BAR`
+同时，短名称的存储方式会在文件名长度小于最大长度时在其后面填补空格，例如 `FOO.BAR` 在存储时由于文件名为三字节，所以会在其后填补 5 个空格，存储为 `FOO    BAR`
 
-除此之外，短名称还遵循以下规则：
+除此之外，短名称域还遵循以下规则：
 
 - 若首字节为 `0xE5` 则代表当前条目为空
 - 若首字节为 `0x00` 则同样代表当前条目为空，并且还代表当前条目之后的所有条目都为空
 - 首字节不能为空格，也就是说文件名不能以空格开头
 - 目录中不能出现名称相同的两个条目
 - 不能出现小写字母
-- ASCII 值小于 `0x20` 的字符以及 `0x22`、`0x2A`、`0x2B`、`0x2C`、`0x2E`、`0x2F`、`0x3A`、`0x3B`、`0x3C`、`0x3D`、`0x3E`、`0x3F`、`0x5B`、`0x5C`、`0x5D`、`0x7C`
+- 不能出现ASCII 值小于 `0x20` 的字符（控制字符）以及 `0x22`、`0x2A`、`0x2B`、`0x2C`、`0x2E`、`0x2F`、`0x3A`、`0x3B`、`0x3C`、`0x3D`、`0x3E`、`0x3F`、`0x5B`、`0x5C`、`0x5D`、`0x7C`（部分特殊符号）
 
-然而，如果文件名称很长的话，短名称就显得不太够用了，所以 FAT 还额外提出了长名称的解决方案，并且称存储短名称的条目为 `SFNEntry`，长名称的目录为 `LFNEntry`。
+然而，如果文件名称很长的话，短名称就显得不太够用了，所以 FAT 还额外提出了长名称解决方案，并且称存储短名称的条目为 `SFNEntry`，存储长名称的条目为 `LFNEntry`。
 
-在长名称的解决方案中，一个文件会对应一个短名称的条目和一系列长名称的条目，短名称条目存储文件名称的前数个字符和扩展名，而长名称则存储文件的全部名称。
+在长名称解决方案中，一个文件会对应一个短名称的条目和一系列长名称的条目。短名称条目存储文件名称的前数个字符和扩展名，而长名称则存储文件的全部名称。
 
 在目录中，一个文件对应的长名称条目和短名称条目连续存储，其中地址从低到高依次存储：
 
@@ -216,7 +216,7 @@ FAT 表中第一个保留的条目 `FAT [0]` 包含了 `BPB_Media` 域中的内�
 - 第 1 个长名称条目
 - 短名称条目
 
-但是目前短名称足够使用了，所以不妨暂时跳过长名称的进一步介绍和实现
+但是目前短名称足够使用了，所以不妨暂时跳过长名称的进一步介绍和实现。
 
 文件的属性使用按位枚举的方式表示，其中的六个二进制位分别如下：
 
@@ -232,7 +232,7 @@ FAT 表中第一个保留的条目 `FAT [0]` 包含了 `BPB_Media` 域中的内�
 
 - `[4:0]`：日（从 1 至 31）
 - `[8:5]`：月（从 1 至 12）
-- `[9]`：从 1980 年起的年份偏移（从 0 至 127）
+- `[15:9]`：从 1980 年起的年份偏移（从 0 至 127）
 
 文件的时间同样也包括三个部分：
 
