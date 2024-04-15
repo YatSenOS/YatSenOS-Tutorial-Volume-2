@@ -73,7 +73,7 @@ use lib::*;
 
 extern crate lib;
 
-fn main() -> usize {
+fn main() -> isize {
     println!("Hello, world!!!");
 
     233
@@ -871,7 +871,7 @@ fn factorial(n: u64) -> u64 {
     }
 }
 
-fn main() -> usize {
+fn main() -> isize {
     print!("Input n: ");
 
     let input = lib::stdin().read_line();

@@ -271,7 +271,7 @@ use lib::*;
 
 static mut M: u64 = 0xdeadbeef;
 
-fn main() -> usize {
+fn main() -> isize {
     let mut c = 32;
 
     let pid = sys_fork();
