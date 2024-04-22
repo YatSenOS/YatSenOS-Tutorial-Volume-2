@@ -12,7 +12,7 @@ use core::ops::*;
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct DirEntry {
     pub filename: ShortFileName,
-    pub moditified_time: FsTime,
+    pub modified_time: FsTime,
     pub created_time: FsTime,
     pub accessed_time: FsTime,
     pub cluster: Cluster,
@@ -61,7 +61,7 @@ impl DirEntry {
 
         Ok(DirEntry {
             filename,
-            moditified_time,
+            modified_time,
             created_time,
             accessed_time,
             cluster: Cluster(cluster),
@@ -209,7 +209,7 @@ impl From<&DirEntry> for Metadata {
             len: entry.size as usize,
             created: Some(entry.created_time),
             accessed: Some(entry.accessed_time),
-            modified: Some(entry.moditified_time),
+            modified: Some(entry.modified_time),
         }
     }
 }
@@ -249,7 +249,7 @@ mod tests {
             Utc.with_ymd_and_hms(2020, 6, 16, 23, 48, 30).unwrap()
         );
         assert_eq!(
-            res.moditified_time,
+            res.modified_time,
             Utc.with_ymd_and_hms(2020, 6, 16, 23, 48, 30).unwrap()
         );
         assert_eq!(
