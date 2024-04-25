@@ -36,10 +36,10 @@ impl Fat16Impl {
     }
 
     // FIXME: YOU NEED TO IMPLEMENT THE FILE SYSTEM OPERATIONS HERE
-    //      - calculate the sectors and the clusters
-    //      - read the FAT and get cluster chain
+    //      - read the FAT and get next cluster
     //      - traverse the cluster chain and read the data
-    //      - parse the directory entries
+    //      - parse the path
+    //      - open the root directory
     //      - ...
     //      - finally, implement the FileSystem trait for Fat16 with `self.handle`
 }
