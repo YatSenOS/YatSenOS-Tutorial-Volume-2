@@ -18,7 +18,7 @@ const CONFIG_PATH: &str = "\\EFI\\BOOT\\boot.conf";
 
 #[entry]
 fn efi_main(image: uefi::Handle, mut system_table: SystemTable<Boot>) -> Status {
-    uefi_services::init(&mut system_table).expect("Failed to initialize utilities");
+    uefi::helpers::init(&mut system_table).expect("Failed to initialize utilities");
 
     log::set_max_level(log::LevelFilter::Info);
     info!("Running UEFI bootloader...");
