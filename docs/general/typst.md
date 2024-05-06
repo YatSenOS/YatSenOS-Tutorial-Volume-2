@@ -65,7 +65,7 @@
 
 #### 标题
 
-typst 在某些防线和 Markdown 有一定的相似之处，例如在 Markdown 中，我们使用 `#` 来表示标题，而在 typst 中，我们使用 `=` 来表示
+typst 在某些方面和 Markdown 有一定的相似之处，例如在 Markdown 中，我们使用 `#` 来表示标题，而在 typst 中，我们使用 `=` 来表示
 
 即 Markdown 中的
 
