@@ -329,8 +329,8 @@ pub fn spawn(
 ) -> ProcessId {
     let kproc = self.get_proc(&KERNEL_PID).unwrap();
     let page_table = kproc.read().clone_page_table();
-    let proc = Process::new(name, parent, page_table, proc_data);
-    let pid = proc.pid();
+    let proc_vm = Some(ProcessVm::new(page_table));
+    let proc = Process::new(name, parent, proc_vm, proc_data);
 
     let mut inner = proc.write();
     // FIXME: load elf to process pagetable
@@ -340,7 +340,9 @@ pub fn spawn(
 
     trace!("New {:#?}", &proc);
 
+    let pid = proc.pid();
     // FIXME: something like kernel thread
+
     pid
 }
 ```
@@ -371,9 +373,23 @@ if user_access {
 
 这一标志位只应当为用户进程所使用，内核相关代码不应当拥有这一权限。由于用户程序是不可信的，需要以此防止用户态程序访问内核的内存空间。
 
+
 !!! note "**对于用户进程而言，不再与内核共享页表，而是通过克隆内核页表获取了自己的页表。这意味着可以为每个用户进程分配同样的栈地址，而不会相互干扰。**"
 
-需要在 GDT 中为 Ring 3 的代码段和数据段添加对应的选择子，在初始化栈帧的时候将其传入。在 `kernel/src/memory/gdt.rs` 中，你可以使用如下方式添加：
+之后在 `ProcessInner` 和 `ProcessVm` 中实现 `load_elf` 函数，来处理代码段映射等内容。
+
+```rust
+pub fn load_elf(&mut self, elf: &ElfFile) {
+    let mapper = &mut self.page_table.mapper();
+    let alloc = &mut *get_frame_alloc_for_sure();
+
+    self.stack.init(mapper, alloc);
+
+    // FIXME: load elf to process pagetable
+}
+```
+
+同时，需要在 GDT 中为 Ring 3 的代码段和数据段添加对应的选择子，在初始化栈帧的时候将其传入。在 `kernel/src/memory/gdt.rs` 中，你可以使用如下方式添加：
 
 ```rust
 lazy_static! {
@@ -403,7 +419,6 @@ pub fn init_stack_frame(&mut self, entry: VirtAddr, stack_top: VirtAddr) {
 !!! tip "一些提示"
 
     - 与内核类似，使用 `elf.header.pt2.entry_point()` 获取 ELF 文件的入口地址。
-    - 或许可以在 `ProcessInner` 中实现一个 `load_elf` 函数，来处理代码段映射等内容。
     - 记得为进程分配好合适的栈空间，并使用 `init_stack_frame` 初始化程序栈和指令指针。
     - 或许你可以同时实现 **加分项 1** 所描述的功能。
 
@@ -750,7 +765,7 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
 
 进程退出释放资源的过程基本有如下几步：
 
-1. 释放进程的页表，释放页表占用的页面。
+1. 释放进程的虚拟内存信息（`ProcessVm`），释放页表和页表占用的页面。
 
     > 这部分将在后续实验中实现。此处不需要关心，但是建议完成 **加分项 2** 的内容
 

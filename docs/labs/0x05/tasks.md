@@ -114,16 +114,12 @@ pub struct ProcessInner {
 
 impl ProcessInner {
     pub fn fork(&mut self, parent: Weak<Process>) -> ProcessInner {
-        // FIXME: get current process's stack info
+        // FIXME: fork the process virtual memory struct
 
         // FIXME: clone the process data struct
-        // FIXME: clone the page table context (see instructions)
-
-        // FIXME: alloc & map new stack for child (see instructions)
-        // FIXME: copy the *entire stack* from parent to child
 
         // FIXME: update child's context with new *stack pointer*
-        //          > update child's stack to new base
+        //          > update child's stack to new base (from forked stack)
         //          > keep lower bits of *rsp*, update the higher bits
         //          > also update the stack record in process data
 
@@ -132,6 +128,46 @@ impl ProcessInner {
         // FIXME: construct the child process inner
 
         // NOTE: return inner because there's no pid record in inner
+    }
+}
+```
+
+```rust
+impl ProcessVm {
+    pub fn fork(&self, stack_offset_count: u64) -> Self {
+        // clone the page table context (see instructions)
+        let owned_page_table = self.page_table.fork();
+
+        let mapper = &mut owned_page_table.mapper();
+        let alloc = &mut *get_frame_alloc_for_sure();
+
+        Self {
+            page_table: owned_page_table,
+            stack: self.stack.fork(mapper, alloc, stack_offset_count),
+
+            // do not share code info
+            code: Vec::new(),
+            code_usage: 0,
+        }
+    }
+}
+
+impl Stack {
+    pub fn fork(
+        &self,
+        mapper: MapperRef,
+        alloc: FrameAllocatorRef,
+        stack_offset_count: u64,
+    ) -> Self {
+        // FIXME: alloc & map new stack for child (see instructions)
+
+        // FIXME: copy the *entire stack* from parent to child
+
+        // FIXME: return the new stack
+        Self {
+            range: /* new stack range */,
+            usage: /* new stack usage */
+        }
     }
 }
 ```
@@ -172,13 +208,13 @@ impl ProcessInner {
     /// - `src_addr`: the address of the source memory
     /// - `dest_addr`: the address of the target memory
     /// - `size`: the count of pages to be cloned
-    fn clone_range(src_addr: u64, dest_addr: u64, size: usize) {
-        trace!("Clone range: {:#x} -> {:#x}", src_addr, dest_addr);
+    fn clone_range(&self, cur_addr: u64, dest_addr: u64, size: u64) {
+        trace!("Clone range: {:#x} -> {:#x}", cur_addr, dest_addr);
         unsafe {
-            copy_nonoverlapping::<u8>(
-                src_addr as *mut u8,
-                dest_addr as *mut u8,
-                size * Size4KiB::SIZE as usize,
+            copy_nonoverlapping::<u64>(
+                cur_addr as *mut u64,
+                dest_addr as *mut u64,
+                (size * Size4KiB::SIZE / 8) as usize,
             );
         }
     }
