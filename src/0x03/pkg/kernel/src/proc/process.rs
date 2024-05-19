@@ -19,10 +19,10 @@ pub struct ProcessInner {
     children: Vec<Arc<Process>>,
     ticks_passed: usize,
     status: ProgramStatus,
-    exit_code: Option<isize>,
     context: ProcessContext,
-    page_table: Option<PageTableContext>,
+    exit_code: Option<isize>,
     proc_data: Option<ProcessData>,
+    proc_vm: Option<ProcessVm>,
 }
 
 impl Process {
@@ -87,9 +87,7 @@ impl Process {
     }
 
     pub fn alloc_init_stack(&self) -> VirtAddr {
-        // FIXME: alloc init stack base on self pid
-
-        VirtAddr::new(0)
+        self.write().vm_mut().init_proc_stack(self.pid)
     }
 }
 
@@ -124,6 +122,18 @@ impl ProcessInner {
 
     pub fn is_ready(&self) -> bool {
         self.status == ProgramStatus::Ready
+    }
+
+    pub fn vm(&self) -> &ProcessVm {
+        self.proc_vm.as_ref().unwrap()
+    }
+
+    pub fn vm_mut(&mut self) -> &mut ProcessVm {
+        self.proc_vm.as_mut().unwrap()
+    }
+
+    pub fn handle_page_fault(&mut self, addr: VirtAddr) -> bool {
+        self.vm_mut().handle_page_fault(addr)
     }
 
     /// Save the process's context
@@ -179,25 +189,21 @@ impl core::ops::DerefMut for ProcessInner {
     }
 }
 
+
 impl core::fmt::Debug for Process {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        let mut f = f.debug_struct("Process");
-        f.field("pid", &self.pid);
-
         let inner = self.inner.read();
-        f.field("name", &inner.name);
-        f.field("parent", &inner.parent().map(|p| p.pid));
-        f.field("status", &inner.status);
-        f.field("ticks_passed", &inner.ticks_passed);
-        f.field(
-            "children",
-            &inner.children.iter().map(|c| c.pid.0).collect::<Vec<u16>>(),
-        );
-        f.field("page_table", &inner.page_table);
-        f.field("status", &inner.status);
-        f.field("context", &inner.context);
-        f.field("stack", &inner.proc_data.as_ref().map(|d| d.stack_segment));
-        f.finish()
+        f.debug_struct("Process")
+            .field("pid", &self.pid)
+            .field("name", &inner.name)
+            .field("parent", &inner.parent().map(|p| p.pid))
+            .field("status", &inner.status)
+            .field("ticks_passed", &inner.ticks_passed)
+            .field("children", &inner.children.iter().map(|c| c.pid.0))
+            .field("status", &inner.status)
+            .field("context", &inner.context)
+            .field("vm", &inner.proc_vm)
+            .finish()
     }
 }
 

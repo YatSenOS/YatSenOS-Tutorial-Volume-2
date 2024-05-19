@@ -92,7 +92,8 @@ impl ProcessManager {
     ) -> ProcessId {
         let kproc = self.get_proc(&KERNEL_PID).unwrap();
         let page_table = kproc.read().clone_page_table();
-        let proc = Process::new(name, Some(Arc::downgrade(&kproc)), page_table, proc_data);
+        let proc_vm = Some(ProcessVm::new(page_table));
+        let proc = Process::new(name, Some(Arc::downgrade(&kproc)), proc_vm, proc_data);
 
         // alloc stack for the new process base on pid
         let stack_top = proc.alloc_init_stack();

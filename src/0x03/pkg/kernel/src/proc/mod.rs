@@ -18,27 +18,6 @@ pub use pid::ProcessId;
 
 use x86_64::structures::idt::PageFaultErrorCode;
 use x86_64::VirtAddr;
-
-// 0xffff_ff00_0000_0000 is the kernel's address space
-pub const STACK_MAX: u64 = 0x0000_4000_0000_0000;
-
-pub const STACK_MAX_PAGES: u64 = 0x100000;
-pub const STACK_MAX_SIZE: u64 = STACK_MAX_PAGES * PAGE_SIZE;
-pub const STACK_START_MASK: u64 = !(STACK_MAX_SIZE - 1);
-// [bot..0x2000_0000_0000..top..0x3fff_ffff_ffff]
-// init stack
-pub const STACK_DEF_PAGE: u64 = 1;
-pub const STACK_DEF_SIZE: u64 = STACK_DEF_PAGE * PAGE_SIZE;
-pub const STACK_INIT_BOT: u64 = STACK_MAX - STACK_DEF_SIZE;
-pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
-// [bot..0xffffff0100000000..top..0xffffff01ffffffff]
-// kernel stack
-pub const KSTACK_MAX: u64 = 0xffff_ff02_0000_0000;
-pub const KSTACK_DEF_PAGE: u64 = /* FIXME: decide on the boot config */;
-pub const KSTACK_DEF_SIZE: u64 = KSTACK_DEF_PAGE * PAGE_SIZE;
-pub const KSTACK_INIT_BOT: u64 = KSTACK_MAX - KSTACK_DEF_SIZE;
-pub const KSTACK_INIT_TOP: u64 = KSTACK_MAX - 8;
-
 pub const KERNEL_PID: ProcessId = ProcessId(1);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -51,11 +30,9 @@ pub enum ProgramStatus {
 
 /// init process manager
 pub fn init() {
-    let mut kproc_data = ProcessData::new();
+    let proc_vm = ProcessVm::new(PageTableContext::new()).init_kernel_vm();
 
-    // FIXME: set the kernel stack
-
-    trace!("Init process data: {:#?}", kproc_data);
+    trace!("Init kernel vm: {:#?}", proc_vm);
 
     // kernel process
     let kproc = { /* FIXME: create kernel process */ };
