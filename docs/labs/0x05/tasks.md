@@ -115,15 +115,11 @@ pub struct ProcessInner {
 impl ProcessInner {
     pub fn fork(&mut self, parent: Weak<Process>) -> ProcessInner {
         // FIXME: fork the process virtual memory struct
+        // FIXME: calculate the real stack offset
+        // FIXME: update `rsp` in interrupt stack frame
+        // FIXME: set the return value 0 for child with `context.set_rax`
 
         // FIXME: clone the process data struct
-
-        // FIXME: update child's context with new *stack pointer*
-        //          > update child's stack to new base (from forked stack)
-        //          > keep lower bits of *rsp*, update the higher bits
-        //          > also update the stack record in process data
-
-        // FIXME: set the return value 0 for child with `context.set_rax`
 
         // FIXME: construct the child process inner
 
