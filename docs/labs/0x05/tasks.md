@@ -393,7 +393,7 @@ pub fn block(&self, pid: ProcessId) {
     }
     ```
 
-在 `pkg/kernel/src/proc/mod.rs` 中，修改 `wait_pid` 系统调用的实现，添加 `ProcessContext` 参数来确保可以进行可能切换上下文操作（意味着当前进程被阻塞，需要切换到下一个进程）：
+在 `pkg/kernel/src/proc/mod.rs` 中，修改 `wait_pid` 系统调用的实现，添加 `ProcessContext` 参数来确保可以进行可能的切换上下文操作（意味着当前进程被阻塞，需要切换到下一个进程）：
 
 ```rust
 pub fn wait_pid(pid: ProcessId, context: &mut ProcessContext) {
@@ -635,7 +635,7 @@ unsafe impl Sync for SpinLock {}
 
 - `load` 函数用于读取当前值。
 - `store` 函数用于设置新值。
-- `compare_exchange` 函数用户原子得进行比较-交换，也即比较当前值是否为目标值，如果是则将其设置为新值，否则返回当前值。
+- `compare_exchange` 函数用于原子地进行比较-交换，也即比较当前值是否为目标值，如果是则将其设置为新值，否则返回当前值。
 
 在进行循环等待时，可以使用 `core::hint::spin_loop` 提高性能，在 x86_64 架构中，它实际上会编译为 `pause` 指令。
 
@@ -757,7 +757,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
     与 `wait_pid` 系统调用类似，你需要在 `sem_signal` 中对进程进行唤醒。
 
-    但是无需为进程设置返回值，因此在调用 `wake_up` 时，传入 `None` 即可。
+    但是此处无需为进程设置返回值，因此在调用 `wake_up` 时，传入 `None` 即可。
 
 !!! tip "完善用户库"
 
@@ -809,7 +809,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 创建一个用户程序 `pkg/app/mq`，结合使用信号量，实现一个消息队列：
 
-- 父进程使用 fork 创建额外 16 个进程，其中一半为生产者，一半为消费者。
+- 父进程使用 fork 创建额外的 16 个进程，其中一半为生产者，一半为消费者。
 
 - 生产者不断地向消息队列中写入消息，消费者不断地从消息队列中读取消息。
 
@@ -951,7 +951,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 3. 🔥 尝试使用符合 Rust 做法的方式处理互斥锁，使用 RAII 的方式来保证锁的释放：
 
-    RAII（Resource Acquisition Is Initialization）是一种资源获取即初始化的技术，它通过在对象的构造函数中获取资源，然后在析构函数中释放资源，来保证资源的正确释放。
+    RAII（Resource Acquisition Is Initialization）是一种资源获取即初始化的技术，它通过在对象的构造函数中获取资源，然后在析构函数中释放资源的方法，来保证资源的正确释放。
 
     对于 Rust，也即实现 `MutexGuard` 类似的结构，它在构造时获取锁，然后在此结构体被移出作用域时释放锁。
 
