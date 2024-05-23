@@ -21,6 +21,7 @@ pub struct ProcessVm {
 
     // stack is pre-process allocated
     pub(super) stack: Stack,
+    pub(super) code: Vec<page::PageRangeInclusive>,
 }
 
 impl ProcessVm {
@@ -28,6 +29,7 @@ impl ProcessVm {
         Self {
             page_table,
             stack: Stack::empty(),
+            code: Vec::new(),
         }
     }
 
