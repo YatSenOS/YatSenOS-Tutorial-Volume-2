@@ -22,6 +22,7 @@ pub struct ProcessVm {
     // stack is pre-process allocated
     pub(super) stack: Stack,
     pub(super) code: Vec<page::PageRangeInclusive>,
+    pub(super) code_usage: u64,
 }
 
 impl ProcessVm {
@@ -30,6 +31,7 @@ impl ProcessVm {
             page_table,
             stack: Stack::empty(),
             code: Vec::new(),
+            0,
         }
     }
 
@@ -53,7 +55,7 @@ impl ProcessVm {
     }
 
     pub(super) fn memory_usage(&self) -> u64 {
-        self.stack.memory_usage()
+        self.stack.memory_usage() + self.code_usage
     }
 }
 
