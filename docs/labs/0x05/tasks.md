@@ -140,10 +140,6 @@ impl ProcessVm {
         Self {
             page_table: owned_page_table,
             stack: self.stack.fork(mapper, alloc, stack_offset_count),
-
-            // do not share code info
-            code: Vec::new(),
-            code_usage: 0,
         }
     }
 }
