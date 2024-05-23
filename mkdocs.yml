@@ -58,7 +58,7 @@ nav:
     - 实验四：用户程序与系统调用:
       - labs/0x04/index.md
       - 实验任务: labs/0x04/tasks.md
-    - 实验五：fork 与并发:
+    - 实验五：fork、阻塞与并发:
       - labs/0x05/index.md
       - 实验任务: labs/0x05/tasks.md
     - 实验六：硬盘驱动与文件系统:
