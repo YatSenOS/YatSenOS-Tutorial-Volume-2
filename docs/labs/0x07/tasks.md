@@ -316,7 +316,7 @@ impl ProcessManager {
         //      (you may implement following functions)
         let alloc = get_frame_alloc_for_sure();
         let frames_used = alloc.frames_used();
-        let frames_recycled = alloc.recycled_count();
+        let frames_recycled = alloc.frames_recycled();
         let frames_total = alloc.frames_total();
 
         let used = (frames_used - frames_recycled) * PAGE_SIZE as usize;
