@@ -22,19 +22,19 @@
 
 在 `pkg/kernel/src/memory` 文件夹中，增量代码补充包含了如下的模块：
 
-- `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
-- `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
-- `gdt.rs`：定义 TSS 和 GDT，为内核提供内存段描述符和任务状态段。
-- `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而能够在内核中使用 `alloc` 提供的操作和数据结构，进行动态内存分配的操作，如 `Vec`、`String`、`Box` 等。
+-   `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
+-   `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
+-   `gdt.rs`：定义 TSS 和 GDT，为内核提供内存段描述符和任务状态段。
+-   `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而能够在内核中使用 `alloc` 提供的操作和数据结构，进行动态内存分配的操作，如 `Vec`、`String`、`Box` 等。
 
 !!! note "动态内存分配算法在这里不做要求，本次实验直接使用现有的库赋予内核堆分配能力。"
 
 在 `pkg/kernel/src/interrupt` 文件夹中，增量代码补充包含了如下的模块：
 
-- `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
-- `consts.rs`：有关于中断向量、IRQ 的常量定义。
-- `exceptions.rs`：包含了 CPU 异常的处理函数，并暴露 `register_idt` 用于注册 IDT。
-- `mod.rs`：定义了 `init` 函数，用于初始化中断系统，加载 IDT。
+-   `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
+-   `consts.rs`：有关于中断向量、IRQ 的常量定义。
+-   `exceptions.rs`：包含了 CPU 异常的处理函数，并暴露 `register_idt` 用于注册 IDT。
+-   `mod.rs`：定义了 `init` 函数，用于初始化中断系统，加载 IDT。
 
 ## GDT 与 TSS
 
@@ -179,7 +179,7 @@ impl XApic {
 
 下面以部分操作为例讲解如何进行 APIC 的初始化。
 
-- 检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
+-   检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
 
     ```rust
     CpuId::new().get_feature_info().map(
@@ -187,35 +187,35 @@ impl XApic {
     ).unwrap_or(false)
     ```
 
-- 操作 SPIV 寄存器，启用 APIC 并设置 Spurious IRQ Vector。
+-   操作 SPIV 寄存器，启用 APIC 并设置 Spurious IRQ Vector。
 
     查询文档可知，SPIV 寄存器的偏移量为 0xF0。其位描述如下：
 
-    <table class="inst">
-    <tr>
-        <td class="inst-numnodel">31</td>
-        <td class="inst-numnode" colspan="16"></td>
-        <td class="inst-numnoder">10</td>
-        <td class="inst-numnoder">9</td>
-        <td class="inst-numnoder">8</td>
-        <td class="inst-numnode" colspan="3"></td>
-        <td class="inst-numnoder">4</td>
-        <td class="inst-numnoder">3</td>
-        <td class="inst-numnoder">2</td>
-        <td class="inst-numnoder">1</td>
-        <td class="inst-numnoder">0</td>
-    </tr>
-    <tr>
-        <td colspan="18" class="inst-node-little"></td>
-        <td colspan="1" class="inst-node-little">FC</td>
-        <td colspan="1" class="inst-node-little">EN</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-        <td colspan="1" class="inst-node-little">1</td>
-        <td colspan="1" class="inst-node-little">1</td>
-        <td colspan="1" class="inst-node-little">1</td>
-        <td colspan="1" class="inst-node-little">1</td>
-    </tr>
-    </table>
+      <table class="inst">
+      <tr>
+          <td class="inst-numnodel">31</td>
+          <td class="inst-numnode" colspan="16"></td>
+          <td class="inst-numnoder">10</td>
+          <td class="inst-numnoder">9</td>
+          <td class="inst-numnoder">8</td>
+          <td class="inst-numnode" colspan="3"></td>
+          <td class="inst-numnoder">4</td>
+          <td class="inst-numnoder">3</td>
+          <td class="inst-numnoder">2</td>
+          <td class="inst-numnoder">1</td>
+          <td class="inst-numnoder">0</td>
+      </tr>
+      <tr>
+          <td colspan="18" class="inst-node-little"></td>
+          <td colspan="1" class="inst-node-little">FC</td>
+          <td colspan="1" class="inst-node-little">EN</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+          <td colspan="1" class="inst-node-little">1</td>
+          <td colspan="1" class="inst-node-little">1</td>
+          <td colspan="1" class="inst-node-little">1</td>
+          <td colspan="1" class="inst-node-little">1</td>
+      </tr>
+      </table>
 
     因此，需要在保持其他位不变的情况下，将 EN bit 设置为 1，并将 Vector 设置为 `Irq::Spurious`，但是请注意实际设置的中断向量号需要加上 `Interrupts::IrqBase`。同时，此寄存器的 0-3 bit 无法被修改，始终为 1。
 
@@ -230,88 +230,88 @@ impl XApic {
     self.write(0xF0, spiv);
     ```
 
-- 设置 LVT 寄存器。
+-   设置 LVT 寄存器。
 
     Local Vector Table 寄存器用于设置中断向量号和触发模式。它们的位描述如下：
 
-    <table class="inst">
-    <tr>
-        <td class="inst-numnode" colspan="4"></td>
-        <td class="inst-numnodel">31</td>
-        <td class="inst-numnode" colspan="8"></td>
-        <td class="inst-numnoder">18</td>
-        <td class="inst-numnoder">17</td>
-        <td class="inst-numnoder">16</td>
-        <td class="inst-numnoder">15</td>
-        <td class="inst-numnoder">14</td>
-        <td class="inst-numnoder">13</td>
-        <td class="inst-numnoder">12</td>
-        <td class="inst-numnoder">11</td>
-        <td class="inst-numnode" colspan="2"></td>
-        <td class="inst-numnoder">8</td>
-        <td class="inst-numnode" colspan="3"></td>
-        <td class="inst-numnoder">0</td>
-    </tr>
-    <tr>
-        <td colspan="4">Timer</td>
-        <td colspan="10" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">TP</td>
-        <td colspan="1" class="inst-node-little">M</td>
-        <td colspan="3" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="4" class="inst-node-little">-</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-    </tr>
-    <tr>
-        <td colspan="4">LINT0</td>
-        <td colspan="11" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">M</td>
-        <td colspan="1" class="inst-node-little">TM</td>
-        <td colspan="1" class="inst-node-little">RI</td>
-        <td colspan="1" class="inst-node-little">IP</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="1" class="inst-node-little">-</td>
-        <td colspan="3" class="inst-node-little">DMode</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-    </tr>
-    <tr>
-        <td colspan="4">LINT1</td>
-        <td colspan="11" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">M</td>
-        <td colspan="1" class="inst-node-little">TM</td>
-        <td colspan="1" class="inst-node-little">RI</td>
-        <td colspan="1" class="inst-node-little">IP</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="1" class="inst-node-little">-</td>
-        <td colspan="3" class="inst-node-little">DMode</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-    </tr>
-    <tr>
-        <td colspan="4">ERROR</td>
-        <td colspan="11" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">M</td>
-        <td colspan="3" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="4" class="inst-node-little">-</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-    </tr>
-    <tr>
-        <td colspan="4">PCINT</td>
-        <td colspan="11" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">M</td>
-        <td colspan="3" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="1" class="inst-node-little">-</td>
-        <td colspan="3" class="inst-node-little">DMode</td>
-        <td colspan="4" class="inst-node-little">Vector</td>
-    </tr>
-    </table>
+      <table class="inst">
+      <tr>
+          <td class="inst-numnode" colspan="4"></td>
+          <td class="inst-numnodel">31</td>
+          <td class="inst-numnode" colspan="8"></td>
+          <td class="inst-numnoder">18</td>
+          <td class="inst-numnoder">17</td>
+          <td class="inst-numnoder">16</td>
+          <td class="inst-numnoder">15</td>
+          <td class="inst-numnoder">14</td>
+          <td class="inst-numnoder">13</td>
+          <td class="inst-numnoder">12</td>
+          <td class="inst-numnoder">11</td>
+          <td class="inst-numnode" colspan="2"></td>
+          <td class="inst-numnoder">8</td>
+          <td class="inst-numnode" colspan="3"></td>
+          <td class="inst-numnoder">0</td>
+      </tr>
+      <tr>
+          <td colspan="4">Timer</td>
+          <td colspan="10" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">TP</td>
+          <td colspan="1" class="inst-node-little">M</td>
+          <td colspan="3" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="4" class="inst-node-little">-</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+      </tr>
+      <tr>
+          <td colspan="4">LINT0</td>
+          <td colspan="11" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">M</td>
+          <td colspan="1" class="inst-node-little">TM</td>
+          <td colspan="1" class="inst-node-little">RI</td>
+          <td colspan="1" class="inst-node-little">IP</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="1" class="inst-node-little">-</td>
+          <td colspan="3" class="inst-node-little">DMode</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+      </tr>
+      <tr>
+          <td colspan="4">LINT1</td>
+          <td colspan="11" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">M</td>
+          <td colspan="1" class="inst-node-little">TM</td>
+          <td colspan="1" class="inst-node-little">RI</td>
+          <td colspan="1" class="inst-node-little">IP</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="1" class="inst-node-little">-</td>
+          <td colspan="3" class="inst-node-little">DMode</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+      </tr>
+      <tr>
+          <td colspan="4">ERROR</td>
+          <td colspan="11" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">M</td>
+          <td colspan="3" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="4" class="inst-node-little">-</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+      </tr>
+      <tr>
+          <td colspan="4">PCINT</td>
+          <td colspan="11" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">M</td>
+          <td colspan="3" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="1" class="inst-node-little">-</td>
+          <td colspan="3" class="inst-node-little">DMode</td>
+          <td colspan="4" class="inst-node-little">Vector</td>
+      </tr>
+      </table>
 
-    - Vector 为中断向量号，当中断发生时，CPU 会跳转到中断向量表中对应处理程序执行。
-    - DMode（Delivery Mode）为中断传递模式，本实验中不做理解要求。
-    - DS（Delivery Status）为中断传递状态，只读。
-    - M（Mask）为中断屏蔽位，取值为 1 表示中断已屏蔽。
-    - TP（Timer Periodic Mode）为定时器周期模式，决定定时器周期触发还是仅触发一次。
+    -   Vector 为中断向量号，当中断发生时，CPU 会跳转到中断向量表中对应处理程序执行。
+    -   DMode（Delivery Mode）为中断传递模式，本实验中不做理解要求。
+    -   DS（Delivery Status）为中断传递状态，只读。
+    -   M（Mask）为中断屏蔽位，取值为 1 表示中断已屏蔽。
+    -   TP（Timer Periodic Mode）为定时器周期模式，决定定时器周期触发还是仅触发一次。
 
     其余的位暂时不需要关注，如有兴趣可以参考 APIC 文档下的参考资料。
 
@@ -333,12 +333,12 @@ impl XApic {
     self.write(0x350, 1 << 16); // set Mask
     ```
 
-- 设置计时器相关寄存器。
+-   设置计时器相关寄存器。
 
     APIC 中控制计时器的寄存器包括 TDCR、TICR 和 LVT Timer。其中，TDCR 用于设置分频系数，TICR 用于设置初始计数值。
 
-    - TDCR(0x3E0) 的分频系数决定了总线时钟与计时器时钟的比例，也即计时器的计数频率。
-    - TICR(0x380) 的初始计数值决定了计时器的计数周期，每当计数到 0 时，就会触发中断。
+    -   TDCR(0x3E0) 的分频系数决定了总线时钟与计时器时钟的比例，也即计时器的计数频率。
+    -   TICR(0x380) 的初始计数值决定了计时器的计数周期，每当计数到 0 时，就会触发中断。
 
     分频系数和 TDCR 寄存器的取值关系如下表所示，第二比特总是为 0：
 
@@ -356,7 +356,7 @@ impl XApic {
     self.write(0x380, 0x20000); // set initial count to 0x20000
     ```
 
-- 清除错误状态寄存器。
+-   清除错误状态寄存器。
 
     APIC 中的错误状态寄存器（Error Status Register, 0x280）用于记录 APIC 内部的错误状态。当 APIC 发生错误时，CPU 会将错误信息写入此寄存器。为了避免错误状态寄存器中的错误信息影响后续的错误处理，需要在初始化 APIC 时清除错误状态寄存器中的错误信息。
 
@@ -367,66 +367,66 @@ impl XApic {
     self.write(0x280, 0);
     ```
 
-- 设置 ICR 寄存器。
+-   设置 ICR 寄存器。
 
     中断命令寄存器由两个 32 位寄存器组成，一个在 0x300，另一个在 0x310。它用于向不同的处理器发送中断。在写入 0x300 时发出中断，但在写入 0x310 时不发出中断。因此，要发送中断命令，应首先写入 0x310，然后写入 0x300。
 
     中断命令寄存器的位描述如下：
 
-    <table class="inst">
-    <tr>
-        <td class="inst-numnode" colspan="3"></td>
-        <td class="inst-numnodel">63</td>
-        <td class="inst-numnode" colspan="3"></td>
-        <td class="inst-numnoder">56</td>
-        <td class="inst-numnode" colspan="17"></td>
-        <td class="inst-numnoder">32</td>
-    </tr>
-    <tr>
-        <td colspan="3" >0x310</td>
-        <td colspan="5" class="inst-node-little">DF</td>
-        <td colspan="18" class="inst-node-little">-</td>
-    </tr>
-    <tr>
-        <td class="inst-numnode" colspan="3"></td>
-        <td class="inst-numnodel">31</td>
-        <td class="inst-numnode" colspan="4"></td>
-        <td class="inst-numnoder">20</td>
-        <td class="inst-numnode" colspan="1"></td>
-        <td class="inst-numnoder">18</td>
-        <td class="inst-numnode" colspan="1"></td>
-        <td class="inst-numnoder">16</td>
-        <td class="inst-numnoder">15</td>
-        <td class="inst-numnoder">14</td>
-        <td class="inst-numnoder">13</td>
-        <td class="inst-numnoder">12</td>
-        <td class="inst-numnoder">11</td>
-        <td class="inst-numnode" colspan="2"></td>
-        <td class="inst-numnoder">8</td>
-        <td class="inst-numnode" colspan="4"></td>
-        <td class="inst-numnoder">0</td>
-    </tr>
-    <tr>
-        <td colspan="3" >0x300</td>
-        <td colspan="6" class="inst-node-little">-</td>
-        <td colspan="2" class="inst-node-little">DSH</td>
-        <td colspan="2" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">TM</td>
-        <td colspan="1" class="inst-node-little">LV</td>
-        <td colspan="1" class="inst-node-little">-</td>
-        <td colspan="1" class="inst-node-little">DS</td>
-        <td colspan="1" class="inst-node-little">DM</td>
-        <td colspan="3" class="inst-node-little">DMode</td>
-        <td colspan="5" class="inst-node-little">Vector</td>
-    </tr>
-    </table>
+      <table class="inst">
+      <tr>
+          <td class="inst-numnode" colspan="3"></td>
+          <td class="inst-numnodel">63</td>
+          <td class="inst-numnode" colspan="3"></td>
+          <td class="inst-numnoder">56</td>
+          <td class="inst-numnode" colspan="17"></td>
+          <td class="inst-numnoder">32</td>
+      </tr>
+      <tr>
+          <td colspan="3" >0x310</td>
+          <td colspan="5" class="inst-node-little">DF</td>
+          <td colspan="18" class="inst-node-little">-</td>
+      </tr>
+      <tr>
+          <td class="inst-numnode" colspan="3"></td>
+          <td class="inst-numnodel">31</td>
+          <td class="inst-numnode" colspan="4"></td>
+          <td class="inst-numnoder">20</td>
+          <td class="inst-numnode" colspan="1"></td>
+          <td class="inst-numnoder">18</td>
+          <td class="inst-numnode" colspan="1"></td>
+          <td class="inst-numnoder">16</td>
+          <td class="inst-numnoder">15</td>
+          <td class="inst-numnoder">14</td>
+          <td class="inst-numnoder">13</td>
+          <td class="inst-numnoder">12</td>
+          <td class="inst-numnoder">11</td>
+          <td class="inst-numnode" colspan="2"></td>
+          <td class="inst-numnoder">8</td>
+          <td class="inst-numnode" colspan="4"></td>
+          <td class="inst-numnoder">0</td>
+      </tr>
+      <tr>
+          <td colspan="3" >0x300</td>
+          <td colspan="6" class="inst-node-little">-</td>
+          <td colspan="2" class="inst-node-little">DSH</td>
+          <td colspan="2" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">TM</td>
+          <td colspan="1" class="inst-node-little">LV</td>
+          <td colspan="1" class="inst-node-little">-</td>
+          <td colspan="1" class="inst-node-little">DS</td>
+          <td colspan="1" class="inst-node-little">DM</td>
+          <td colspan="3" class="inst-node-little">DMode</td>
+          <td colspan="5" class="inst-node-little">Vector</td>
+      </tr>
+      </table>
 
     具体的配置配置细节这里不做理解要求，只需要按照如下描述进行配置即可：
 
-    - DSH（Destination Shorthand）：设置为 2，始终将中断发送给所有 APIC
-    - DMode（Delivery Mode）：设置为 5，INIT De-assert 模式
-    - LV（Level）：设置为 0，INIT De-assert 模式
-    - TM（Trigger Mode）：设置为 1，INIT De-assert 模式
+    -   DSH（Destination Shorthand）：设置为 2，始终将中断发送给所有 APIC
+    -   DMode（Delivery Mode）：设置为 5，INIT De-assert 模式
+    -   LV（Level）：设置为 0，INIT De-assert 模式
+    -   TM（Trigger Mode）：设置为 1，INIT De-assert 模式
 
     参考代码如下：
 
@@ -529,7 +529,7 @@ enable_irq(Irq::Serial0 as u8, 0); // enable IRQ4 for CPU0
 
 按照下列描述，补全 `src/drivers/input.rs` 驱动代码：
 
-1. 使用你喜欢的数据结构存储用户输入的数据。
+1.  使用你喜欢的数据结构存储用户输入的数据。
 
     此缓冲区大小和存储的数据类型由你自行决定，一个参考的缓冲区大小为 128。
 
@@ -544,7 +544,7 @@ enable_irq(Irq::Serial0 as u8, 0); // enable IRQ4 for CPU0
         crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
         ```
 
-2. 处理数据结构的初始化，暴露基本功能。
+2.  处理数据结构的初始化，暴露基本功能。
 
     初始化 `INPUT_BUFFER`，你可以直接使用 `lazy_static` 初始化：
 
@@ -568,11 +568,11 @@ enable_irq(Irq::Serial0 as u8, 0); // enable IRQ4 for CPU0
     }
     ```
 
-3. 实现并暴露 `pop_key` 函数。
+3.  实现并暴露 `pop_key` 函数。
 
     利用 `try_pop_key` 函数，从缓冲区中**阻塞**取出数据：循环等待，直到缓冲区中有数据，并返回获取到的数据。
 
-4. 实现并暴露 `get_line` 函数。
+4.  实现并暴露 `get_line` 函数。
 
     从缓冲区中**阻塞**取出数据，并将其实时打印出来。直到遇到换行符 `\n`。将数据转换为 `String` 类型，并返回。
 
@@ -580,7 +580,7 @@ enable_irq(Irq::Serial0 as u8, 0); // enable IRQ4 for CPU0
 
     删除操作可以通过发送 `0x08`、`0x20`、`0x08` 序列实现。你可以在串口驱动中将它封装为 `backspace` 函数。
 
-    *Note: `String::with_capacity` 可以帮助你预先分配足够的内存。*
+    _Note: `String::with_capacity` 可以帮助你预先分配足够的内存。_
 
 串口的输入中断与时钟中断类似，在 `src/interrupt/serial.rs` 中补全代码，为 **IRQ4 Serial0** 设置中断处理程序：
 

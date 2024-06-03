@@ -26,17 +26,17 @@
 
 在 `pkg/storage/src/common` 中，提供了众多有关存储的底层结构：
 
-- `block.rs`: 提供了数据块的抽象，用于存储数据，内部为指定大小的 `u8` 数组。
-- `device.rs`: 目前只提供了块设备的抽象，提供分块读取数据的接口。
-- `error.rs`: 定义了文件系统、磁盘、文件名可能遇到的一系列错误，并定义了以 `FsError` 为错误类型的 `Result`。
-- `filesystem.rs`: 定义了文件系统的抽象，提供了文件系统的基本操作接口。
-- `io.rs`: 定义了 `Read`、`Write` 和 `Seek` 的行为，不过在本次实验中只需要实现 `Read`。
-- `metadata.rs`：定义了统一的文件元信息，包含文件名、修改时间、大小等信息。
+-   `block.rs`: 提供了数据块的抽象，用于存储数据，内部为指定大小的 `u8` 数组。
+-   `device.rs`: 目前只提供了块设备的抽象，提供分块读取数据的接口。
+-   `error.rs`: 定义了文件系统、磁盘、文件名可能遇到的一系列错误，并定义了以 `FsError` 为错误类型的 `Result`。
+-   `filesystem.rs`: 定义了文件系统的抽象，提供了文件系统的基本操作接口。
+-   `io.rs`: 定义了 `Read`、`Write` 和 `Seek` 的行为，不过在本次实验中只需要实现 `Read`。
+-   `metadata.rs`：定义了统一的文件元信息，包含文件名、修改时间、大小等信息。
 
 同时，有了接口定义了统一的行为之后，可以利用他们来实现具有更丰富功能的结构体：
 
-- `filehandle.rs`: 定义了文件句柄，它持有一个实现了 `FileIO` trait 的字段，并维护了文件的元数据。
-- `mount.rs`: 定义了挂载点，它持有一个实现了 `Filesystem` trait 的字段，并维护了一个固定的挂载点路径，它会将挂载点路径下的文件操作请求转发给内部的文件系统。
+-   `filehandle.rs`: 定义了文件句柄，它持有一个实现了 `FileIO` trait 的字段，并维护了文件的元数据。
+-   `mount.rs`: 定义了挂载点，它持有一个实现了 `Filesystem` trait 的字段，并维护了一个固定的挂载点路径，它会将挂载点路径下的文件操作请求转发给内部的文件系统。
 
 在 `pkg/storage/src/partition/mod.rs` 中，定义了 `Partition` 结构体，和 `PartitionTable` trait，用于统一块设备的分区表行为。
 
@@ -119,10 +119,10 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 回顾一下之前编写串口驱动的过程，它与即将实现的驱动类似，都是 PIO 来进行数据传输：
 
-- 根据规范定义端口，使用端口进行读写操作控制外设寄存器
-- 按照规定修改外设寄存器，使得设备按照预期的方式运行
-- 通过数据和状态寄存器，实现数据的发送和接收
-- 通过启用设备的中断，实现异步的数据传输（与轮询方式相对）
+-   根据规范定义端口，使用端口进行读写操作控制外设寄存器
+-   按照规定修改外设寄存器，使得设备按照预期的方式运行
+-   通过数据和状态寄存器，实现数据的发送和接收
+-   通过启用设备的中断，实现异步的数据传输（与轮询方式相对）
 
 在 [ATA 硬盘简介](../../wiki/ata.md) 中，介绍了 ATA 硬盘的基本工作原理，以及相关概念。
 
@@ -260,30 +260,30 @@ storage = { package = "ysos_storage", path = "../storage" }
 
 在实现了上述文件系统的数据格式之后，你需要在 `fs/fat16/impls.rs` 中实现你需要的一系列函数，包括但不限于：
 
-- 将 `cluster: &Cluster` 转换为 `sector`
-- 根据当前 `cluster: &Cluster`，利用 FAT 表，获取下一个 `cluster`
-- 根据当前文件夹 `dir: &Directory` 信息，获取名字为 `name: &str` 的 `DirEntry`
-- 遍历文件夹 `dir: &Directory`，获取其中文件信息
-- 其他你可能需要的帮助函数
+-   将 `cluster: &Cluster` 转换为 `sector`
+-   根据当前 `cluster: &Cluster`，利用 FAT 表，获取下一个 `cluster`
+-   根据当前文件夹 `dir: &Directory` 信息，获取名字为 `name: &str` 的 `DirEntry`
+-   遍历文件夹 `dir: &Directory`，获取其中文件信息
+-   其他你可能需要的帮助函数
 
 在实现了一系列函数后，为 `impl FileSystem for Fat16` 补全实现：
 
-- `Iterator<Item = Metadata>` 可以简单利用 `Vec::into_iter` 作为返回值，不需要考虑懒求值。
-- `FileHandle` 的 `file` 部分直接使用 `fs/fat16/file.rs` 中定义的 `File` 结构体，并使用 `Box` 包装。
+-   `Iterator<Item = Metadata>` 可以简单利用 `Vec::into_iter` 作为返回值，不需要考虑懒求值。
+-   `FileHandle` 的 `file` 部分直接使用 `fs/fat16/file.rs` 中定义的 `File` 结构体，并使用 `Box` 包装。
 
 最后，为 `File` 实现 `Read` trait，需要注意：
 
-- `cluster` 链需要使用上述函数读取 FAT 表进行获取。
-- `offset` 用于记录当前文件读取到了什么位置，需要实时更新。
-- 一个 `cluster` 中存在多个 `sector`，你需要根据 `bpb` 信息进行读取操作。
-- `buf` 参数是不定长的，你需要考虑文件长度、块长度以及缓冲区长度，来决定什么时候终止读取。
+-   `cluster` 链需要使用上述函数读取 FAT 表进行获取。
+-   `offset` 用于记录当前文件读取到了什么位置，需要实时更新。
+-   一个 `cluster` 中存在多个 `sector`，你需要根据 `bpb` 信息进行读取操作。
+-   `buf` 参数是不定长的，你需要考虑文件长度、块长度以及缓冲区长度，来决定什么时候终止读取。
 
 除此之外，本部分的实现不作任何要求，阅读并理解给出的 [FAT 文件系统](../../wiki/fat.md) 内容，尝试实现文件系统的功能。
 
 同时，由于文件系统的实现相对较为严格，笔者鼓励大家多多查找相关已有实现，参考完善自己的文件系统，下面给出几个可供参考的仓库：
 
-- [embedded-sdmmc-rs](https://github.com/rust-embedded-community/embedded-sdmmc-rs)
-- [rust-fatfs](https://github.com/rafalh/rust-fatfs)
+-   [embedded-sdmmc-rs](https://github.com/rust-embedded-community/embedded-sdmmc-rs)
+-   [rust-fatfs](https://github.com/rafalh/rust-fatfs)
 
 ## 接入操作系统
 

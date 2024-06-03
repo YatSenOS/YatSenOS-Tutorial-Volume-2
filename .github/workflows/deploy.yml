@@ -2,8 +2,8 @@ name: Deploy on GitHub Pages
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "lab/*"]
-    paths: ["docs/**"]
+    branches: ['main', 'lab/*']
+    paths: ['docs/**']
 
 permissions:
   contents: read
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 jobs:

@@ -11,7 +11,8 @@
 基于实用性和实现的简便考虑，实验将采用串口作为操作系统的输入输出接口，从而避免对输出图像相关驱动、渲染相关问题的考虑。通过将操作系统的输出重定向到串口和终端程序，让它们完成输出信息的显示渲染工作。
 
 !!! note "串口与屏幕显示"
-      串口输出与常见的屏幕显示不同，这是两套**独立**的输出逻辑，请大家注意甄别。
+
+    串口输出与常见的屏幕显示不同，这是两套**独立**的输出逻辑，请大家注意甄别。
 
 ## UART 与串口
 
@@ -22,10 +23,10 @@
 2. 全双工通信：UART 采用全双工通信方式，发送方和接收方可以同时发送和接收数据。
 
 !!! note "关于 UART 细节"
-      经讨论，TA 们认为 UART 硬件细节不是实验的重点，因此不要求同学们掌握 UART 细节，只需了解 UART 16550 接口的调用方法即可。
 
-      如果你对 UART 协议的细节感兴趣，可以参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports) 以及 [UART串口知识整理 - 知乎](https://zhuanlan.zhihu.com/p/467003598)。
+    经讨论，TA 们认为 UART 硬件细节不是实验的重点，因此不要求同学们掌握 UART 细节，只需了解 UART 16550 接口的调用方法即可。
 
+    如果你对 UART 协议的细节感兴趣，可以参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports) 以及 [UART串口知识整理 - 知乎](https://zhuanlan.zhihu.com/p/467003598)。
 
 ## UART 16550
 
@@ -41,15 +42,15 @@ COM 端口和 I/O 端口的映射关系你可以在 [Port Addresses](https://wik
 
 !!! note "关于 I/O 的访问方式"
 
-      CPU 与计算机外部 I/O 设备的常见交互模式分为 Memory-mapped I/O (MMIO) 和 Port-mapped I/O 两种，这两种方式也被称为统一编址和独立编址。
+    CPU 与计算机外部 I/O 设备的常见交互模式分为 Memory-mapped I/O (MMIO) 和 Port-mapped I/O 两种，这两种方式也被称为统一编址和独立编址。
 
-      - Memory-mapped I/O (MMIO) 即通过将需要进行交互的 I/O 设备的相关寄存器映射到某一段内存地址空间，从而实现对 I/O 设备的访问。在启用虚拟内存机制的系统中，这些内存空间**同样需要通过虚拟地址进行访问**。
+    - Memory-mapped I/O (MMIO) 即通过将需要进行交互的 I/O 设备的相关寄存器映射到某一段内存地址空间，从而实现对 I/O 设备的访问。在启用虚拟内存机制的系统中，这些内存空间**同样需要通过虚拟地址进行访问**。
 
-      - Port-mapped I/O 即将 I/O 设备的相关寄存器编址在相对与内存地址独立的地址空间，并使用专门的指令与 I/O 设备进行交互。在 x86 系统中，I/O 端口的地址空间为 0x0000 - 0xFFFF，可以通过 `in` 和 `out` 指令进行访问。
+    - Port-mapped I/O 即将 I/O 设备的相关寄存器编址在相对与内存地址独立的地址空间，并使用专门的指令与 I/O 设备进行交互。在 x86 系统中，I/O 端口的地址空间为 0x0000 - 0xFFFF，可以通过 `in` 和 `out` 指令进行访问。
 
-      由于历史遗留原因，x86 架构中同时存在 MMIO 和 port-mapped I/O 两种访问方式，不过由于 Port I/O 地址空间太小和其他的一些需求，现代硬件越来越偏向于使用 MMIO。
+    由于历史遗留原因，x86 架构中同时存在 MMIO 和 port-mapped I/O 两种访问方式，不过由于 Port I/O 地址空间太小和其他的一些需求，现代硬件越来越偏向于使用 MMIO。
 
-      有关串口设备驱动实现的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
+    有关串口设备驱动实现的更多信息，请参考 [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)。
 
 在 x86 体系中，I/O 端口的读写是通过 `in` 和 `out` 指令完成的。`in` 指令用于从 I/O 端口读取数据，`out` 指令用于向 I/O 端口写入数据。
 
@@ -63,4 +64,4 @@ COM 端口和 I/O 端口的映射关系你可以在 [Port Addresses](https://wik
 2. [Serial Ports - OSDev](https://wiki.osdev.org/Serial_Ports)
 3. [UART 16550 Tutorial - byterunner](http://byterunner.com/16550.html)
 4. [UART 16550 Tutorial](http://www.larvierinehart.com/serial/serialadc/serial.htm)
-5. [UART串口知识整理 - 知乎](https://zhuanlan.zhihu.com/p/467003598)
+5. [UART 串口知识整理 - 知乎](https://zhuanlan.zhihu.com/p/467003598)

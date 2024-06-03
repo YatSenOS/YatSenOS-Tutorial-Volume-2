@@ -39,8 +39,8 @@
 
 如果想要变更安装路径，可以通过指定如下环境变量来实现：
 
-- `RUSTUP_HOME`：rustup 的安装路径
-- `CARGO_HOME`：cargo 的安装路径
+-   `RUSTUP_HOME`：rustup 的安装路径
+-   `CARGO_HOME`：cargo 的安装路径
 
 rustup 将会把 `CARO_HOME\bin` 添加到 `PATH` 环境变量中。
 
@@ -48,12 +48,12 @@ rustup 将会把 `CARO_HOME\bin` 添加到 `PATH` 环境变量中。
 
 rust 提供了两种 windows 上的工具链：`msvc` 和 `gnu`，详细信息可以参考 [Windows - The rustup book](https://rust-lang.github.io/rustup/installation/windows.html)。
 
-- `msvc`：使用 Visual Studio 的 C++ 编译器，需要安装 Visual Studio。
+-   `msvc`：使用 Visual Studio 的 C++ 编译器，需要安装 Visual Studio。
 
     在安装 Visual Studio 时，需要选择如下组件：
 
-    - `MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)`
-    - `Windows 11 SDK`
+    -   `MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)`
+    -   `Windows 11 SDK`
 
     `msvc` 工具链可以提供更好的 Windows 应用兼容性，也是 Windows 上开发 rust 应用推荐的工具链。
 
@@ -61,7 +61,7 @@ rust 提供了两种 windows 上的工具链：`msvc` 和 `gnu`，详细信息�
 
     此工具链本体占用约为 600MB。推荐本来就有 Visual Studio 的同学使用此工具链。
 
-- `gnu`：使用 GNU 工具链，需要安装 MinGW，会随工具链一起自动安装。
+-   `gnu`：使用 GNU 工具链，需要安装 MinGW，会随工具链一起自动安装。
 
     此工具链总体占用约 1GB。推荐未安装 Visual Studio 的同学使用此工具链。
 

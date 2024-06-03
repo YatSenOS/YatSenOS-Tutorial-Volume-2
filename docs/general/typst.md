@@ -34,7 +34,6 @@
 
 之后，在当前文件夹中打开终端或使用 VSCode，正常使用 typst 即可，例如：
 
-
 !!! note "保证 typst 的工作路径为 `.`"
 
     引用其他更上层的目录是被 Typst 默认禁止的，这是为了避免[任意文件读取](https://github.com/typst/typst/issues/219)问题。
@@ -165,4 +164,4 @@ $ sum_(k=1)^n k = (n(n+1)) / 2 $
 
 会被渲染成单独的一行：
 
-$$ \sum_{k=1}^n k = \frac{n(n+1)}{2} $$
+$$ \sum\_{k=1}^n k = \frac{n(n+1)}{2} $$

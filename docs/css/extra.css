@@ -11,11 +11,11 @@
   }
 
   h5 {
-    font-size: .75rem;
+    font-size: 0.75rem;
   }
 
   h6 {
-    font-size: .7rem;
+    font-size: 0.7rem;
   }
 
   details,
@@ -54,22 +54,22 @@ h2:before {
 }
 h3:before {
   counter-increment: h3;
-  content: counter(h2) "." counter(h3);
+  content: counter(h2) '.' counter(h3);
   margin-right: 0.8rem;
 }
 h4:before {
   counter-increment: h4;
-  content: counter(h2) "." counter(h3) "." counter(h4);
+  content: counter(h2) '.' counter(h3) '.' counter(h4);
   margin-right: 0.8rem;
 }
 h5:before {
   counter-increment: h5;
-  content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5);
+  content: counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5);
   margin-right: 0.8rem;
 }
 h6:before {
   counter-increment: h6;
-  content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "."
+  content: counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5) '.'
     counter(h6);
   margin-right: 0.8rem;
 }
@@ -84,20 +84,21 @@ table.wikitable {
   color: var(--md-default-fg-color);
 }
 
-.wikitable th,.wikitable td {
+.wikitable th,
+.wikitable td {
   border: 1px #aaa solid;
-  padding: 0.2em
+  padding: 0.2em;
 }
 
 .wikitable th {
   background-color: var(--md-code-bg-color);
-  text-align: center
+  text-align: center;
 }
 
 .wikitable caption {
   font-weight: bold;
 }
 
-[data-md-color-scheme="default"] .transparent-img {
-  filter: invert(1) hue-rotate(180deg)
+[data-md-color-scheme='default'] .transparent-img {
+  filter: invert(1) hue-rotate(180deg);
 }
