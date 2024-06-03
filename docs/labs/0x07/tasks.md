@@ -610,7 +610,169 @@ pub fn init_kernel_vm(mut self, pages: &KernelPages) -> Self {
 
 ## 内核栈的自动增长
 
+在 Lab 3 中简单实现了用户进程的栈区自动增长，但是内核的栈区并没有进行相应的处理，这将导致内核栈溢出时无法进行自动增长，从而导致内核崩溃。
+
+为了在之前的实验中避免这种情况，实验通过 bootloader 直接为内核分配了 512 \* 4 KiB = 2 MiB 的栈区来避免可能的栈溢出问题。但这明显是不合理的，因为内核的栈区并不需要这么大的空间。
+
+与其分配一个固定大小的栈区，不如在缺页中断的基础上实现一个简单的栈区自动增长机制，当栈区溢出时，自动为其分配新的页面。
+
+需要用到的配置项在 Lab 1 中已经给出，即 `kernel_stack_auto_grow`，对它的行为进行如下约定：
+
+- 默认为 `0`，这时内核栈区所需的全部页面（页面数量为 `kernel_stack_size`）将会在内核加载时一次性分配。
+- 当这一参数为非零值时，表示内核栈区的初始化页面数量，从栈顶开始向下分配这一数量的初始化页面，并交由内核进行自己的栈区管理。
+
+```rust
+let (stack_start, stack_size) = if config.kernel_stack_auto_grow > 0 {
+    let init_size = config.kernel_stack_auto_grow;
+    let init_bottom = config.kernel_stack_address
+        + (config.kernel_stack_size - init_size) * 0x1000;
+    (init_bottom, init_size)
+} else {
+    (config.kernel_stack_address, config.kernel_stack_size)
+};
+```
+
+与用户态栈类似，你可以在 `pkg/kernel/src/proc/vm/stack.rs` 中将这些信息定义为常量，并在 `Stack` 的 `kstack` 函数中使用这些常量来初始化内核栈区。
+
+> 别忘了修改配置文件使其描述的区域一致！
+
+最后，在缺页中断的处理过程中，对权限、区域进行判断。如果发生缺页中断的进程是内核进程，就**不要设置用户权限标志位**。
+
+!!! success "阶段性成果"
+
+    尝试能使你的内核启动的最小的 `kernel_stack_auto_grow` 值，观察内核栈的自动增长情况。
+
+    并尝试回答思考题 3，它或许会对你的理解有所帮助。
+
 ## 用户态堆
+
+最后，为了提供给用户程序更多的内存管理能力，还需要实现一个系统调用：`sys_brk`，用于调整用户程序的堆区大小。
+
+!!! note "关于 `brk` 系统调用……"
+
+    `brk` 系统调用是一个古老的系统调用，本意为调整 Program Break（程序断点）指针的位置，该指针最初指进程的数据段末尾，但这一断点可以向上增长，进而留出灵活可控的空间作为“堆内存”。
+
+    > 那句老话：“堆向高地址增长，栈向低地址增长”。你可以在本实验开头的 “Linux 进程内存” 部分中找到它。
+
+    而 `brk` 系统调用则是用于调整这一断点的位置，从而调整堆区的大小。在开启地址随机化后，它在初始化时会被加上一个随机的偏移量，从而使得堆区的地址不再是固定的。
+
+    在 C 中，提供了 `brk` 和 `sbrk` 两个函数来调用这一系统调用，在现代的 Linux 中，`brk` 系统调用的功能已经逐渐被更灵活的 `mmap` 系统调用所取代。
+
+    但是在本实验中，为了简化内存管理的实现，仍然使用 `brk` 系统调用来调整用户程序的堆区大小，进而为后续可能的实验提供基础。
+
+首先，参考给出代码中的 `pkg/kernel/src/proc/vm/heap.rs`：
+
+```rust
+// user process runtime heap
+// 0x100000000 bytes -> 4GiB
+// from 0x0000_2000_0000_0000 to 0x0000_2000_ffff_fff8
+pub const HEAP_START: u64 = 0x2000_0000_0000;
+pub const HEAP_PAGES: u64 = 0x100000;
+pub const HEAP_SIZE: u64 = HEAP_PAGES * crate::memory::PAGE_SIZE;
+pub const HEAP_END: u64 = HEAP_START + HEAP_SIZE - 8;
+
+/// User process runtime heap
+///
+/// always page aligned, the range is [base, end)
+pub struct Heap {
+    /// the base address of the heap
+    ///
+    /// immutable after initialization
+    base: VirtAddr,
+
+    /// the current end address of the heap
+    ///
+    /// use atomic to allow multiple threads to access the heap
+    end: Arc<AtomicU64>,
+}
+```
+
+在 `Heap` 中，`base` 表示堆区的起始地址，`end` 表示堆区的结束地址，`end` 是一个 `Arc<AtomicU64>` 类型的原子变量，因此它在多个进程的操作中被并发访问。
+
+> 也就是说，用户程序的堆区是在父子进程之间共享的，`fork` 时不需要复制堆区内容，只需要复制 `Heap` 结构体即可。
+
+在本实验设计中，堆区的最大大小固定、起始地址固定，堆区的大小由 `end` 变量来控制，当用户程序调用 `brk` 系统调用时，内核会根据用户程序传入的参数来调整 `end` 的值，并进行相应的页面映射，从而调整堆区的大小。
+
+> 如果你还是想和 Linux 对齐，`brk` 系统调用的调用号为 12。
+
+下面对 `brk` 系统调用的参数和行为进行简单的约定：
+
+- `brk` 系统调用的参数是一个可为 `NULL` 的指针，表示用户程序希望调整的堆区结束地址；
+- 如果参数为 `NULL`，则表示用户程序希望获取当前的堆区结束地址，即返回 `end` 的值；
+- 在系统调用的实现时，用户参数采用 `0` 表示 `NULL`，返回值采用 `-1` 表示失败；
+- 在内核内部处理时，参数使用 `Option<VirtAddr>` 进行传递，`None` 表示用户程序传入的参数为 `NULL`；`brk` 的返回值也为 `Option<VirtAddr>`，表示内核调整后的堆区结束地址，如果调整失败则返回 `None`；
+- 如果用户程序传入的参数不为 `NULL`，则检查用户传入的地址是否合法，即在 `[HEAP_START, HEAP_END]` 区间内，如果不合法则返回 `None`。
+
+根据上述约定，给出用户态的系统调用函数：
+
+```rust
+#[inline(always)]
+pub fn sys_brk(addr: Option<usize>) -> Option<usize> {
+    const BRK_FAILED: usize = !0;
+    match syscall!(Syscall::Brk, addr.unwrap_or(0)) {
+        BRK_FAILED => None,
+        ret => Some(ret),
+    }
+}
+```
+
+对于有效输入的处理，需要满足如下行为：
+
+- 初始化堆区时，`base` 和 `end` 的值均为 `HEAP_START`；
+- 如果用户传入的地址为 `base`，即用户希望释放整个堆区；
+- 如果用户传入的地址比当前 `end` 小，即用户希望缩小堆区，对指向地址向上对齐到页边界，释放多余的页面；
+- 如果用户传入的地址比当前 `end` 大，即用户希望扩大堆区，对指向地址向上对齐到页边界，分配新的页面。
+
+对于一段典型的系统调用过程，可以参考如下代码：
+
+```rust
+let heap_start = sys_brk(None).unwrap();
+let heap_end = heap_start + HEAP_SIZE;
+
+let ret = sys_brk(Some(heap_end)).expect("Failed to allocate heap");
+
+assert!(ret == heap_end, "Failed to allocate heap");
+```
+
+最后，别忘了为 `Heap` 实现 `clean_up` 函数，用于释放堆区的页面，对于连续的堆区页面释放可以参考 `Stack` 进行实现，这里不再赘述。
+
+在实现了 `sys_brk` 系统调用后，你可以在用户程序中使用 `brk` 系统调用来调整堆区的大小，从而实现用户程序的内存管理。
+
+如果直接替换现有的用户态堆分配，则很难找出可能存在的问题，因此下面给出一个测试和实现流程作为参考：
+
+1. 新建一个用户程序，参考上述代码，尝试在其中使用 `brk` 系统调用来调整堆区的大小，并进行写入和读取操作；
+2. 若上述操作没有问题，则可以在 `lib` 中实现可选的第二个内存分配器（参考给出代码 `pkg/lib/src/allocator/brk.rs`）；
+
+    > 内存分配器的自主实现不是本次实验的内容，因此这里直接使用 `linked_list_allocator` 进行代劳。
+    >
+    > 在后续的实验中，如果你想要自行实现内存管理算法，可以参考给出的方式添加 `feature` 对代码进行隔离，以便于测试和调试。
+
+3. 尝试在进程中使用如下方式来暂时使用新的内存分配器：
+
+   ```diff
+   [dependencies]
+   - lib = { package = "yslib", path = "../../lib" }
+
+   + [dependencies.lib]
+   + package = "yslib"
+   + path = "../../lib"
+   + default-features = false
+   + features = ["brk_alloc"]
+   ```
+
+4. 在你测试通过后，可以将其作为默认的内存分配器：
+
+   ```diff
+   [features]
+   - default = ["kernel_alloc"]
+   + default = ["brk_alloc"]
+   ```
+
+如果想要实现一系列操作的自主测试，可以在自定义的用户程序中进行一系列的操作，或者直接将其实现为接受用户输入的 Shell 命令，进一步测试并记录你的 `brk` 系统调用的行为。
+
+!!! success "阶段性成果"
+
+    你应该能够使用新的内存分配器来让之前的每个用户程序正常执行了。
 
 ## 思考题
 
@@ -618,4 +780,17 @@ pub fn init_kernel_vm(mut self, pages: &KernelPages) -> Self {
 
 2. 为什么要通过 `Arc::strong_count` 来获取 `Arc` 的引用计数？查看它的定义，它和一般使用 `&self` 的方法有什么不同？出于什么考虑不能直接通过 `&self` 来进行这一操作？
 
-## 加分项
+3. bootloader 加载内核并为其分配初始栈区时，至少需要多少页内存才能保证内核正常运行？为什么？
+
+    _提示：内核实现缺页中断的处理时，依赖于哪些子系统？_
+
+4. 尝试查找资料，了解 `mmap`、`munmap` 和 `mprotect` 系统调用的功能和用法，回答下列问题：
+
+    - `mmap` 的主要功能是什么？它可以实现哪些常见的内存管理操作？
+    - `munmap` 的主要功能是什么？什么时候需要使用 `munmap`？
+    - `mprotect` 的主要功能是什么？使用 `mprotect` 可以实现哪些内存保护操作？
+    - 编写 C 程序，使用 `mmap` 将一个文件映射到内存中，并读写该文件的内容。
+
+        _思考：文件内容什么时候会被写入到磁盘？_
+
+    - 综合考虑有关内存、文件、I/O 等方面的知识，讨论为什么 `mmap` 系统调用在现代操作系统中越来越受欢迎，它具有哪些优势？
