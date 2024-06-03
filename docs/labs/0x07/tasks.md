@@ -377,7 +377,236 @@ impl core::fmt::Display for Process {
 
 ## 用户程序的内存释放
 
+在经过上述的讨论和实现后，目前进程的内存管理已经包含了栈区、堆区和 ELF 文件映射三部分，但是在进程退出时，这些内存区域并没有被释放，内存没有被回收，无法被其他程序复用。
+
+不过，在实现了帧分配器的内存回收、进程的内存统计后，进程退出时的内存释放也将得以实现。
+
+### 页表上下文的伏笔
+
+!!! tip "关于本实验的内存模型……"
+
+    还记得 `fork` 的实现吗？在 Linux 等真实世界的操作系统中，`fork` 不会真正复制物理内存，而是使用写时复制 (Copy-On-Write) 的技术，只有在子进程或父进程修改内存时才会进行复制。
+
+    但在本实验中，出于并发等实验功能的实现简易性，`fork` 得到的进程与父进程**共享页面和页表**，因此在释放内存时要注意不要影响到其他进程。
+
+`PageTableContext` 是自 Lab 3 就给出的页表上下文结构，如果你注意过它的定义，或许会发现自那时就埋下的伏笔——没印象也无妨，它的定义如下所示：
+
+```rust
+pub struct PageTableContext {
+    pub reg: Arc<Cr3RegValue>,
+}
+```
+
+> 笔者打赌绝大部分的读者可能会是第一次打开 `proc/paging.rs` 文件……
+
+在目前的项目中，你应当能看到它实现的两个不同的方法：`clone_level_4` 和 `fork`：
+
+```rust
+pub fn clone_level_4(&self) -> Self {
+    // 1. alloc new page table
+    // ...
+
+    // 2. copy current page table to new page table
+    // ...
+
+    // 3. create page table
+    Self {
+        reg: Arc::new(
+            Cr3RegValue::new(page_table_addr, Cr3Flags::empty())
+        ),
+    }
+}
+
+pub fn fork(&self) -> Self {
+    // forked process shares the page table
+    Self {
+        reg: self.reg.clone(),
+    }
+}
+```
+
+- `clone_level_4` 用于复制当前页表（仅第四级页表），并将其作为一个新的页表上下文返回，用于 `spawn` 时复制内核页表；
+- `fork` 则是直接对 `Arc<Cr3RegValue>` 进行 `clone` 操作，使得新的进程与父进程共享页表。
+
+也即，在目前的实现中，对于每一棵独立的“进程树”，它们的页表是独立的，但是在同一棵“进程树”中，它们的页表是共享的。
+
+> 这里仅是一个简单的表示，本实验并没有真正去记录有关“树”的信息，只是为了方便理解。
+
+既然 `Arc` 表示“原子引用计数”，也就意味着可以通过它来确定**”当前页表被多少个进程共享“**，从而在释放内存时，只有在最后一个进程退出时才释放共享的内存。
+
+为 `PageTableContext` 添加一个 `using_count` 方法，用于获取当前页表被引用的次数：
+
+```rust
+pub fn using_count(&self) -> usize {
+    Arc::strong_count(&self.reg)
+}
+```
+
+### 内存释放的实现
+
+出于模块化设计，先为 `Stack` 实现 `clean_up` 函数，由于栈是一块连续的内存区域，且进程间不共享栈区，因此在进程退出时直接释放栈区的页面即可。
+
+```rust
+impl Stack {
+    fn clean_up(
+        &mut self,
+        // following types are defined in
+        //   `pkg/kernel/src/proc/vm/mod.rs`
+        mapper: MapperRef,
+        dealloc: FrameAllocatorRef,
+    ) -> Result<(), UnmapError> {
+        if self.usage == 0 {
+            warn!("Stack is empty, no need to clean up.");
+            return Ok(());
+        }
+
+        // FIXME: unmap stack pages with `elf::unmap_pages`
+
+        self.usage = 0;
+
+        Ok(())
+    }
+}
+```
+
+接下来重点关注 `ProcessVm` 的相关实现，位于 `pkg/kernel/src/proc/vm/mod.rs` 中，首先为它添加 `clean_up` 函数：
+
+```rust
+impl ProcessVm {
+    pub(super) fn clean_up(&mut self) -> Result<(), UnmapError> {
+        let mapper = &mut self.page_table.mapper();
+        let dealloc = &mut *get_frame_alloc_for_sure();
+
+        // statistics for logging and debugging
+        // NOTE: you may need to implement `frames_recycled` by yourself
+        let start_count = dealloc.frames_recycled();
+
+        // TODO...
+
+        // statistics for logging and debugging
+        let end_count = dealloc.frames_recycled();
+
+        debug!(
+            "Recycled {}({:.3} MiB) frames, {}({:.3} MiB) frames in total.",
+            end_count - start_count,
+            ((end_count - start_count) * 4) as f32 / 1024.0,
+            end_count,
+            (end_count * 4) as f32 / 1024.0
+        );
+
+        Ok(())
+    }
+}
+```
+
+在上述框架之上，按照顺序依次释放栈区、堆区和 ELF 文件映射的内存区域：
+
+1. 释放栈区：调用 `Stack` 的 `clean_up` 函数；
+2. 如果**当前页表被引用次数为 1**，则进行共享内存的释放，否则跳过至第 7 步；
+3. 释放堆区：调用 `Heap` 的 `clean_up` 函数（后续实现）；
+4. 释放 ELF 文件映射的内存区域：根据记录的 `code` 页面范围数组，依次调用 `elf::unmap_range` 函数，并进行页面回收。
+5. 清理页表：调用 `mapper` 的 `clean_up` 函数，这将清空全部**无页面映射的**一至三级页表。
+6. 清理四级页表：直接回收 `PageTableContext` 的 `reg.addr` 所指向的页面。
+7. 统计内存回收情况，并打印调试信息。
+
+对于第 5 和第 6 步，可以参考使用如下代码：
+
+```rust
+unsafe {
+    // free P1-P3
+    mapper.clean_up(dealloc);
+
+    // free P4
+    dealloc.deallocate_frame(self.page_table.reg.addr);
+}
+```
+
+!!! success "阶段性成果"
+
+    使用你实现的 Shell 运行 `fact` 阶乘递归程序，观察进程的内存占用和**释放**情况。
+
+    在 `fact` 程序中，尝试使用 `sys_stat` 系统调用打印进程信息，观察到**内存占用的变化**。
+
+    > 你的页面被成功回收了吗？
+
 ## 内核的内存统计
+
+至此，用户程序的内存管理已经得到了较好的实现，但是内核占用了多少内存呢？
+
+类似于用户进程的加载过程，可以通过在内核加载时记录内存占用来实现内核的初步内存统计，即在 bootloader 中实现这一功能。
+
+首先，在 `pkg/boot/src/lib.rs` 中，定义一个 `KernelPages` 类型，用于传递内核的内存占用信息，并将其添加到 `BootInfo` 结构体的定义中：
+
+```rust
+pub type KernelPages = ArrayVec<PageRangeInclusive, 8>;
+
+pub struct BootInfo {
+    // ...
+
+    // Kernel pages
+    pub kernel_pages: KernelPages,
+}
+```
+
+并在 `pkg/boot/src/main.rs` 中，将 `load_elf` 函数返回的内存占用信息传递至 `BootInfo` 结构体中：
+
+??? note "使用了其他函数加载内核？"
+
+    如果你跟着实验指南一步一步实现，那么你的内核加载函数应当是 `load_elf`，它通过分配新的帧、映射它们、复制数据的顺序来进行加载。
+
+    如果你使用了参考实现提供的代码，这里可能会有所不同：参考实现中使用 `map_elf` 来实现内核页面的映射**它不再新分配帧**，而是对 ELF 文件中的页面**直接映射**，因此你需要根据实际情况来获取内核被加载的页面信息。
+
+    作为参考，可以使用如下代码直接从 `ElfFile` 中获取内核被加载的页面信息：
+
+    ```rust
+    pub fn get_page_usage(elf: &ElfFile) -> KernelPages {
+        elf.program_iter()
+            .filter(|segment| segment.get_type() == Ok(xmas_elf::program::Type::Load))
+            .map(|segment| get_page_range(segment))
+            .collect()
+    }
+    ```
+
+成功加载映射信息后，将其作为 `ProcessManager` 的初始化参数，用于构建 `kernel` 进程：
+
+```rust
+/// init process manager
+pub fn init(boot_info: &'static boot::BootInfo) {
+    // FIXME: you may need to implement `init_kernel_vm` by yourself
+    let proc_vm = ProcessVm::new(PageTableContext::new()).init_kernel_vm(&boot_info.kernel_pages);
+
+    trace!("Init kernel vm: {:#?}", proc_vm);
+
+    // kernel process
+    let kproc = Process::new(String::from("kernel"), None, Some(proc_vm), None);
+
+    kproc.write().resume();
+    manager::init(kproc);
+
+    info!("Process Manager Initialized.");
+}
+```
+
+其中，为 `ProcessVm` 添加 `init_kernel_vm` 函数，用于初始化内核的内存布局：
+
+```rust
+pub fn init_kernel_vm(mut self, pages: &KernelPages) -> Self {
+    // FIXME: load `self.code` and `self.code_usage` from `pages`
+
+    // FIXME: init kernel stack (impl the const `kstack` function)
+    //        `pub const fn kstack() -> Self`
+    //         use consts to init stack, same with kernel config
+    self.stack = Stack::kstack();
+
+    self
+}
+```
+
+在进行后续实验的过程中，将会继续对 `ksatck` 函数进行修改，这里可以直接使用配置文件中指定的常量来初始化，或者先行忽略。
+
+!!! success "阶段性成果"
+
+    试使用 `sys_stat` 系统调用打印进程信息，观察内核内存的占用情况。
 
 ## 内核栈的自动增长
 
@@ -386,5 +615,7 @@ impl core::fmt::Display for Process {
 ## 思考题
 
 1. 当在 Linux 中运行程序的时候删除程序在文件系统中对应的文件，会发生什么？程序能否继续运行？遇到未被映射的内存会发生什么？
+
+2. 为什么要通过 `Arc::strong_count` 来获取 `Arc` 的引用计数？查看它的定义，它和一般使用 `&self` 的方法有什么不同？出于什么考虑不能直接通过 `&self` 来进行这一操作？
 
 ## 加分项
