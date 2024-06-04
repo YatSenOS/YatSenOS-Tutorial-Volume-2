@@ -774,14 +774,9 @@ pub struct Heap {
 
 > 如果你还是想和 Linux 对齐，`brk` 系统调用的调用号为 12。
 
-下面对 `brk` 系统调用的参数和行为进行简单的约定：
+下面对 `brk` 系统调用的参数和行为进行简单的约定。
 
--   用户态下，传递给 `sys_brk` 函数的参数是一个 `Option<usize>` 。若参数为 `None` ，表示用户程序希望获取当前的堆区结束地址，即返回 `end` 的值；若参数为 `Some(addr)` ，表示用户程序希望将堆区结束地址调整到 `addr`；
--   `sys_brk` 函数中，若传来的参数为 `None` ，变成 `0` 后传递给 `syscall!`，`syscall!` 的返回值为 `-1` 时表示调整失败；
--   内核态下，将拿到的 `usize` 参数重新变为 `Option<VirtAddr>` 进行传递；`brk` 的返回值也为 `Option<VirtAddr>`，如果为 `None` 表示调整失败，否则表示内核调整后的堆区结束地址；
--   如果用户程序传入的参数不为 `None`，则检查用户传入的地址是否合法，即是否在 `[HEAP_START, HEAP_END]` 区间内，如果不合法则返回 `None`。
-
-根据上述约定，给出用户态的系统调用函数：
+在用户态中，考虑下列系统调用函数封装：`brk` 系统调用的参数是一个可为 `None` 的指针，表示用户程序希望调整的堆区结束地址，用户参数采用 `0` 表示 `None`，返回值采用 `-1` 表示操作失败。
 
 ```rust
 #[inline(always)]
@@ -794,12 +789,42 @@ pub fn sys_brk(addr: Option<usize>) -> Option<usize> {
 }
 ```
 
-对于有效输入的处理，需要满足如下行为：
+在内核中，`brk` 系统调用的处理函数如下：将用户传入的参数转换为内核的 `Option<VirtAddr>` 类型进行传递，并使用相同类型作为返回值。
+
+```rust
+// in `pkg/kernel/src/syscall/service.rs`
+pub fn sys_brk(args: &SyscallArgs) -> usize {
+    let new_heap_end = if args.arg0 == 0 {
+        None
+    } else {
+        Some(VirtAddr::new(args.arg0 as u64))
+    };
+    match brk(addr) {
+        Some(addr) => addr.as_u64() as usize,
+        None => !0,
+    }
+}
+
+// in `pkg/kernel/src/proc/mod.rs`
+pub fn brk(addr: Option<VirtAddr>) -> Option<VirtAddr> {
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        // NOTE: `brk` does not need to get write lock
+        get_process_manager().current().read().brk(addr)
+    })
+}
+```
+
+对于 `brk` 系统调用的具体实现，你需要在 `pkg/kernel/src/proc/vm/heap.rs` 中为 `Heap` 结构体实现 `brk` 函数：
+
+-   如果参数为 `None`，则表示用户程序希望获取当前的堆区结束地址，即返回 `end` 的值；
+-   如果用户程序传入的参数不为 `None`，则检查用户传入的地址是否合法，即在 `[HEAP_START, HEAP_END]` 区间内，如果不合法则返回 `None`。
+
+对于有效输入的处理，需要满足如下约定：
 
 -   初始化堆区时，`base` 和 `end` 的值均为 `HEAP_START`；
--   如果用户传入的地址为 `base`，即用户希望释放整个堆区；
--   如果用户传入的地址比当前 `end` 小，即用户希望缩小堆区，对指向地址向上对齐到页边界，释放多余的页面；
--   如果用户传入的地址比当前 `end` 大，即用户希望扩大堆区，对指向地址向上对齐到页边界，分配新的页面。
+-   用户希望释放整个堆区：传入地址为 `base`，释放所有页面，`end` 重置为 `base`；
+-   用户希望缩小堆区：传入地址比当前 `end` 小，对目的地址向上对齐到页边界，释放多余的页面；
+-   用户希望扩大堆区：传入地址比当前 `end` 大，对目的地址向上对齐到页边界，分配新的页面。
 
 对于一段典型的系统调用过程，可以参考如下代码：
 

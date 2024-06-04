@@ -47,7 +47,7 @@ impl Heap {
     }
 
     pub fn brk(
-        &mut self,
+        &self,
         new_end: Option<VirtAddr>,
         mapper: MapperRef,
         alloc: FrameAllocatorRef,

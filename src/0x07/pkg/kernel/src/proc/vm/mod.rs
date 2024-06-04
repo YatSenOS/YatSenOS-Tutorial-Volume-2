@@ -71,7 +71,7 @@ impl ProcessVm {
     //     self
     // }
 
-    pub fn brk(&mut self, addr: Option<VirtAddr>) -> Option<VirtAddr> {
+    pub fn brk(&self, addr: Option<VirtAddr>) -> Option<VirtAddr> {
         self.heap.brk(
             addr,
             &mut self.page_table.mapper(),
