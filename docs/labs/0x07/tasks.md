@@ -521,6 +521,25 @@ unsafe {
 }
 ```
 
+最后，遵守 Rust 的内存管理规则，需要在 `Process` 的 `Drop` 实现中调用 `ProcessVm` 的 `clean_up` 函数：
+
+```rust
+impl Drop for ProcessVm {
+    fn drop(&mut self) {
+        if let Err(err) = self.clean_up() {
+            error!("Failed to clean up process memory: {:?}", err);
+        }
+    }
+}
+```
+
+在实现了 `Drop` 之后，你可以在 `Process` 的 `kill` 函数中直接使用 `take` 来释放进程的内存：
+
+```rust
+// consume the Option<ProcessVm> and drop it
+self.proc_vm.take();
+```
+
 !!! success "阶段性成果"
 
     使用你实现的 Shell 运行 `fact` 阶乘递归程序，观察进程的内存占用和**释放**情况。
