@@ -624,8 +624,8 @@ pub fn init_kernel_vm(mut self, pages: &KernelPages) -> Self {
 ```rust
 let (stack_start, stack_size) = if config.kernel_stack_auto_grow > 0 {
     let init_size = config.kernel_stack_auto_grow;
-    let init_bottom = config.kernel_stack_address
-        + (config.kernel_stack_size - init_size) * 0x1000;
+    let bottom_offset = (config.kernel_stack_size - init_size) * 0x1000;
+    let init_bottom = config.kernel_stack_address + bottom_offset;
     (init_bottom, init_size)
 } else {
     (config.kernel_stack_address, config.kernel_stack_size)
@@ -646,14 +646,22 @@ pub const KSTACK_INIT_BOT: u64 = KSTACK_MAX - KSTACK_DEF_SIZE;
 pub const KSTACK_INIT_TOP: u64 = KSTACK_MAX - 8;
 ```
 
-> 别忘了修改配置文件使其描述的区域一致！
+!!! warning "别忘了修改配置文件使其描述的区域一致！"
+
+    对于上述的常量，你应当在配置文件中这样修改，其中 `kernel_stack_auto_grow` 的取值视实现可能有所不同：
+
+    ```toml
+    # The size of the kernel stack, given in number of 4KiB pages.
+    kernel_stack_size=1048576
+
+    # Define if the kernel stack will auto grow (handled by kernel).
+    kernel_stack_auto_grow=8
+    ```
 
 最后，在缺页中断的处理过程中，对权限、区域进行判断。如果发生缺页中断的进程是内核进程则**不要设置用户权限标志位**，并进行日志记录：
 
 ```rust
-if cur_proc.pid() == KERNEL_PID {
-    info!("Page fault on kernel at {:#x}", addr);
-}
+info!("Page fault on kernel at {:#x}", addr);
 ```
 
 最后，为了测试你的栈扩容成果，可以用如下代码在 `pkg/kernel/src/lib.rs` 中进行测试：
@@ -694,7 +702,7 @@ pub fn grow_stack() {
 
     尝试能使你的内核启动的最小的 `kernel_stack_auto_grow` 值，观察内核栈的自动增长情况。
 
-    并尝试回答思考题 3，它或许会对你的理解有所帮助。
+    **并尝试回答思考题 3，它或许会对你的理解有所帮助。**
 
 ## 用户态堆
 
@@ -833,9 +841,11 @@ assert!(ret == heap_end, "Failed to allocate heap");
 
 2. 为什么要通过 `Arc::strong_count` 来获取 `Arc` 的引用计数？查看它的定义，它和一般使用 `&self` 的方法有什么不同？出于什么考虑不能直接通过 `&self` 来进行这一操作？
 
-3. bootloader 加载内核并为其分配初始栈区时，至少需要多少页内存才能保证内核正常运行？为什么？
+3. bootloader 加载内核并为其分配初始栈区时，至少需要多少页内存才能保证内核正常运行？
 
-    _提示：内核实现缺页中断的处理时，依赖于哪些子系统？_
+    尝试逐渐增大内核的栈区大小，观察内核的运行情况，对于**不能正常启动的情况**，尝试分析可能的原因。
+
+    _提示：内核实现缺页中断的处理时，依赖于哪些子系统？报错是什么？什么子系统可能会导致对应的问题？_
 
 4. 尝试查找资料，了解 `mmap`、`munmap` 和 `mprotect` 系统调用的功能和用法，回答下列问题：
 
