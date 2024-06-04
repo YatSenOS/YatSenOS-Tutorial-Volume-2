@@ -632,11 +632,63 @@ let (stack_start, stack_size) = if config.kernel_stack_auto_grow > 0 {
 };
 ```
 
-与用户态栈类似，你可以在 `pkg/kernel/src/proc/vm/stack.rs` 中将这些信息定义为常量，并在 `Stack` 的 `kstack` 函数中使用这些常量来初始化内核栈区。
+与用户态栈类似，你可以在 `pkg/kernel/src/proc/vm/stack.rs` 中将这些信息定义为常量，并在 `Stack` 的 `kstack` 函数中使用这些常量来初始化内核栈区：
+
+```rust
+// [bot..0xffffff0100000000..top..0xffffff01ffffffff]
+// kernel stack
+pub const KSTACK_MAX: u64 = 0xffff_ff02_0000_0000;
+pub const KSTACK_DEF_BOT: u64 = KSTACK_MAX - STACK_MAX_SIZE;
+pub const KSTACK_DEF_PAGE: u64 = 8;
+pub const KSTACK_DEF_SIZE: u64 = KSTACK_DEF_PAGE * crate::memory::PAGE_SIZE;
+
+pub const KSTACK_INIT_BOT: u64 = KSTACK_MAX - KSTACK_DEF_SIZE;
+pub const KSTACK_INIT_TOP: u64 = KSTACK_MAX - 8;
+```
 
 > 别忘了修改配置文件使其描述的区域一致！
 
-最后，在缺页中断的处理过程中，对权限、区域进行判断。如果发生缺页中断的进程是内核进程，就**不要设置用户权限标志位**。
+最后，在缺页中断的处理过程中，对权限、区域进行判断。如果发生缺页中断的进程是内核进程则**不要设置用户权限标志位**，并进行日志记录：
+
+```rust
+if cur_proc.pid() == KERNEL_PID {
+    info!("Page fault on kernel at {:#x}", addr);
+}
+```
+
+最后，为了测试你的栈扩容成果，可以用如下代码在 `pkg/kernel/src/lib.rs` 中进行测试：
+
+```rust
+pub fn init(boot_info: &'static BootInfo) {
+    // ...
+
+    info!("Test stack grow.");
+
+    grow_stack();
+
+    info!("Stack grow test done.");
+}
+
+#[no_mangle]
+#[inline(never)]
+pub fn grow_stack() {
+    const STACK_SIZE: usize = 1024 * 4;
+    const STEP: usize = 64;
+
+    let mut array = [0u64; STACK_SIZE];
+    info!("Stack: {:?}", array.as_ptr());
+
+    // test write
+    for i in (0..STACK_SIZE).step_by(STEP) {
+        array[i] = i as u64;
+    }
+
+    // test read
+    for i in (0..STACK_SIZE).step_by(STEP) {
+        assert_eq!(array[i], i as u64);
+    }
+}
+```
 
 !!! success "阶段性成果"
 
