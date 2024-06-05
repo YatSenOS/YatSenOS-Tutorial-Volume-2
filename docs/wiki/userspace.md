@@ -4,8 +4,8 @@
 
 从执行原理来说，不同进程的指令均运行在同一个处理器上，基于同一个处理器访问系统资源。但从资源管理、安全管理、崩溃预防的角度来看，操作系统需隔离敏感资源，限制不同进程的可执行的指令以及可访问的地址空间。因此，现代操作系统通常会将进程分为两种状态：
 
-- 用户态（user mode）：是指进程运行在低特权级别，只能执行受限指令，访问受限资源；
-- 内核态（kernel mode）：是指进程运行在高特权级别，可以执行特权指令，并且可以直接访问所有系统资源。
+-   用户态（user mode）：是指进程运行在低特权级别，只能执行受限指令，访问受限资源；
+-   内核态（kernel mode）：是指进程运行在高特权级别，可以执行特权指令，并且可以直接访问所有系统资源。
 
 处理器通常借助某个控制寄存器中的一个模式位（mode bit）来提供区分用户态、内核态。该寄存器描述了进程当前享有的特权。一个运行在内核态的进程可以执行指令集中的任何指令，并访问系统中的任何内存位置。
 
@@ -23,9 +23,9 @@
 
 在 x86_64 体系结构中，操作系统和应用程序运行在不同的特权级别（privilege levels）中，这些级别被称为 Rings。一般来说，较*低*的数字代表更*高*的特权级别：
 
-- Ring 0：内核态，最高特权级别，可以执行所有指令，访问所有内存。
-- Ring 1/2：被设计用于设备驱动程序和其他系统服务，但在现代操作系统中不再使用。
-- Ring 3：用户态，最低特权级别，只能执行受限指令，需要访问受限资源时，必须通过系统调用等方式。
+-   Ring 0：内核态，最高特权级别，可以执行所有指令，访问所有内存。
+-   Ring 1/2：被设计用于设备驱动程序和其他系统服务，但在现代操作系统中不再使用。
+-   Ring 3：用户态，最低特权级别，只能执行受限指令，需要访问受限资源时，必须通过系统调用等方式。
 
 !!! question "为什么现代操作系统不使用 Ring 1/2？"
 
@@ -68,9 +68,9 @@ C 语言标准库提供了一组函数和数据结构，供应用程序使用以
 
 这些用户态库的设计与其提供的服务紧密相关：
 
-- **跨平台兼容性**：用户态库的设计要求之一即屏蔽底层硬件的差异，向上提供统一的编程接口。换言之，用户态库的一致可以保持用户态程序跨平台兼容性，在更换平台时不需要修改应用程序的代码。
-- **性能与效率**：用户态库的设计需要考虑到性能和效率，尤其是对于系统调用等底层操作的封装，需要尽可能地减少额外的开销。[这篇文章](http://arkanis.de/weblog/2017-01-05-measurements-of-system-call-performance-and-overhead)测量了不同系统调用的性能和开销，并讨论了系统调用设计方法。
-- **功能完备性**：库中需要包含常用的系统调用封装和其他功能，以便开发者可以方便地进行应用程序开发，而不需要重复造轮子。
+-   **跨平台兼容性**：用户态库的设计要求之一即屏蔽底层硬件的差异，向上提供统一的编程接口。换言之，用户态库的一致可以保持用户态程序跨平台兼容性，在更换平台时不需要修改应用程序的代码。
+-   **性能与效率**：用户态库的设计需要考虑到性能和效率，尤其是对于系统调用等底层操作的封装，需要尽可能地减少额外的开销。[这篇文章](http://arkanis.de/weblog/2017-01-05-measurements-of-system-call-performance-and-overhead)测量了不同系统调用的性能和开销，并讨论了系统调用设计方法。
+-   **功能完备性**：库中需要包含常用的系统调用封装和其他功能，以便开发者可以方便地进行应用程序开发，而不需要重复造轮子。
 
 ### 用户态库的服务
 
@@ -92,10 +92,10 @@ Rust 语言中的标准用户态库是 `std`，它提供了一系列的系统调
 
 ## 参考资料
 
-- [Getting to Ring 3 - OSDev](https://wiki.osdev.org/Getting_to_Ring_3)
-- [Security - OSDev](https://wiki.osdev.org/Security)
-- [Paging - OSDev](https://wiki.osdev.org/Paging)
-- [Protection ring - Wikipedia](https://en.wikipedia.org/wiki/Protection_ring)
-- [Computer Systems: A Programmer's Perspective - CSAPP](http://www.csapp.cs.cmu.edu/3e/home.html)
-- [Why do x86 CPUs only use 2 out of 4 rings?](https://superuser.com/questions/1063420/why-do-x86-cpus-only-use-2-out-of-4-rings)
-- [printf 是怎么输出到控制台的呢？](https://www.zhihu.com/question/456916638/answer/3099313413)
+-   [Getting to Ring 3 - OSDev](https://wiki.osdev.org/Getting_to_Ring_3)
+-   [Security - OSDev](https://wiki.osdev.org/Security)
+-   [Paging - OSDev](https://wiki.osdev.org/Paging)
+-   [Protection ring - Wikipedia](https://en.wikipedia.org/wiki/Protection_ring)
+-   [Computer Systems: A Programmer's Perspective - CSAPP](http://www.csapp.cs.cmu.edu/3e/home.html)
+-   [Why do x86 CPUs only use 2 out of 4 rings?](https://superuser.com/questions/1063420/why-do-x86-cpus-only-use-2-out-of-4-rings)
+-   [printf 是怎么输出到控制台的呢？](https://www.zhihu.com/question/456916638/answer/3099313413)

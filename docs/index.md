@@ -10,12 +10,12 @@
 
 每一次实验区间为两周。
 
-- [实验零：环境搭建与实验准备](./labs/0x00/index.md)
-- [实验一：操作系统的启动](./labs/0x01/index.md)
-- [实验二：中断处理](./labs/0x02/index.md)
-- [实验三：内核线程与缺页异常](./labs/0x03/index.md)
-- [实验四：用户程序与系统调用](./labs/0x04/index.md)
-- [实验五：fork 的实现、并发与锁机制](./labs/0x05/index.md)
-- [实验六：硬盘驱动与文件系统](./labs/0x06/index.md)
-- [实验七：更好的内存管理](./labs/0x07/index.md)
-- [实验八：扩展实验](./labs/0x08/index.md)
+-   [实验零：环境搭建与实验准备](./labs/0x00/index.md)
+-   [实验一：操作系统的启动](./labs/0x01/index.md)
+-   [实验二：中断处理](./labs/0x02/index.md)
+-   [实验三：内核线程与缺页异常](./labs/0x03/index.md)
+-   [实验四：用户程序与系统调用](./labs/0x04/index.md)
+-   [实验五：fork 的实现、并发与锁机制](./labs/0x05/index.md)
+-   [实验六：硬盘驱动与文件系统](./labs/0x06/index.md)
+-   [实验七：更好的内存管理](./labs/0x07/index.md)
+-   [实验八：扩展实验](./labs/0x08/index.md)

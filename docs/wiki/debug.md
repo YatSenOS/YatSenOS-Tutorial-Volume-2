@@ -61,9 +61,9 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
 2. 远程连接：QEMU 提供了 GDB 服务器暴露远程调试接口。可以通过 GDB 连接到对应服务器，进而调试 QEMU 中运行的内核。
 
-   - QEMU 设置：请参考[QEMU Wiki](./qemu.md)中对`-s`参数的解释。
-   - GDB 设置： `target remote <ip>:<port>`：连接到远程调试服务器，如连接到 QEMU 的 GDB 服务器：`target remote localhost:1234`
-   - 使用 gef 时进行远程调试：`gef-remote <ip> <port>`：连接到远程调试服务器，如：`gef-remote localhost 1234`
+    - QEMU 设置：请参考[QEMU Wiki](./qemu.md)中对`-s`参数的解释。
+    - GDB 设置： `target remote <ip>:<port>`：连接到远程调试服务器，如连接到 QEMU 的 GDB 服务器：`target remote localhost:1234`
+    - 使用 gef 时进行远程调试：`gef-remote <ip> <port>`：连接到远程调试服务器，如：`gef-remote localhost 1234`
 
 3. `run`：运行程序，简写为 `r`。
 
@@ -111,8 +111,8 @@ b ysos_kernel::init
 
 以上是 GDB 的基本使用方法，更多的 GDB 使用方法请参考：
 
-- [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
-- [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
+-   [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
+-   [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
 
 ## 命令行调试进阶：gef
 
@@ -178,9 +178,7 @@ VSCode 是一个轻量级的跨平台编辑器，支持多种编程语言，同�
             "program": "${workspaceFolder}/esp/KERNEL.ELF",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "processCreateCommands": [
-                "gdb-remote 1234"
-            ]
+            "processCreateCommands": ["gdb-remote 1234"]
         }
     ]
 }
@@ -215,8 +213,8 @@ python ysos.py run -p debug -d
 
 以上即是 VSCode + LLDB 的调试效果。可以看到，VSCode 提供了一个非常方便的调试界面，同时也提供了丰富的调试功能：
 
-- 可以在左侧的 `VARIABLES` 中查看变量的值；
-- 也可以在 `CALL STACK` 中查看函数调用栈。
-- 更多的调试功能请参考[官方文档](https://code.visualstudio.com/docs/editor/debugging)。
+-   可以在左侧的 `VARIABLES` 中查看变量的值；
+-   也可以在 `CALL STACK` 中查看函数调用栈。
+-   更多的调试功能请参考[官方文档](https://code.visualstudio.com/docs/editor/debugging)。
 
 以上即基本调试方法入门，欢迎大家探索属于自己的调试工具链。

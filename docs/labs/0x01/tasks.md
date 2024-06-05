@@ -32,22 +32,22 @@
 
 ```json
 {
-  "llvm-target": "x86_64-unknown-none",
-  "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
-  "linker-flavor": "ld.lld",
-  "target-endian": "little",
-  "target-pointer-width": "64",
-  "target-c-int-width": "32",
-  "arch": "x86_64",
-  "os": "none",
-  "executables": true,
-  "linker": "rust-lld",
-  "disable-redzone": true,
-  "features": "-mmx,-sse,+soft-float",
-  "panic-strategy": "abort",
-  "pre-link-args": {
-    "ld.lld": ["-Tpkg/kernel/config/kernel.ld", "-export-dynamic"]
-  }
+    "llvm-target": "x86_64-unknown-none",
+    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
+    "linker-flavor": "ld.lld",
+    "target-endian": "little",
+    "target-pointer-width": "64",
+    "target-c-int-width": "32",
+    "arch": "x86_64",
+    "os": "none",
+    "executables": true,
+    "linker": "rust-lld",
+    "disable-redzone": true,
+    "features": "-mmx,-sse,+soft-float",
+    "panic-strategy": "abort",
+    "pre-link-args": {
+        "ld.lld": ["-Tpkg/kernel/config/kernel.ld", "-export-dynamic"]
+    }
 }
 ```
 
@@ -89,11 +89,11 @@ SECTIONS {
 
 实验在 `pkg/boot` 中提供了一些基本的功能实现：
 
-- `allocator.rs`：为 `uefi` crate 中的 `UEFIFrameAllocator` 实现 `x86_64` crate 所定义的 `FrameAllocator<Size4KiB>` trait，以便在页面分配、页表映射时使用。
-- `config.rs`：提供了一个读取并解析 `boot.conf` 的基本实现，可以使用它来自定义 bootloader 的行为、启动参数等等。
-- `fs.rs`：提供了在 UEFI 环境下打开文件、列出目录、加载文件、释放 `ElfFile` 的功能，你可以参考这部分代码了解与文件系统相关操作的基本内容。在后期的实验中，你将自己实现对文件系统的相关操作。
-- `lib.rs`：这部分内容定义了 bootloader 将要传递给内核的信息、内核的入口点、跳转到内核的实现等等。定义在 `lib.rs` 中是为了能够在内核实现中引用这些数据结构，确保内核与 bootloader 的数据结构一致。
-- `main.rs`：这里是 bootloader 的入口点，你可以在这里编写你的 bootloader 代码。
+-   `allocator.rs`：为 `uefi` crate 中的 `UEFIFrameAllocator` 实现 `x86_64` crate 所定义的 `FrameAllocator<Size4KiB>` trait，以便在页面分配、页表映射时使用。
+-   `config.rs`：提供了一个读取并解析 `boot.conf` 的基本实现，可以使用它来自定义 bootloader 的行为、启动参数等等。
+-   `fs.rs`：提供了在 UEFI 环境下打开文件、列出目录、加载文件、释放 `ElfFile` 的功能，你可以参考这部分代码了解与文件系统相关操作的基本内容。在后期的实验中，你将自己实现对文件系统的相关操作。
+-   `lib.rs`：这部分内容定义了 bootloader 将要传递给内核的信息、内核的入口点、跳转到内核的实现等等。定义在 `lib.rs` 中是为了能够在内核实现中引用这些数据结构，确保内核与 bootloader 的数据结构一致。
+-   `main.rs`：这里是 bootloader 的入口点，你可以在这里编写你的 bootloader 代码。
 
 同时在 `pkg/elf` 中实验提供了加载 ELF 文件的相关代码，其中也有需要你自己实现的部分。
 
@@ -153,7 +153,7 @@ unsafe {
 
 ### 映射内核文件
 
-在成功加载内核，并禁用根页表写保护后，需要将内核的代码段、数据段、BSS 段等映射到虚拟地址空间中。你可以参考和使用 `pkg/elf/src/lib.rs` 中的相关函数进行映射工作。
+在成功加载内核，并禁用根页表写保护后，需要将内核的代码段、数据段、BSS 段等映射到虚拟地址空间中。你可以参考和使用 `pkg/elf/src/lib.rs` 中的 `load_elf` 函数来帮助你完成。
 
 !!! tip "一些提示"
 
@@ -183,23 +183,23 @@ unsafe {
 
 最后，你需要检验是否成功加载了内核：
 
-- 使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
-- 使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
-- 在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
+-   使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
+-   使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
+-   在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
 
     !!! note "使用 `.gdbinit` 方便你的调试过程"
 
-        以下是一个 `.gdbinit` 的例子，你可以将其放置在你的工作目录下，这样每次进入 GDB 调试环境时，它都会自动加载。请注意部分指令是 `gef` 所提供的，详情请见调试文档。
+          以下是一个 `.gdbinit` 的例子，你可以将其放置在你的工作目录下，这样每次进入 GDB 调试环境时，它都会自动加载。请注意部分指令是 `gef` 所提供的，详情请见调试文档。
 
-        ```bash
-        file esp/KERNEL.ELF
-        gef-remote localhost 1234
-        tmux-setup
-        b ysos_kernel::init
-        ```
+          ```bash
+          file esp/KERNEL.ELF
+          gef-remote localhost 1234
+          tmux-setup
+          b ysos_kernel::init
+          ```
 
-- 使用 `c` 命令继续执行，你将会看到 QEMU 窗口中的输出，同时 GDB 将会在断点处停下。
-- 查看断点处的汇编和符号是否正确，使用 `vmmap` 和 `readelf` 等指令查看内核的加载情况。
+-   使用 `c` 命令继续执行，你将会看到 QEMU 窗口中的输出，同时 GDB 将会在断点处停下。
+-   查看断点处的汇编和符号是否正确，使用 `vmmap` 和 `readelf` 等指令查看内核的加载情况。
 
 !!! tip "遇到了奇怪的问题？尝试更改 `log::set_max_level(log::LevelFilter::Info);` 来调整日志输出的等级，以便你能够观察到更多的日志输出。"
 
@@ -362,7 +362,7 @@ pub fn try_lock(&self) -> Option<SpinMutexGuard<T>> {
 
 为了与串口设备进行交互，你需要存储一个设备端口的基地址，对于 COM1 端口，它的基地址为 `0x3F8`。
 
-在这一基地址的基础上，你可以通过偏移量来访问串口设备的寄存器，例如 `0x3F8 + 0` 将会访问串口设备的数据寄存器，`0x3F8 + 1` 将会访问串口设备的中断使能寄存器等等。*上方链接中的资料中有详细的寄存器地址和偏移量的对应关系。*
+在这一基地址的基础上，你可以通过偏移量来访问串口设备的寄存器，例如 `0x3F8 + 0` 将会访问串口设备的数据寄存器，`0x3F8 + 1` 将会访问串口设备的中断使能寄存器等等。_上方链接中的资料中有详细的寄存器地址和偏移量的对应关系。_
 
 为了与这些寄存器进行交互，你可以使用 `x86_64` crate 中的 `Port`，以下是一个简单的例子：
 
@@ -374,8 +374,8 @@ let ret = data.read();
 
 对于只读和只写的寄存器，你可以使用 `PortWriteOnly` 和 `PortReadOnly` 来从类型系统上防止误操作的发生。
 
-- 偏移量为 `1` 的寄存器是中断使能寄存器，可以使用 `PortWriteOnly::new(base + 1)` 操作。
-- 偏移量为 `5` 的寄存器是线控寄存器，可以使用 `PortReadOnly::new(base + 5)` 操作。
+-   偏移量为 `1` 的寄存器是中断使能寄存器，可以使用 `PortWriteOnly::new(base + 1)` 操作。
+-   偏移量为 `5` 的寄存器是线控寄存器，可以使用 `PortReadOnly::new(base + 5)` 操作。
 
 对于串口设备，其寄存器均为 8 位，你可以使用 `u8` 类型来进行读写操作。
 
@@ -509,24 +509,23 @@ println!("{}", record.args());
 
 ## 思考题
 
-1. 在 `pkg/kernel` 的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，这是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
+1.  在 `pkg/kernel` 的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，这是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
 
-2. 在 `pkg/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
+2.  在 `pkg/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
 
-3. 串口驱动是在进入内核后启用的，那么在进入内核之前，显示的内容是如何输出的？
+3.  串口驱动是在进入内核后启用的，那么在进入内核之前，显示的内容是如何输出的？
 
-4. 在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。
+4.  在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。
 
-    - 假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
-    - 在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
-    - 如果你使用 `ysos.py` 来启动 qemu，可以尝试修改 `-o` 选项来实现上述功能。
+    -   假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
+    -   在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
+    -   如果你使用 `ysos.py` 来启动 qemu，可以尝试修改 `-o` 选项来实现上述功能。
 
     !!! note "现象观察提示"
 
         若此时启动 QEMU 的输出提示是 `vnc server running on ::1:5900`，则说明 QEMU 的图形界面被启用并通过端口 5900 输出。你可以考虑使用 `VNC Viewer` 来观察 QEMU 界面。
 
         **这一步骤不做要求，如果自身环境实现遇到困难，可以尝试与其他同学合作进行观察。**
-
 
 ## 加分项
 
