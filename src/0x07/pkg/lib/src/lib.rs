@@ -16,7 +16,6 @@ pub mod sync;
 pub extern crate alloc;
 
 mod syscall;
-mod utils;
 
 use core::fmt::*;
 
@@ -25,7 +24,6 @@ pub use chrono::*;
 pub use io::*;
 pub use sync::*;
 pub use syscall::*;
-pub use utils::*;
 
 pub fn init() {
     #[cfg(feature = "brk_alloc")]
