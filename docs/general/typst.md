@@ -1,8 +1,8 @@
 # 使用 typst 编写实验报告
 
-[typst](https://github.com/typst/typst) 是一个新型的基于标记的轻量化排版系统，相较于安装复杂且体积庞大的 LaTex，typst 所需要的空间仅仅约 30M，安装方法也十分简单，下载对应的二进制文件，添加到系统路径即可。对于IDE，推荐使用 VSCode，并安装 Typst LSP 插件实现实时预览。
+[typst](https://github.com/typst/typst) 是一个新型的基于标记的轻量化排版系统，相较于安装复杂且体积庞大的 LaTex，typst 所需要的空间仅仅约 30M，安装方法也十分简单，下载对应的二进制文件，添加到系统路径即可。对于 IDE，推荐使用 VSCode，并安装 Typst LSP 插件实现实时预览。
 
-关于 typst 的一些细节可以参考 [typst doc](https://typst.app/docs/)，同时，推荐使用模板来撰写格式更加更为统一的实验报告，可以参考[模板](https://github.com/GZTimeWalker/GZ-Typst-Templates)，后文给出了一个可能的使用方法。
+关于 typst 的一些细节可以参考 [typst doc](https://typst.app/docs/)，同时，推荐使用模板来撰写格式更加更为统一的实验报告，可以参考[模板](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/template)，后文给出了一个可能的使用方法。
 
 ## 使用示例
 
@@ -12,11 +12,13 @@
 
 为了方便，我们从头开始，新建一个文件夹，专门用来进行实验报告的撰写。
 
-假设你本地已经克隆了一份[模板](https://github.com/GZTimeWalker/GZ-Typst-Templates)，在 Unix 系统中使用 `ln -s /path/to/the/template/repo base` 创建一个名为 `base` 的软链接，目的是为了方便我们后续使用模板。操作成功后，你的目录结构应该类似于：
+本实验报告模板存放在本实验仓库的 `templates` 目录下，你可以通过 `git clone` 或者直接下载的方式将其下载到本地。
+
+假设你本地已经克隆了一份模版，在 Unix 系统中使用 `ln -s /path/to/the/template/repo base` 创建一个名为 `base` 的软链接，目的是为了方便我们后续使用模板。操作成功后，你的目录结构应该类似于：
 
 ```txt
 .
-└── base -> ../GZ-Typst-Templates
+└── base -> ../template
 ```
 
 !!! tip "对于 Windows 用户，可以考虑使用 mklink 来创建软链接，或直接拷贝模版文件"
@@ -25,7 +27,7 @@
 
 ```txt
 .
-├── base -> ../GZ-Typst-Templates
+├── base -> ../template
 └── lab-0
     ├── images
     │   └── linux.png
@@ -33,7 +35,6 @@
 ```
 
 之后，在当前文件夹中打开终端或使用 VSCode，正常使用 typst 即可，例如：
-
 
 !!! note "保证 typst 的工作路径为 `.`"
 
@@ -44,7 +45,7 @@
 打开 `example.typ`，并输入：
 
 ```js
-#import "../base/templates/report.typ": *
+#import "../base/report.typ": *
 
 #show: report.with(
   title: "实验报告实验",
@@ -165,4 +166,4 @@ $ sum_(k=1)^n k = (n(n+1)) / 2 $
 
 会被渲染成单独的一行：
 
-$$ \sum_{k=1}^n k = \frac{n(n+1)}{2} $$
+$$ \sum\_{k=1}^n k = \frac{n(n+1)}{2} $$

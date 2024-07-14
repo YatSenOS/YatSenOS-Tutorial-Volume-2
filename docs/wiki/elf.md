@@ -12,10 +12,10 @@ ELF 文件大体上由文件头和数据组成，它还可以加上额外的调�
 
 一般来说，ELF 有以下几个部分
 
-- ELF 文件头
-- Section header table，为 relocatable files 所必须，loadable files 可选，链接器需要 Section Table 进行链接
-- Program header table，为 loadable files 所必需，但 relocatable files 可选，Program header table 描述了所有可加载的 segments 和其他数据结构，这或许会是我们遇见最多的
-- 有文件头还得有内容，即 section 和 segment，这包括了各种可加载的数据，字符串表，符号表等等。每个 segment 里可以包含多个 sections。
+-   ELF 文件头
+-   Section header table，为 relocatable files 所必须，loadable files 可选，链接器需要 Section Table 进行链接
+-   Program header table，为 loadable files 所必需，但 relocatable files 可选，Program header table 描述了所有可加载的 segments 和其他数据结构，这或许会是我们遇见最多的
+-   有文件头还得有内容，即 section 和 segment，这包括了各种可加载的数据，字符串表，符号表等等。每个 segment 里可以包含多个 sections。
 
 ### ELF Header
 
@@ -57,117 +57,117 @@ typedef __u64	Elf64_Xword;
 typedef __s64	Elf64_Sxword;
 ```
 
-- `e_ident` ，即 ELF identification，描述了“这是一个 ELF 文件”
+-   `e_ident` ，即 ELF identification，描述了“这是一个 ELF 文件”
 
-  ```shell
-  ➜  xiao hexdump -C ./this_is_an_elf_file | head -1
-  00000000  7f 45 4c 46 02 01 01 00  00 00 00 00 00 00 00 00  |.ELF............|
-  ```
+    ```shell
+    ➜  xiao hexdump -C ./this_is_an_elf_file | head -1
+    00000000  7f 45 4c 46 02 01 01 00  00 00 00 00 00 00 00 00  |.ELF............|
+    ```
 
-  这 16 个 bytes 表示了不同的意思，接下来通过写一个简单的 ELF parser 来描述这一段内容吧！
+    这 16 个 bytes 表示了不同的意思，接下来通过写一个简单的 ELF parser 来描述这一段内容吧！
 
-  ```c
-  #include <stdio.h>
-  #include <stdint.h>
-  #include <stdlib.h>
-  #include <assert.h>
-  #include <fcntl.h>
-  #include <unistd.h>
-  #include <elf.h>
-  
-  #define	EI_MAG0		0		/* e_ident[] indexes */
-  #define	EI_MAG1		1
-  #define	EI_MAG2		2
-  #define	EI_MAG3		3
-  #define	EI_CLASS	4
-  #define	EI_DATA		5
-  #define	EI_VERSION	6
-  #define	EI_OSABI	7
-  #define	EI_PAD		8
+    ```c
+    #include <stdio.h>
+    #include <stdint.h>
+    #include <stdlib.h>
+    #include <assert.h>
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <elf.h>
 
-  #define	ELFMAG0		0x7f		/* EI_MAG */
-  #define	ELFMAG1		'E'
-  #define	ELFMAG2		'L'
-  #define	ELFMAG3		'F'
-  #define	ELFMAG		"\177ELF"
-  #define	SELFMAG		4
+    #define	EI_MAG0		0		/* e_ident[] indexes */
+    #define	EI_MAG1		1
+    #define	EI_MAG2		2
+    #define	EI_MAG3		3
+    #define	EI_CLASS	4
+    #define	EI_DATA		5
+    #define	EI_VERSION	6
+    #define	EI_OSABI	7
+    #define	EI_PAD		8
 
-  int main() {
-    int fd = open("./this_is_an_elf_file", 0, 0);
-    uint8_t ident[0x10] = { 0 };
-    read(fd, &ident, 0x10);
+    #define	ELFMAG0		0x7f		/* EI_MAG */
+    #define	ELFMAG1		'E'
+    #define	ELFMAG2		'L'
+    #define	ELFMAG3		'F'
+    #define	ELFMAG		"\177ELF"
+    #define	SELFMAG		4
 
-    // the first 4 bytes
-    uint8_t *magic = (uint8_t *)ident;
+    int main() {
+      int fd = open("./this_is_an_elf_file", 0, 0);
+      uint8_t ident[0x10] = { 0 };
+      read(fd, &ident, 0x10);
 
-    // identify the ELF file
-    assert(
-      magic[0] == ELFMAG0 &&
-      magic[1] == ELFMAG1 &&
-      magic[2] == ELFMAG2 &&
-      magic[3] == ELFMAG3
-    );
+      // the first 4 bytes
+      uint8_t *magic = (uint8_t *)ident;
 
-    // ELF class
-    if (ident[EI_CLASS] == ELFCLASS64) {
-      printf("[*] 64 bit files\n");
-    } else if (ident[EI_CLASS] == ELFCLASS32) {
-      printf("[*] 32 bit files\n");
+      // identify the ELF file
+      assert(
+        magic[0] == ELFMAG0 &&
+        magic[1] == ELFMAG1 &&
+        magic[2] == ELFMAG2 &&
+        magic[3] == ELFMAG3
+      );
+
+      // ELF class
+      if (ident[EI_CLASS] == ELFCLASS64) {
+        printf("[*] 64 bit files\n");
+      } else if (ident[EI_CLASS] == ELFCLASS32) {
+        printf("[*] 32 bit files\n");
+      }
+
+      // ELF encoding
+      if (ident[EI_DATA] == ELFDATA2LSB) {
+        printf("[*] little endian ELF\n");
+      } else if (ident[EI_DATA] == ELFDATA2MSB) {
+        printf("[*] big endian ELF\n");
+      }
+
+      // ELF OS ABI
+      if (ident[EI_OSABI] == ELFOSABI_SYSV) {
+        printf("[*] System V ABI\n");
+      } else if (ident[EI_OSABI] == ELFOSABI_HPUX) {
+        printf("[*] HP-UX operating system ABI\n");
+      } else if (ident[EI_OSABI] == ELFOSABI_STANDALONE) {
+        printf("[*] Standalone (embedded) application\n");
+      }
+
+      printf("[*] API version: %d\n", ident[EI_VERSION]);
+
+      return 0;
     }
+    ```
 
-    // ELF encoding
-    if (ident[EI_DATA] == ELFDATA2LSB) {
-      printf("[*] little endian ELF\n");
-    } else if (ident[EI_DATA] == ELFDATA2MSB) {
-      printf("[*] big endian ELF\n");
-    }
+-   `e_type` 描述 ELF 的类型，包括：
 
-    // ELF OS ABI
-    if (ident[EI_OSABI] == ELFOSABI_SYSV) {
-      printf("[*] System V ABI\n");
-    } else if (ident[EI_OSABI] == ELFOSABI_HPUX) {
-      printf("[*] HP-UX operating system ABI\n");
-    } else if (ident[EI_OSABI] == ELFOSABI_STANDALONE) {
-      printf("[*] Standalone (embedded) application\n");
-    }
+    -   `ET_NONE` 没有类型也是类型
+    -   `ET_REL` Relocatable file
+    -   `ET_EXEC` Executable file
+    -   `ET_DYN` Shared object file
+    -   `ET_CORE` Core file, Coredump 也是 ELF 类型
 
-    printf("[*] API version: %d\n", ident[EI_VERSION]);
+-   `e_machine` 描述目标平台
 
-    return 0;
-  }
-  ```
+-   `e_version` 描述版本
 
-- `e_type` 描述 ELF 的类型，包括：
+-   `e_entry` 储存 ELF 文件的入口虚拟地址
 
-  - `ET_NONE` 没有类型也是类型
-  - `ET_REL` Relocatable file
-  - `ET_EXEC` Executable file
-  - `ET_DYN` Shared object file
-  - `ET_CORE` Core file, Coredump 也是 ELF 类型
+-   `e_phoff` 储存 ELF Program header 的 offset，也就是说，Program header 储存在距离文件开头 `e_phoff`的位置
 
-- `e_machine` 描述目标平台
+-   `e_shoff` 储存 ELF Section header 的 offset
 
-- `e_version` 描述版本
+-   `e_flags` 处理器特定的 flags
 
-- `e_entry` 储存 ELF 文件的入口虚拟地址
+-   `e_ehsize` ELF 文件头的大小
 
-- `e_phoff` 储存 ELF Program header 的 offset，也就是说，Program header 储存在距离文件开头 `e_phoff`的位置
+-   `e_phentsize` ELF Program header entry 的大小
 
-- `e_shoff` 储存 ELF Section header 的 offset
+-   `e_phnum` ELF Program header 的数量
 
-- `e_flags` 处理器特定的 flags
+-   `e_shentsize` 类似 `e_phentsize`但是是 Section
 
-- `e_ehsize` ELF 文件头的大小
+-   `e_shnum` 同上类推
 
-- `e_phentsize` ELF Program header entry 的大小
-
-- `e_phnum` ELF Program header 的数量
-
-- `e_shentsize` 类似 `e_phentsize`但是是 Section
-
-- `e_shnum` 同上类推
-
-- `e_shstrndx` Section 中字符串表的 index
+-   `e_shstrndx` Section 中字符串表的 index
 
 ### Section Header
 
@@ -189,26 +189,26 @@ typedef struct elf64_shdr {
 
 ```
 
-- `sh_flags` 描述了 Section 的一些属性，包括 `SHF_WRITE`，`SHF_ALLOC`，`SHF_EXECINSTR` 等等
+-   `sh_flags` 描述了 Section 的一些属性，包括 `SHF_WRITE`，`SHF_ALLOC`，`SHF_EXECINSTR` 等等
 
-- `sh_type`描述了 Section 的类型，包括了储存 dynamic linking table 的 `SHT_DYNAMIC` ，存放 linker symbol table 的 `SHT_SYMTAB`，由程序定义的 `SHT_PROGBITS`等等
+-   `sh_type`描述了 Section 的类型，包括了储存 dynamic linking table 的 `SHT_DYNAMIC` ，存放 linker symbol table 的 `SHT_SYMTAB`，由程序定义的 `SHT_PROGBITS`等等
 
-  使用 `readelf -S`可以观察程序的 section headers
+    使用 `readelf -S`可以观察程序的 section headers
 
-  ```log
-  root@da070736a297:/# readelf -S /bin/sh
-  There are 28 section headers, starting at offset 0x1d358:
+    ```log
+    root@da070736a297:/# readelf -S /bin/sh
+    There are 28 section headers, starting at offset 0x1d358:
 
-  Section Headers:
-    [Nr] Name              Type             Address           Offset
-         Size              EntSize          Flags  Link  Info  Align
-    [ 0]                   NULL             0000000000000000  00000000
-         0000000000000000  0000000000000000           0     0     0
-    [ 1] .interp           PROGBITS         0000000000000238  00000238
-         000000000000001c  0000000000000000   A       0     0     1
-    [ 2] .note.ABI-tag     NOTE             0000000000000254  00000254
-         0000000000000020  0000000000000000   A       0     0     4
-  ```
+    Section Headers:
+      [Nr] Name              Type             Address           Offset
+           Size              EntSize          Flags  Link  Info  Align
+      [ 0]                   NULL             0000000000000000  00000000
+           0000000000000000  0000000000000000           0     0     0
+      [ 1] .interp           PROGBITS         0000000000000238  00000238
+           000000000000001c  0000000000000000   A       0     0     1
+      [ 2] .note.ABI-tag     NOTE             0000000000000254  00000254
+           0000000000000020  0000000000000000   A       0     0     4
+    ```
 
 ### Program Header
 
@@ -228,52 +228,52 @@ typedef struct elf64_phdr {
 
 ```
 
-- `p_type`表示 segment 的类型，包括有 `PT_LOAD`，`PT_DYNAMIC`，`PT_INTERP`等等。
+-   `p_type`表示 segment 的类型，包括有 `PT_LOAD`，`PT_DYNAMIC`，`PT_INTERP`等等。
 
-- `p_flags` 包括有 `PF_X`，`PF_W`，`PF_R`等等，通过不同的 bit 表达不同的信息，可以相互组合。这决定了 segment 映射时的权限。
+-   `p_flags` 包括有 `PF_X`，`PF_W`，`PF_R`等等，通过不同的 bit 表达不同的信息，可以相互组合。这决定了 segment 映射时的权限。
 
-  ```log
-  root@da070736a297:/# readelf -l /bin/sh
+    ```log
+    root@da070736a297:/# readelf -l /bin/sh
 
-  Elf file type is DYN (Shared object file)
-  Entry point 0x4a20
-  There are 9 program headers, starting at offset 64
+    Elf file type is DYN (Shared object file)
+    Entry point 0x4a20
+    There are 9 program headers, starting at offset 64
 
-  Program Headers:
-    Type           Offset             VirtAddr           PhysAddr
-                   FileSiz            MemSiz              Flags  Align
-    PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040
-                   0x00000000000001f8 0x00000000000001f8  R      0x8
-    INTERP         0x0000000000000238 0x0000000000000238 0x0000000000000238
-                   0x000000000000001c 0x000000000000001c  R      0x1
-        [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
-    LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
-                   0x000000000001b268 0x000000000001b268  R E    0x200000
-    LOAD           0x000000000001bf50 0x000000000021bf50 0x000000000021bf50
-                   0x00000000000012d0 0x0000000000003f00  RW     0x200000
-    DYNAMIC        0x000000000001cb28 0x000000000021cb28 0x000000000021cb28
-                   0x00000000000001f0 0x00000000000001f0  RW     0x8
-    NOTE           0x0000000000000254 0x0000000000000254 0x0000000000000254
-                   0x0000000000000044 0x0000000000000044  R      0x4
-    GNU_EH_FRAME   0x00000000000179e4 0x00000000000179e4 0x00000000000179e4
-                   0x00000000000007dc 0x00000000000007dc  R      0x4
-    GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
-                   0x0000000000000000 0x0000000000000000  RW     0x10
-    GNU_RELRO      0x000000000001bf50 0x000000000021bf50 0x000000000021bf50
-                   0x00000000000010b0 0x00000000000010b0  R      0x1
+    Program Headers:
+      Type           Offset             VirtAddr           PhysAddr
+                     FileSiz            MemSiz              Flags  Align
+      PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040
+                     0x00000000000001f8 0x00000000000001f8  R      0x8
+      INTERP         0x0000000000000238 0x0000000000000238 0x0000000000000238
+                     0x000000000000001c 0x000000000000001c  R      0x1
+          [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+      LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                     0x000000000001b268 0x000000000001b268  R E    0x200000
+      LOAD           0x000000000001bf50 0x000000000021bf50 0x000000000021bf50
+                     0x00000000000012d0 0x0000000000003f00  RW     0x200000
+      DYNAMIC        0x000000000001cb28 0x000000000021cb28 0x000000000021cb28
+                     0x00000000000001f0 0x00000000000001f0  RW     0x8
+      NOTE           0x0000000000000254 0x0000000000000254 0x0000000000000254
+                     0x0000000000000044 0x0000000000000044  R      0x4
+      GNU_EH_FRAME   0x00000000000179e4 0x00000000000179e4 0x00000000000179e4
+                     0x00000000000007dc 0x00000000000007dc  R      0x4
+      GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                     0x0000000000000000 0x0000000000000000  RW     0x10
+      GNU_RELRO      0x000000000001bf50 0x000000000021bf50 0x000000000021bf50
+                     0x00000000000010b0 0x00000000000010b0  R      0x1
 
-   Section to Segment mapping:
-    Segment Sections...
-     00
-     01     .interp
-     02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame
-     03     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss
-     04     .dynamic
-     05     .note.ABI-tag .note.gnu.build-id
-     06     .eh_frame_hdr
-     07
-     08     .init_array .fini_array .data.rel.ro .dynamic .got
-  ```
+     Section to Segment mapping:
+      Segment Sections...
+       00
+       01     .interp
+       02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame
+       03     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss
+       04     .dynamic
+       05     .note.ABI-tag .note.gnu.build-id
+       06     .eh_frame_hdr
+       07
+       08     .init_array .fini_array .data.rel.ro .dynamic .got
+    ```
 
 ## 控制 ELF 的结构
 
