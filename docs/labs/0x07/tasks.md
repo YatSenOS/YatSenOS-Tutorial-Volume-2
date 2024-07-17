@@ -799,8 +799,8 @@ pub fn sys_brk(args: &SyscallArgs) -> usize {
     } else {
         Some(VirtAddr::new(args.arg0 as u64))
     };
-    match brk(addr) {
-        Some(addr) => addr.as_u64() as usize,
+    match brk(new_heap_end) {
+        Some(new_heap_end) => new_heap_end.as_u64() as usize,
         None => !0,
     }
 }
