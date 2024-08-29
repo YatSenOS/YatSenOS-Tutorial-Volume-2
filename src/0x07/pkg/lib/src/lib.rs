@@ -1,5 +1,4 @@
 #![allow(dead_code, unused_imports)]
-#![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 #![cfg_attr(not(test), no_std)]
 

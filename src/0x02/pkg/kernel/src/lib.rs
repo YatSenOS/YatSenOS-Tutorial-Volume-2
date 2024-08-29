@@ -4,7 +4,6 @@
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 #![feature(type_alias_impl_trait)]
-#![feature(panic_info_message)]
 #![feature(map_try_insert)]
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::result_unit_err)]
