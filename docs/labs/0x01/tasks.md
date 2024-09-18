@@ -111,8 +111,8 @@ SECTIONS {
 为了方便你的实现，在 `pkg/boot/src/fs.rs` 中，提供了一些函数可供调用，对于一个正常的文件读取流程，你可以参考如下代码：
 
 ```rust
-let mut file = open_file(bs, file_path);
-let buf = load_file(bs, &mut file);
+let mut file = open_file(file_path);
+let buf = load_file(&mut file);
 ```
 
 ### 更新控制寄存器
@@ -158,12 +158,7 @@ unsafe {
 !!! tip "一些提示"
 
     - `physical_memory_offset` 在配置结构体中，它描述了物理地址进行线性映射的偏移量，你可能会使用到。
-    - 你可以使用如下的代码初始化帧分配器：
-
-        ```rust
-        let mut frame_allocator = UEFIFrameAllocator(bs);
-        ```
-
+    - 你可以使用 `&mut UEFIFrameAllocator` 表达式作为参数传递帧分配器。
     - `pkg/elf/src/lib.rs` 中的 `load_segment` 函数需要你进行补全。**请认真学习实验文档所提供的有关分页内存权限管理、内核 ELF 文件格式的内容，以便你能够完成这一部分的实现。**
     - 阅读配置文件定义中有关内核栈的内容，利用相关参数来初始化内核栈。
     - 别忘了将你修改过的控制寄存器恢复原样。

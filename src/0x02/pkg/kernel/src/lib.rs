@@ -32,6 +32,11 @@ pub use alloc::format;
 use boot::BootInfo;
 
 pub fn init(boot_info: &'static BootInfo) {
+    unsafe {
+        // set uefi system table
+        uefi::table::set_system_table(boot_info.system_table.cast().as_ptr());
+    }
+
     serial::init(); // init serial output
     logger::init(); // init logger system
     memory::address::init(boot_info);
@@ -46,13 +51,7 @@ pub fn init(boot_info: &'static BootInfo) {
     info!("YatSenOS initialized.");
 }
 
-pub fn shutdown(boot_info: &'static BootInfo) -> ! {
+pub fn shutdown() -> ! {
     info!("YatSenOS shutting down.");
-    unsafe {
-        boot_info.system_table.runtime_services().reset(
-            boot::ResetType::SHUTDOWN,
-            boot::UefiStatus::SUCCESS,
-            None,
-        );
-    }
+    uefi::runtime::reset(ResetType::SHUTDOWN, Status::SUCCESS, None);
 }

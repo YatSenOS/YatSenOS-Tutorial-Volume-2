@@ -11,7 +11,7 @@ boot::entry_point!(kernel_main);
 pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
     ysos::init(boot_info);
     ysos::wait(spawn_init());
-    ysos::shutdown(boot_info);
+    ysos::shutdown();
 }
 
 pub fn spawn_init() -> proc::ProcessId {

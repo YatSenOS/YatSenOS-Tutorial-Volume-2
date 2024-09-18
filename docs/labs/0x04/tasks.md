@@ -168,8 +168,8 @@ pub struct BootInfo {
 /// Load apps into memory, when no fs implemented in kernel
 ///
 /// List all file under "APP" and load them.
-pub fn load_apps(bs: &BootServices) -> AppList {
-    let mut root = open_root(bs);
+pub fn load_apps() -> AppList {
+    let mut root = open_root();
     let mut buf = [0; 8];
     let cstr_path = uefi::CStr16::from_str_with_buf("\\APP\\", &mut buf).unwrap();
 
@@ -218,7 +218,7 @@ pub fn load_apps(bs: &BootServices) -> AppList {
 
 let apps = if config.load_apps {
     info!("Loading apps...");
-    Some(load_apps(system_table.boot_services()))
+    Some(load_apps())
 } else {
     info!("Skip loading apps");
     None
@@ -966,27 +966,7 @@ The factorial of 999999 under modulo 1000000007 is 128233642.
 
 3. 🤔 基于帧回收器的实现，在 `elf` 中实现 `unmap_range` 函数，从页表中取消映射一段连续的页面，并使用帧回收器进行回收。之后，在合适的地方，结合 `ProcessData` 中存储的页面信息，利用这个函数实现进程栈的回收。其他进程资源（如页表、代码段、数据段等）的回收将会在后续实验中实现，目前暂时不需要考虑。
 
-4. 🤔 尝试利用 `UefiRuntime` 和 `chrono` crate，获取当前时间，并将其暴露给用户态，以实现 `sleep` 函数。
-
-    `UefiRuntime` 的实现，它可能需要使用锁进行保护：
-
-    ```rust
-    pub struct UefiRuntime {
-        runtime_service: &'static RuntimeServices,
-    }
-
-    impl UefiRuntime {
-        pub unsafe fn new(boot_info: &'static BootInfo) -> Self {
-            Self {
-                runtime_service: boot_info.system_table.runtime_services(),
-            }
-        }
-
-        pub fn get_time(&self) -> Time {
-            self.runtime_service.get_time().unwrap()
-        }
-    }
-    ```
+4. 🤔 尝试利用 `uefi::runtime::get_time()` 和 `chrono` crate，获取当前时间，并将其暴露给用户态，以实现 `sleep` 函数。
 
     这里提供一个可能的 `sleep` 函数实现：
 

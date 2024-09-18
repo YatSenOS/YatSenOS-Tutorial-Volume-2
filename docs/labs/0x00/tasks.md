@@ -335,10 +335,10 @@ extern crate log;
 extern crate alloc;
 
 use core::arch::asm;
-use uefi::prelude::*;
+use uefi::{Status, entry};
 
 #[entry]
-fn efi_main(image: uefi::Handle, system_table: SystemTable<Boot>) -> Status {
+fn efi_main() -> Status {
     uefi::helpers::init().expect("Failed to initialize utilities");
     log::set_max_level(log::LevelFilter::Info);
 
@@ -356,9 +356,7 @@ fn efi_main(image: uefi::Handle, system_table: SystemTable<Boot>) -> Status {
 }
 ```
 
-`efi_main` 通过 `#[entry]` 被指定为 UEFI 程序的入口函数，`efi_main` 函数的参数 `system_table` 是一个 `SystemTable<Boot>` 类型的变量，它包含了 UEFI 程序运行时所需要的各种信息，如内存映射、文件系统、图形界面等。
-
-在 `efi_main` 函数中，首先对 `system_table` 和 `log` 进行初始化，然后进入一个死循环，每次循环输出一条日志后等待一段时间。
+`efi_main` 通过 `#[entry]` 被指定为 UEFI 程序的入口函数，在 `efi_main` 函数中，首先对 UEFI 相关功能组件进行初始化，然后进入一个死循环，每次循环输出一条日志后等待一段时间。
 
 在项目根目录下运行 `make run` 或 `python ysos.py run`，预期得到如下输出：
 

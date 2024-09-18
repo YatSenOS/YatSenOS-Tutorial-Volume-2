@@ -11,6 +11,7 @@ pub use uefi::table::Runtime;
 pub use uefi::Status as UefiStatus;
 
 use arrayvec::ArrayVec;
+use core::ptr::NonNull;
 use x86_64::VirtAddr;
 use x86_64::registers::control::Cr3;
 use x86_64::structures::paging::{OffsetPageTable, PageTable};
@@ -35,8 +36,8 @@ pub struct BootInfo {
     /// The offset into the virtual address space where the physical memory is mapped.
     pub physical_memory_offset: u64,
 
-    /// UEFI SystemTable
-    pub system_table: SystemTable<Runtime>,
+    /// The system table virtual address
+    pub system_table: NonNull<core::ffi::c_void>,
 }
 
 /// Get current page table from CR3
