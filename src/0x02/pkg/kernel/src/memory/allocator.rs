@@ -1,5 +1,6 @@
 use linked_list_allocator::LockedHeap;
 use x86_64::VirtAddr;
+use core::ptr::addr_of_mut;
 
 pub const HEAP_SIZE: usize = 8 * 1024 * 1024; // 8 MiB
 
@@ -12,11 +13,11 @@ pub fn init() {
     // will be allocated on the bss section when the kernel is load
     static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
 
-    let heap_start = VirtAddr::from_ptr(unsafe { HEAP.as_ptr() });
+    let heap_start = VirtAddr::from_ptr(addr_of_mut!(HEAP));
     let heap_end = heap_start + HEAP_SIZE as u64;
 
     unsafe {
-        ALLOCATOR.lock().init(HEAP.as_mut_ptr(), HEAP_SIZE);
+        ALLOCATOR.lock().init(addr_of_mut!(HEAP) as *mut u8, HEAP_SIZE);
     }
 
     debug!(

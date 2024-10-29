@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 boot = { package = "ysos_boot", path = "../boot", default-features = false }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
-uefi = { version = "0.32", default-features = false }
+uefi = { version = "0.33", default-features = false }
 paste = "1.0"
 spin = "0.9"
 x86 = "0.52"

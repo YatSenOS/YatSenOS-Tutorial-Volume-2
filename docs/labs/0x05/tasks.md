@@ -300,7 +300,10 @@ static mut M: u64 = 0xdeadbeef;
 
 fn main() -> isize {
     let mut c = 32;
+    let m_ptr = &raw mut M;
 
+    // do not alloc heap before `fork`
+    // which may cause unexpected behavior since we won't copy the heap in `fork`
     let pid = sys_fork();
 
     if pid == 0 {
@@ -309,9 +312,9 @@ fn main() -> isize {
         assert_eq!(c, 32);
 
         unsafe {
-            println!("child read value of M: {:#x}", M);
-            M = 0x2333;
-            println!("child changed the value of M: {:#x}", M);
+            println!("child read value of M: {:#x}", *m_ptr);
+            *m_ptr = 0x2333;
+            println!("child changed the value of M: {:#x}", *m_ptr);
         }
 
         c += 32;
@@ -331,8 +334,8 @@ fn main() -> isize {
         assert_eq!(ret, 64);
 
         unsafe {
-            println!("parent read value of M: {:#x}", M);
-            assert_eq!(M, 0x2333);
+            println!("parent read value of M: {:#x}", *m_ptr);
+            assert_eq!(*m_ptr, 0x2333);
         }
 
         c += 1024;

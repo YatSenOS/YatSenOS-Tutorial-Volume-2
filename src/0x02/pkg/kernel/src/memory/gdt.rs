@@ -1,3 +1,4 @@
+use core::ptr::addr_of_mut;
 use lazy_static::lazy_static;
 use x86_64::registers::segmentation::Segment;
 use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
@@ -20,7 +21,7 @@ lazy_static! {
         tss.privilege_stack_table[0] = {
             const STACK_SIZE: usize = IST_SIZES[0];
             static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
-            let stack_start = VirtAddr::from_ptr(unsafe { STACK.as_ptr() });
+            let stack_start = VirtAddr::from_ptr(addr_of_mut!(STACK));
             let stack_end = stack_start + STACK_SIZE as u64;
             info!(
                 "Privilege Stack  : 0x{:016x}-0x{:016x}",

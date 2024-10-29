@@ -49,7 +49,7 @@ macro_rules! as_handler {
             #[naked]
             pub extern "x86-interrupt" fn [<$fn _handler>](_sf: InterruptStackFrame) {
                 unsafe {
-                    core::arch::asm!("
+                    core::arch::naked_asm!("
                     push rbp
                     push rax
                     push rbx
@@ -82,7 +82,7 @@ macro_rules! as_handler {
                     pop rax
                     pop rbp
                     iretq",
-                    sym $fn, options(noreturn));
+                    sym $fn);
                 }
             }
         }

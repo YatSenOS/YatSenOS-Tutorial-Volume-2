@@ -1,4 +1,5 @@
 /esp
+/.idea
 /.vscode
 **/target
 **/.gdb_history
