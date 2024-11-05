@@ -1,3 +1,4 @@
+use core::ptr::NonNull;
 use uefi::proto::media::file::*;
 use uefi::proto::media::fs::SimpleFileSystem;
 use uefi::boot::*;
@@ -12,7 +13,6 @@ pub fn open_root() -> Directory {
 
     fs.open_volume().expect("Failed to open volume")
 }
-
 
 /// Open file at `path`
 pub fn open_file(path: &str) -> RegularFile {
@@ -50,6 +50,7 @@ pub fn load_file(file: &mut RegularFile) -> &'static mut [u8] {
         info.file_name(),
         len
     );
+
     &mut buf[..len]
 }
 
