@@ -21,10 +21,10 @@
 
 对于本次实验内容，你需要参考学习如下实验资料：
 
--   [分页内存简述](../../wiki/paging.md)
--   [ELF 文件格式](../../wiki/elf.md)
--   [串口输出简介](../../wiki/uart.md)
--   [实验调试指南](../../wiki/debug.md)
+- [分页内存简述](../../wiki/paging.md)
+- [ELF 文件格式](../../wiki/elf.md)
+- [串口输出简介](../../wiki/uart.md)
+- [实验调试指南](../../wiki/debug.md)
 
 ## 实验任务与要求
 

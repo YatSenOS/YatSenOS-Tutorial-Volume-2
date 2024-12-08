@@ -5,6 +5,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "0.4"
-x86_64 = "0.15"
-xmas-elf = "0.9"
+log = { workspace = true }
+x86_64 = { workspace = true }
+xmas-elf = { workspace = true }

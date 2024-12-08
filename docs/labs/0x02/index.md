@@ -23,9 +23,9 @@
 
 对于本次实验内容，你需要参考学习如下实验资料：
 
--   [CPU 异常与中断处理](../../wiki/interrupts.md)
--   [APIC 可编程中断控制器](../../wiki/apic.md)
--   [x64 数据结构概述](../../wiki/structures.md)
+- [CPU 异常与中断处理](../../wiki/interrupts.md)
+- [APIC 可编程中断控制器](../../wiki/apic.md)
+- [x64 数据结构概述](../../wiki/structures.md)
 
 ## 实验任务与要求
 

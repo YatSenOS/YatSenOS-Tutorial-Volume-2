@@ -5,13 +5,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-boot = { package = "ysos_boot", path = "../boot", default-features = false }
-lazy_static = { version = "1.4", features = ["spin_no_std"] }
-uefi = { version = "0.33", default-features = false }
-paste = "1.0"
-spin = "0.9"
-x86 = "0.52"
-x86_64 = "0.15"
-log = "0.4"
-bitflags = "2.3"
-libm = "0.2"
+boot = { workspace = true }
+uefi = { workspace = true }
+paste = { workspace = true }
+spin = { workspace = true }
+x86 = { workspace = true }
+x86_64 = { workspace = true }
+log = { workspace = true }
+bitflags = { workspace = true }
+libm = { workspace = true }

@@ -111,8 +111,8 @@ b ysos_kernel::init
 
 以上是 GDB 的基本使用方法，更多的 GDB 使用方法请参考：
 
--   [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
--   [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
+- [官方文档](https://sourceware.org/gdb/current/onlinedocs/gdb/)
+- [知乎：GDB 调试入门指南](https://zhuanlan.zhihu.com/p/74897601)
 
 ## 命令行调试进阶：gef
 
@@ -213,8 +213,8 @@ python ysos.py run -p debug -d
 
 以上即是 VSCode + LLDB 的调试效果。可以看到，VSCode 提供了一个非常方便的调试界面，同时也提供了丰富的调试功能：
 
--   可以在左侧的 `VARIABLES` 中查看变量的值；
--   也可以在 `CALL STACK` 中查看函数调用栈。
--   更多的调试功能请参考[官方文档](https://code.visualstudio.com/docs/editor/debugging)。
+- 可以在左侧的 `VARIABLES` 中查看变量的值；
+- 也可以在 `CALL STACK` 中查看函数调用栈。
+- 更多的调试功能请参考[官方文档](https://code.visualstudio.com/docs/editor/debugging)。
 
 以上即基本调试方法入门，欢迎大家探索属于自己的调试工具链。

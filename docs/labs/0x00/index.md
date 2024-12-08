@@ -22,11 +22,11 @@
 
 对于本次实验内容，你需要参考学习如下实验资料：
 
--   [Linux 环境配置](../../wiki/linux.md)
--   [Windows 环境配置](../../wiki/windows.md)
--   [Rust 语言学习](../../wiki/rust.md)
--   [UEFI 启动过程](../../wiki/uefi.md)
--   [QEMU 使用参考](../../wiki/qemu.md)
+- [Linux 环境配置](../../wiki/linux.md)
+- [Windows 环境配置](../../wiki/windows.md)
+- [Rust 语言学习](../../wiki/rust.md)
+- [UEFI 启动过程](../../wiki/uefi.md)
+- [QEMU 使用参考](../../wiki/qemu.md)
 
 ## 实验任务与要求
 

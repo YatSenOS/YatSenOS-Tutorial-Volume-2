@@ -18,42 +18,42 @@ x2APIC 是 xAPIC 的变体和扩展，主要改进解决了支持的 CPU 数量�
 
 APIC 的初始化过程基本包括以下几个步骤：
 
--   禁用 8259 PIC，使得系统只使用 APIC 进行中断处理。
+- 禁用 8259 PIC，使得系统只使用 APIC 进行中断处理。
 
     这一步被 UEFI BIOS 自动完成，我们无需关心。
 
--   检测系统中是否存在 APIC。
+- 检测系统中是否存在 APIC。
 
--   确定 APIC 的地址空间，即 LAPIC 和 IOAPIC 的 MMIO 地址空间。
+- 确定 APIC 的地址空间，即 LAPIC 和 IOAPIC 的 MMIO 地址空间。
 
     由于我们采用了虚拟地址空间，所以这里需要将物理地址映射到虚拟地址空间中，之后再进行 APIC 的相关操作。
 
--   操作 SPIV（Spurious Interrupt Vector Register, 0xF0）寄存器，启用 APIC 并设置 Spurious IRQ Vector。
+- 操作 SPIV（Spurious Interrupt Vector Register, 0xF0）寄存器，启用 APIC 并设置 Spurious IRQ Vector。
 
--   设置计时器相关寄存器：
+- 设置计时器相关寄存器：
 
-    -   TDCR(0x3E0): Divide Configuration Register，设置分频系数。
-    -   TICR(0x380): Initial Count Register，设置初始计数值。
-    -   LVT Timer(0x320): Local Vector Table Timer，设置中断向量号和触发模式。
+    - TDCR(0x3E0): Divide Configuration Register，设置分频系数。
+    - TICR(0x380): Initial Count Register，设置初始计数值。
+    - LVT Timer(0x320): Local Vector Table Timer，设置中断向量号和触发模式。
 
--   禁用 LVT LINT0, LVT LINT1，LVT PCINT，向对应寄存器写入 Mask 位。
+- 禁用 LVT LINT0, LVT LINT1，LVT PCINT，向对应寄存器写入 Mask 位。
 
--   设置错误中断 LVT Error 到对应的中断向量号。
+- 设置错误中断 LVT Error 到对应的中断向量号。
 
--   连续写入两次 0 以清除错误状态寄存器。
+- 连续写入两次 0 以清除错误状态寄存器。
 
--   向 EOI 寄存器写入 0 以确认任何挂起的中断。
+- 向 EOI 寄存器写入 0 以确认任何挂起的中断。
 
--   设置 ICR 寄存器：
+- 设置 ICR 寄存器：
 
-    -   Destination Shorthand(bit 18-19): 设置为 2，始终将中断发送给所有 APIC
-    -   Delivery Mode(bit 8-10): 设置为 5，INIT De-assert 模式所需
-    -   Level(bit 14): 设置为 0，INIT De-assert 所需
-    -   Trigger Mode(bit 15): 设置为 1，INIT De-assert 所需
+    - Destination Shorthand(bit 18-19): 设置为 2，始终将中断发送给所有 APIC
+    - Delivery Mode(bit 8-10): 设置为 5，INIT De-assert 模式所需
+    - Level(bit 14): 设置为 0，INIT De-assert 所需
+    - Trigger Mode(bit 15): 设置为 1，INIT De-assert 所需
 
     设置完成后等待 Delivery Status(bit 12) 为 0。
 
--   设置 TPR 寄存器为 0，允许接收中断。
+- 设置 TPR 寄存器为 0，允许接收中断。
 
 以上过程的代码示例会在实验任务文档中进行详细描述，具体细节和设置原因涉及对称多处理 SMP 等内容，不做理解要求，如有兴趣可以自行查阅参考资料了解。
 
@@ -67,9 +67,9 @@ APIC 的初始化过程基本包括以下几个步骤：
 
 ## 参考资料
 
--   [APIC - OSDev](https://wiki.osdev.org/APIC)
--   [/arch/x86/kernel/apic/apic.c - Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/kernel/apic/apic.c?h=v6.7#n1525)
--   [Symmetric Multiprocessing - OSDev](https://wiki.osdev.org/Symmetric_Multiprocessing)
--   [APIC Timer - OSDev](https://wiki.osdev.org/APIC_timer)
--   [Multiprocessing Support for Hobby OSes Explained](http://www.osdever.net/tutorials/view/multiprocessing-support-for-hobby-oses-explained)
--   [apic crate - theseus-os](https://www.theseus-os.com/Theseus/doc/apic/)
+- [APIC - OSDev](https://wiki.osdev.org/APIC)
+- [/arch/x86/kernel/apic/apic.c - Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/kernel/apic/apic.c?h=v6.7#n1525)
+- [Symmetric Multiprocessing - OSDev](https://wiki.osdev.org/Symmetric_Multiprocessing)
+- [APIC Timer - OSDev](https://wiki.osdev.org/APIC_timer)
+- [Multiprocessing Support for Hobby OSes Explained](http://www.osdever.net/tutorials/view/multiprocessing-support-for-hobby-oses-explained)
+- [apic crate - theseus-os](https://www.theseus-os.com/Theseus/doc/apic/)

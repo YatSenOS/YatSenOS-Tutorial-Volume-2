@@ -12,10 +12,10 @@ ELF 文件大体上由文件头和数据组成，它还可以加上额外的调�
 
 一般来说，ELF 有以下几个部分
 
--   ELF 文件头
--   Section header table，为 relocatable files 所必须，loadable files 可选，链接器需要 Section Table 进行链接
--   Program header table，为 loadable files 所必需，但 relocatable files 可选，Program header table 描述了所有可加载的 segments 和其他数据结构，这或许会是我们遇见最多的
--   有文件头还得有内容，即 section 和 segment，这包括了各种可加载的数据，字符串表，符号表等等。每个 segment 里可以包含多个 sections。
+- ELF 文件头
+- Section header table，为 relocatable files 所必须，loadable files 可选，链接器需要 Section Table 进行链接
+- Program header table，为 loadable files 所必需，但 relocatable files 可选，Program header table 描述了所有可加载的 segments 和其他数据结构，这或许会是我们遇见最多的
+- 有文件头还得有内容，即 section 和 segment，这包括了各种可加载的数据，字符串表，符号表等等。每个 segment 里可以包含多个 sections。
 
 ### ELF Header
 
@@ -57,7 +57,7 @@ typedef __u64	Elf64_Xword;
 typedef __s64	Elf64_Sxword;
 ```
 
--   `e_ident` ，即 ELF identification，描述了“这是一个 ELF 文件”
+- `e_ident` ，即 ELF identification，描述了“这是一个 ELF 文件”
 
     ```shell
     ➜  xiao hexdump -C ./this_is_an_elf_file | head -1
@@ -137,37 +137,37 @@ typedef __s64	Elf64_Sxword;
     }
     ```
 
--   `e_type` 描述 ELF 的类型，包括：
+- `e_type` 描述 ELF 的类型，包括：
 
-    -   `ET_NONE` 没有类型也是类型
-    -   `ET_REL` Relocatable file
-    -   `ET_EXEC` Executable file
-    -   `ET_DYN` Shared object file
-    -   `ET_CORE` Core file, Coredump 也是 ELF 类型
+    - `ET_NONE` 没有类型也是类型
+    - `ET_REL` Relocatable file
+    - `ET_EXEC` Executable file
+    - `ET_DYN` Shared object file
+    - `ET_CORE` Core file, Coredump 也是 ELF 类型
 
--   `e_machine` 描述目标平台
+- `e_machine` 描述目标平台
 
--   `e_version` 描述版本
+- `e_version` 描述版本
 
--   `e_entry` 储存 ELF 文件的入口虚拟地址
+- `e_entry` 储存 ELF 文件的入口虚拟地址
 
--   `e_phoff` 储存 ELF Program header 的 offset，也就是说，Program header 储存在距离文件开头 `e_phoff`的位置
+- `e_phoff` 储存 ELF Program header 的 offset，也就是说，Program header 储存在距离文件开头 `e_phoff`的位置
 
--   `e_shoff` 储存 ELF Section header 的 offset
+- `e_shoff` 储存 ELF Section header 的 offset
 
--   `e_flags` 处理器特定的 flags
+- `e_flags` 处理器特定的 flags
 
--   `e_ehsize` ELF 文件头的大小
+- `e_ehsize` ELF 文件头的大小
 
--   `e_phentsize` ELF Program header entry 的大小
+- `e_phentsize` ELF Program header entry 的大小
 
--   `e_phnum` ELF Program header 的数量
+- `e_phnum` ELF Program header 的数量
 
--   `e_shentsize` 类似 `e_phentsize`但是是 Section
+- `e_shentsize` 类似 `e_phentsize`但是是 Section
 
--   `e_shnum` 同上类推
+- `e_shnum` 同上类推
 
--   `e_shstrndx` Section 中字符串表的 index
+- `e_shstrndx` Section 中字符串表的 index
 
 ### Section Header
 
@@ -189,9 +189,9 @@ typedef struct elf64_shdr {
 
 ```
 
--   `sh_flags` 描述了 Section 的一些属性，包括 `SHF_WRITE`，`SHF_ALLOC`，`SHF_EXECINSTR` 等等
+- `sh_flags` 描述了 Section 的一些属性，包括 `SHF_WRITE`，`SHF_ALLOC`，`SHF_EXECINSTR` 等等
 
--   `sh_type`描述了 Section 的类型，包括了储存 dynamic linking table 的 `SHT_DYNAMIC` ，存放 linker symbol table 的 `SHT_SYMTAB`，由程序定义的 `SHT_PROGBITS`等等
+- `sh_type`描述了 Section 的类型，包括了储存 dynamic linking table 的 `SHT_DYNAMIC` ，存放 linker symbol table 的 `SHT_SYMTAB`，由程序定义的 `SHT_PROGBITS`等等
 
     使用 `readelf -S`可以观察程序的 section headers
 
@@ -228,9 +228,9 @@ typedef struct elf64_phdr {
 
 ```
 
--   `p_type`表示 segment 的类型，包括有 `PT_LOAD`，`PT_DYNAMIC`，`PT_INTERP`等等。
+- `p_type`表示 segment 的类型，包括有 `PT_LOAD`，`PT_DYNAMIC`，`PT_INTERP`等等。
 
--   `p_flags` 包括有 `PF_X`，`PF_W`，`PF_R`等等，通过不同的 bit 表达不同的信息，可以相互组合。这决定了 segment 映射时的权限。
+- `p_flags` 包括有 `PF_X`，`PF_W`，`PF_R`等等，通过不同的 bit 表达不同的信息，可以相互组合。这决定了 segment 映射时的权限。
 
     ```log
     root@da070736a297:/# readelf -l /bin/sh

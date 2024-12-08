@@ -88,13 +88,13 @@ wsl --install -d Ubuntu
 
 ```bash
 $ rustc --version
-rustc 1.82.0 (f6e511eec 2024-10-15)
+rustc 1.83.0 (90b35a623 2024-11-26)
 
 $ rustc +nightly --version
-rustc 1.84.0-nightly (3ed6e3cc6 2024-10-17)
+rustc 1.85.0-nightly (9c707a8b7 2024-12-07)
 
 $ qemu-system-x86_64 --version
-QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.2)
+QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.4)
 
 $ gcc --version
 gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0
@@ -107,10 +107,10 @@ GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
 
 ```bash
 $ rustc --version
-rustc 1.82.0 (f6e511eec 2024-10-15)
+rustc 1.83.0 (90b35a623 2024-11-26)
 
 $ rustc +nightly --version
-rustc 1.84.0-nightly (3ed6e3cc6 2024-10-17)
+rustc 1.85.0-nightly (9c707a8b7 2024-12-07)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)

@@ -22,19 +22,19 @@
 
 在 `pkg/kernel/src/memory` 文件夹中，增量代码补充包含了如下的模块：
 
--   `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
--   `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
--   `gdt.rs`：定义 TSS 和 GDT，为内核提供内存段描述符和任务状态段。
--   `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而能够在内核中使用 `alloc` 提供的操作和数据结构，进行动态内存分配的操作，如 `Vec`、`String`、`Box` 等。
+- `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
+- `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
+- `gdt.rs`：定义 TSS 和 GDT，为内核提供内存段描述符和任务状态段。
+- `allocator.rs`：注册内核堆分配器，为内核堆分配提供能力。从而能够在内核中使用 `alloc` 提供的操作和数据结构，进行动态内存分配的操作，如 `Vec`、`String`、`Box` 等。
 
 !!! note "动态内存分配算法在这里不做要求，本次实验直接使用现有的库赋予内核堆分配能力。"
 
 在 `pkg/kernel/src/interrupt` 文件夹中，增量代码补充包含了如下的模块：
 
--   `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
--   `consts.rs`：有关于中断向量、IRQ 的常量定义。
--   `exceptions.rs`：包含了 CPU 异常的处理函数，并暴露 `register_idt` 用于注册 IDT。
--   `mod.rs`：定义了 `init` 函数，用于初始化中断系统，加载 IDT。
+- `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
+- `consts.rs`：有关于中断向量、IRQ 的常量定义。
+- `exceptions.rs`：包含了 CPU 异常的处理函数，并暴露 `register_idt` 用于注册 IDT。
+- `mod.rs`：定义了 `init` 函数，用于初始化中断系统，加载 IDT。
 
 ## GDT 与 TSS
 
@@ -179,7 +179,7 @@ impl XApic {
 
 下面以部分操作为例讲解如何进行 APIC 的初始化。
 
--   检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
+- 检测系统中是否存在 APIC，在 `x86_64` 中可以通过如下代码获知：
 
     ```rust
     CpuId::new().get_feature_info().map(
@@ -187,7 +187,7 @@ impl XApic {
     ).unwrap_or(false)
     ```
 
--   操作 SPIV 寄存器，启用 APIC 并设置 Spurious IRQ Vector。
+- 操作 SPIV 寄存器，启用 APIC 并设置 Spurious IRQ Vector。
 
     查询文档可知，SPIV 寄存器的偏移量为 0xF0。其位描述如下：
 
@@ -230,7 +230,7 @@ impl XApic {
     self.write(0xF0, spiv);
     ```
 
--   设置 LVT 寄存器。
+- 设置 LVT 寄存器。
 
     Local Vector Table 寄存器用于设置中断向量号和触发模式。它们的位描述如下：
 
@@ -307,11 +307,11 @@ impl XApic {
       </tr>
       </table>
 
-    -   Vector 为中断向量号，当中断发生时，CPU 会跳转到中断向量表中对应处理程序执行。
-    -   DMode（Delivery Mode）为中断传递模式，本实验中不做理解要求。
-    -   DS（Delivery Status）为中断传递状态，只读。
-    -   M（Mask）为中断屏蔽位，取值为 1 表示中断已屏蔽。
-    -   TP（Timer Periodic Mode）为定时器周期模式，决定定时器周期触发还是仅触发一次。
+    - Vector 为中断向量号，当中断发生时，CPU 会跳转到中断向量表中对应处理程序执行。
+    - DMode（Delivery Mode）为中断传递模式，本实验中不做理解要求。
+    - DS（Delivery Status）为中断传递状态，只读。
+    - M（Mask）为中断屏蔽位，取值为 1 表示中断已屏蔽。
+    - TP（Timer Periodic Mode）为定时器周期模式，决定定时器周期触发还是仅触发一次。
 
     其余的位暂时不需要关注，如有兴趣可以参考 APIC 文档下的参考资料。
 
@@ -333,12 +333,12 @@ impl XApic {
     self.write(0x350, 1 << 16); // set Mask
     ```
 
--   设置计时器相关寄存器。
+- 设置计时器相关寄存器。
 
     APIC 中控制计时器的寄存器包括 TDCR、TICR 和 LVT Timer。其中，TDCR 用于设置分频系数，TICR 用于设置初始计数值。
 
-    -   TDCR(0x3E0) 的分频系数决定了总线时钟与计时器时钟的比例，也即计时器的计数频率。
-    -   TICR(0x380) 的初始计数值决定了计时器的计数周期，每当计数到 0 时，就会触发中断。
+    - TDCR(0x3E0) 的分频系数决定了总线时钟与计时器时钟的比例，也即计时器的计数频率。
+    - TICR(0x380) 的初始计数值决定了计时器的计数周期，每当计数到 0 时，就会触发中断。
 
     分频系数和 TDCR 寄存器的取值关系如下表所示，第二比特总是为 0：
 
@@ -356,7 +356,7 @@ impl XApic {
     self.write(0x380, 0x20000); // set initial count to 0x20000
     ```
 
--   清除错误状态寄存器。
+- 清除错误状态寄存器。
 
     APIC 中的错误状态寄存器（Error Status Register, 0x280）用于记录 APIC 内部的错误状态。当 APIC 发生错误时，CPU 会将错误信息写入此寄存器。为了避免错误状态寄存器中的错误信息影响后续的错误处理，需要在初始化 APIC 时清除错误状态寄存器中的错误信息。
 
@@ -367,7 +367,7 @@ impl XApic {
     self.write(0x280, 0);
     ```
 
--   设置 ICR 寄存器。
+- 设置 ICR 寄存器。
 
     中断命令寄存器由两个 32 位寄存器组成，一个在 0x300，另一个在 0x310。它用于向不同的处理器发送中断。在写入 0x300 时发出中断，但在写入 0x310 时不发出中断。因此，要发送中断命令，应首先写入 0x310，然后写入 0x300。
 
@@ -423,10 +423,10 @@ impl XApic {
 
     具体的配置配置细节这里不做理解要求，只需要按照如下描述进行配置即可：
 
-    -   DSH（Destination Shorthand）：设置为 2，始终将中断发送给所有 APIC
-    -   DMode（Delivery Mode）：设置为 5，INIT De-assert 模式
-    -   LV（Level）：设置为 0，INIT De-assert 模式
-    -   TM（Trigger Mode）：设置为 1，INIT De-assert 模式
+    - DSH（Destination Shorthand）：设置为 2，始终将中断发送给所有 APIC
+    - DMode（Delivery Mode）：设置为 5，INIT De-assert 模式
+    - LV（Level）：设置为 0，INIT De-assert 模式
+    - TM（Trigger Mode）：设置为 1，INIT De-assert 模式
 
     参考代码如下：
 

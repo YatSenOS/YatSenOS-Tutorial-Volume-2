@@ -28,6 +28,8 @@
 
     请注意本次实验中的 `Makefile` 和 `ysos.py` 均有更新，并注意保留 `assets/OVMF.fd` 文件。
 
+    同时，自本次实验开始，采用工作区依赖的方式进行依赖管理，在根目录下的 `Cargo.toml` 中定义整个项目所需的依赖，并在 `pkg` 目录下的 `Cargo.toml` 中使用 `workspace = true` 的方式引用他们（详见参考代码）。
+
 在 `pkg/kernel/config` 中，引用了 `config/x86_64-unknown-none.json` 的编译目标配置，该配置文件如下所示：
 
 ```json
@@ -89,11 +91,11 @@ SECTIONS {
 
 实验在 `pkg/boot` 中提供了一些基本的功能实现：
 
--   `allocator.rs`：为 `uefi` crate 中的 `UEFIFrameAllocator` 实现 `x86_64` crate 所定义的 `FrameAllocator<Size4KiB>` trait，以便在页面分配、页表映射时使用。
--   `config.rs`：提供了一个读取并解析 `boot.conf` 的基本实现，可以使用它来自定义 bootloader 的行为、启动参数等等。
--   `fs.rs`：提供了在 UEFI 环境下打开文件、列出目录、加载文件、释放 `ElfFile` 的功能，你可以参考这部分代码了解与文件系统相关操作的基本内容。在后期的实验中，你将自己实现对文件系统的相关操作。
--   `lib.rs`：这部分内容定义了 bootloader 将要传递给内核的信息、内核的入口点、跳转到内核的实现等等。定义在 `lib.rs` 中是为了能够在内核实现中引用这些数据结构，确保内核与 bootloader 的数据结构一致。
--   `main.rs`：这里是 bootloader 的入口点，你可以在这里编写你的 bootloader 代码。
+- `allocator.rs`：为 `uefi` crate 中的 `UEFIFrameAllocator` 实现 `x86_64` crate 所定义的 `FrameAllocator<Size4KiB>` trait，以便在页面分配、页表映射时使用。
+- `config.rs`：提供了一个读取并解析 `boot.conf` 的基本实现，可以使用它来自定义 bootloader 的行为、启动参数等等。
+- `fs.rs`：提供了在 UEFI 环境下打开文件、列出目录、加载文件、释放 `ElfFile` 的功能，你可以参考这部分代码了解与文件系统相关操作的基本内容。在后期的实验中，你将自己实现对文件系统的相关操作。
+- `lib.rs`：这部分内容定义了 bootloader 将要传递给内核的信息、内核的入口点、跳转到内核的实现等等。定义在 `lib.rs` 中是为了能够在内核实现中引用这些数据结构，确保内核与 bootloader 的数据结构一致。
+- `main.rs`：这里是 bootloader 的入口点，你可以在这里编写你的 bootloader 代码。
 
 同时在 `pkg/elf` 中实验提供了加载 ELF 文件的相关代码，其中也有需要你自己实现的部分。
 
@@ -178,9 +180,9 @@ unsafe {
 
 最后，你需要检验是否成功加载了内核：
 
--   使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
--   使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
--   在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
+- 使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
+- 使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
+- 在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
 
     !!! note "使用 `.gdbinit` 方便你的调试过程"
 
@@ -193,8 +195,8 @@ unsafe {
           b ysos_kernel::init
           ```
 
--   使用 `c` 命令继续执行，你将会看到 QEMU 窗口中的输出，同时 GDB 将会在断点处停下。
--   查看断点处的汇编和符号是否正确，使用 `vmmap` 和 `readelf` 等指令查看内核的加载情况。
+- 使用 `c` 命令继续执行，你将会看到 QEMU 窗口中的输出，同时 GDB 将会在断点处停下。
+- 查看断点处的汇编和符号是否正确，使用 `vmmap` 和 `readelf` 等指令查看内核的加载情况。
 
 !!! tip "遇到了奇怪的问题？尝试更改 `log::set_max_level(log::LevelFilter::Info);` 来调整日志输出的等级，以便你能够观察到更多的日志输出。"
 
@@ -369,8 +371,8 @@ let ret = data.read();
 
 对于只读和只写的寄存器，你可以使用 `PortWriteOnly` 和 `PortReadOnly` 来从类型系统上防止误操作的发生。
 
--   偏移量为 `1` 的寄存器是中断使能寄存器，可以使用 `PortWriteOnly::new(base + 1)` 操作。
--   偏移量为 `5` 的寄存器是线控寄存器，可以使用 `PortReadOnly::new(base + 5)` 操作。
+- 偏移量为 `1` 的寄存器是中断使能寄存器，可以使用 `PortWriteOnly::new(base + 1)` 操作。
+- 偏移量为 `5` 的寄存器是线控寄存器，可以使用 `PortReadOnly::new(base + 5)` 操作。
 
 对于串口设备，其寄存器均为 8 位，你可以使用 `u8` 类型来进行读写操作。
 
@@ -512,9 +514,9 @@ println!("{}", record.args());
 
 4.  在 QEMU 中，我们通过指定 `-nographic` 参数来禁用图形界面，这样 QEMU 会默认将串口输出重定向到主机的标准输出。
 
-    -   假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
-    -   在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
-    -   如果你使用 `ysos.py` 来启动 qemu，可以尝试修改 `-o` 选项来实现上述功能。
+    - 假如我们将 `Makefile` 中取消该选项，QEMU 的输出窗口会发生什么变化？请观察指令 `make run QEMU_OUTPUT=` 的输出，结合截图分析对应现象。
+    - 在移除 `-nographic` 的情况下，如何依然将串口重定向到主机的标准输入输出？请尝试自行构造命令行参数，并查阅 QEMU 的文档，进行实验。
+    - 如果你使用 `ysos.py` 来启动 qemu，可以尝试修改 `-o` 选项来实现上述功能。
 
     !!! note "现象观察提示"
 

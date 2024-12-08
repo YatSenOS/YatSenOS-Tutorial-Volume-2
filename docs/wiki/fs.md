@@ -14,8 +14,8 @@
 
 要想深刻理解文件系统，首先需要了解文件与持久存储。由于计算机内存中的数据在掉电后会丢失，应用程序需要将数据保存在持久存储设备上。为了满足这个需求，计算机操作系统一般会有两种处理方法：
 
--   应用程序直接操作持久存储设备，自己维护数据的存储和读写。
--   应用程序通过操作系统提供的文件系统接口，由操作系统负责维护数据的存储和读写。
+- 应用程序直接操作持久存储设备，自己维护数据的存储和读写。
+- 应用程序通过操作系统提供的文件系统接口，由操作系统负责维护数据的存储和读写。
 
 对于前者，由之前的学习可以知道：计算机中应用程序若要和设备直接交互，需要操作系统让渡部分设备管理权限，无形中会引入安全隐患（如侧信道攻击等）。此外，不同的设备有不同的操作模式，应用程序需要针对不同的设备编写不同的代码，增加了开发难度的同时，还降低了应用的可移植性。
 
@@ -53,9 +53,9 @@
 
 在本实验和[rCore](https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter6/2fs-implementation.html)的设计中，都采用了这样的思路，具体可以体现在：
 
--   `BlockDevice`：文件系统与底层设备驱动之间通过抽象层 `BlockDevice` 来连接，避免了与设备驱动、分区方式的绑定。
--   `alloc` crate：通过 Rust 提供的 `alloc crate` 来隔离了语言层面的内存管理，避免了直接调用内存管理的内核函数，同时提供了在 `std` 环境下进行测试的能力。
--   `trait` 和 `dyn`：通过对文件系统的功能、相关数据结构进行抽象封装，从而使得创建虚拟文件系统和支持更多不同的文件系统成为可能。
+- `BlockDevice`：文件系统与底层设备驱动之间通过抽象层 `BlockDevice` 来连接，避免了与设备驱动、分区方式的绑定。
+- `alloc` crate：通过 Rust 提供的 `alloc crate` 来隔离了语言层面的内存管理，避免了直接调用内存管理的内核函数，同时提供了在 `std` 环境下进行测试的能力。
+- `trait` 和 `dyn`：通过对文件系统的功能、相关数据结构进行抽象封装，从而使得创建虚拟文件系统和支持更多不同的文件系统成为可能。
 
 ### 实现方法
 
@@ -93,11 +93,11 @@ FAT 的实现很简单：它将文件系统的元信息和文件数据都存储�
 
 ## 参考资料
 
--   [File Systems - OSDev](https://wiki.osdev.org/File_Systems)
--   [rCore - fs implementation](https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter6/index.html#)
--   [FAT 和 UNIX 文件系统](https://jyywiki.cn/OS/2022/slides/27.slides.html#/)
--   [Xv6 文件系统实现](https://jyywiki.cn/OS/2022/slides/29.slides.html#/)
--   [你管这破玩意叫文件系统 - 微信科普公众号](https://mp.weixin.qq.com/s/q6OjwCXSk05TvX_BIu1M0g)
--   [OSDI '22 Best Paper: XRP](https://www.usenix.org/conference/osdi22/presentation/zhong)
--   [SPDKL: The Storage Performance Development Kit](https://spdk.io/doc/about.html)
--   [存储系统-从没入门到刚入门](https://www.yuque.com/wwyf/blog/dhoobh)
+- [File Systems - OSDev](https://wiki.osdev.org/File_Systems)
+- [rCore - fs implementation](https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter6/index.html#)
+- [FAT 和 UNIX 文件系统](https://jyywiki.cn/OS/2022/slides/27.slides.html#/)
+- [Xv6 文件系统实现](https://jyywiki.cn/OS/2022/slides/29.slides.html#/)
+- [你管这破玩意叫文件系统 - 微信科普公众号](https://mp.weixin.qq.com/s/q6OjwCXSk05TvX_BIu1M0g)
+- [OSDI '22 Best Paper: XRP](https://www.usenix.org/conference/osdi22/presentation/zhong)
+- [SPDKL: The Storage Performance Development Kit](https://spdk.io/doc/about.html)
+- [存储系统-从没入门到刚入门](https://www.yuque.com/wwyf/blog/dhoobh)

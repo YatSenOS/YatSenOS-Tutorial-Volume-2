@@ -10,8 +10,8 @@ ATA 接口经历了多个版本的发展，包括 ATA、ATAPI（用于附加设�
 
 由上介绍，ATA 硬盘使用 IDE 接口，分为 PATA 和 SATA 两种类型。
 
--   **PATA 硬盘**（Parallel ATA）：即并行 ATA 硬盘接口规范，有着非常悠久的迭代历史，但已经不常见。
--   **SATA 硬盘**（Serial ATA）：即串行 ATA 硬盘接口规范，为常见类型，如今我们常说的外存设备 HDD 或 SSD 多数为 SATA 接口。
+- **PATA 硬盘**（Parallel ATA）：即并行 ATA 硬盘接口规范，有着非常悠久的迭代历史，但已经不常见。
+- **SATA 硬盘**（Serial ATA）：即串行 ATA 硬盘接口规范，为常见类型，如今我们常说的外存设备 HDD 或 SSD 多数为 SATA 接口。
 
 PATA 之所以被 SATA 取代，其中一个重要原因是 SATA 接口的传输速度更快。到目前为止，ATA-7 是 ATA 接口的最后一个版本，也叫 ATA133 。 ATA133 最大支持 133 MB/s 数据传输速度。但 SATA 接口的第一代就已经达到了 150 MB/s 的传输速度，第二代则达到了 300 MB/s，第三代则达到了 600 MB/s。从数据上可以直观发现，SATA 硬盘的最大传输速度远远超过了 PATA 硬盘。
 
@@ -23,8 +23,8 @@ PATA 之所以被 SATA 取代，其中一个重要原因是 SATA 接口的传输
 
 为什么 PATA 接口会比 SATA 接口慢呢？更进一步，为什么现在流行的高速接口都是串行接口呢？直观上感觉，相同情况下 ATA 的**多通道**应该比 SATA 的**单通道**应该更快才对。这里我们需要了解一些比特数据传输与速率限制的知识。相较 PATA 的多通道，SATA 的单数据通道速度频率限制：
 
--   由于多通道并行，PATA 必须在数据线中一次传输 16 个信号，如果信号没有及时到达，就会产生错误传输结果。因此，比特流传输的速度必须**减缓**以纠正错误。
--   而 SATA 一次只传输一个比特的数据，此时比特流的传递速度要快得多。
+- 由于多通道并行，PATA 必须在数据线中一次传输 16 个信号，如果信号没有及时到达，就会产生错误传输结果。因此，比特流传输的速度必须**减缓**以纠正错误。
+- 而 SATA 一次只传输一个比特的数据，此时比特流的传递速度要快得多。
 
 因此，SATA 传输线的传输速度比 PATA 要快了近 30 倍。此外，SATA 另一个进步在于它的数据连线，它的体积更小，散热也更好，与硬盘的连接相当方便。与 PATA 相比，SATA 的功耗更低，同时配备的 CRC 技术让数据传输也更为安全。
 
@@ -76,7 +76,7 @@ PIO (Programmed Input/Output) 是过 CPU 执行 I/O 端口指令来进行数据�
 
 ## 参考资料
 
--   [ATA PIO - OSDev](https://wiki.osdev.org/ATA_PIO)
--   [ATA - Wikipedia](https://en.wikipedia.org/wiki/Parallel_ATA)
--   [百度百科 - ATA 硬盘](https://baike.baidu.com/item/ATA%E7%A1%AC%E7%9B%98/10009258)
--   [知乎 - ATA PIO 模式](https://zhuanlan.zhihu.com/p/653413684)
+- [ATA PIO - OSDev](https://wiki.osdev.org/ATA_PIO)
+- [ATA - Wikipedia](https://en.wikipedia.org/wiki/Parallel_ATA)
+- [百度百科 - ATA 硬盘](https://baike.baidu.com/item/ATA%E7%A1%AC%E7%9B%98/10009258)
+- [知乎 - ATA PIO 模式](https://zhuanlan.zhihu.com/p/653413684)

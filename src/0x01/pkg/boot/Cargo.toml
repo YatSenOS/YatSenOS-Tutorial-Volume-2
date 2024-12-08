@@ -5,12 +5,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-arrayvec = { version = "0.7", default-features = false }
-uefi = { version = "0.33", default-features = false }
-log = "0.4"
-x86_64 = "0.15"
-xmas-elf = "0.9"
-elf = { package = "ysos_elf", path = "../elf" }
+arrayvec = { workspace = true }
+uefi = { workspace = true }
+log = { workspace = true }
+x86_64 = { workspace = true }
+xmas-elf = { workspace = true }
+elf = { workspace = true }
 
 [features]
 boot = ["uefi/alloc", "uefi/logger", "uefi/panic_handler", "uefi/global_allocator"]

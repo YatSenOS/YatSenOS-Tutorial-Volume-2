@@ -14,10 +14,10 @@
 
 我们推荐在以下环境进行实验：
 
--   Ubuntu 22.04 LTS (jammy) on WSL 2 **(推荐 Windows 用户选择)**
--   Windows 10/11 **(Windows 原生备选，GDB 相关功能无法使用)**
--   Ubuntu 22.04 LTS (jammy)
--   macOS with Apple Silicon
+- Ubuntu 22.04 LTS (jammy) on WSL 2 **(推荐 Windows 用户选择)**
+- Windows 10/11 **(Windows 原生备选，GDB 相关功能无法使用)**
+- Ubuntu 22.04 LTS (jammy)
+- macOS with Apple Silicon
 
 以上环境经过我们的测试和验证，可以正常进行实验。对于其他常用的 Linux 发行版，通常也可以正常进行实验，但我们不提供技术支持。
 
@@ -33,11 +33,11 @@
 
     在 Windows 平台上我们建议通过 VSCode + Python + CodeLLDB 插件进行开发、调试。
 
--   对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置，**文档包含 Linux 相关安装指南**。
+- 对于选择使用 Linux 的同学，请参考 [Linux 环境配置](../../wiki/linux.md) 进行配置，**文档包含 Linux 相关安装指南**。
 
--   对于选择使用 Windows 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
+- 对于选择使用 Windows 的同学，请参考 [Windows 环境配置](../../wiki/windows.md) 进行配置。
 
--   对于选择使用 macOS 的同学，请安装 `brew` 和相应工具，参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
+- 对于选择使用 macOS 的同学，请安装 `brew` 和相应工具，参考 [Linux 环境配置](../../wiki/linux.md) 进行配置。
 
 ## 尝试使用 Rust 进行编程
 
@@ -129,10 +129,10 @@
 
     尝试输出如下格式和内容：
 
-    -   `INFO: Hello, world!`，其中 `INFO:` 为绿色，后续内容为白色
-    -   `WARNING: I'm a teapot!`，颜色为黄色，加粗，并为 `WARNING` 添加下划线
-    -   `ERROR: KERNEL PANIC!!!`，颜色为红色，加粗，并尝试让这一行在控制行窗口居中
-    -   一些你想尝试的其他效果和内容……
+    - `INFO: Hello, world!`，其中 `INFO:` 为绿色，后续内容为白色
+    - `WARNING: I'm a teapot!`，颜色为黄色，加粗，并为 `WARNING` 添加下划线
+    - `ERROR: KERNEL PANIC!!!`，颜色为红色，加粗，并尝试让这一行在控制行窗口居中
+    - 一些你想尝试的其他效果和内容……
 
     !!! tip "如果你想进一步了解，可以尝试搜索 **ANSI 转义序列**"
 
@@ -140,9 +140,9 @@
 
     实现一个名为 `Shape` 的枚举，并为它实现 `pub fn area(&self) -> f64` 方法，用于计算不同形状的面积。
 
-    -   你可能需要使用模式匹配来达到相应的功能
-    -   请实现 `Rectangle` 和 `Circle` 两种 `Shape`，并使得 `area` 函数能够正确计算它们的面积
-    -   使得你的实现能够通过如下测试：
+    - 你可能需要使用模式匹配来达到相应的功能
+    - 请实现 `Rectangle` 和 `Circle` 两种 `Shape`，并使得 `area` 函数能够正确计算它们的面积
+    - 使得你的实现能够通过如下测试：
 
         ```rust
         #[test]
@@ -164,9 +164,9 @@
 
     使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
 
-    -   你可以在函数体中定义 `static` 变量来存储一些全局状态
-    -   你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证，相关原理将在 Lab 5 介绍，此处不做要求）
-    -   使得你的实现能够通过如下测试：
+    - 你可以在函数体中定义 `static` 变量来存储一些全局状态
+    - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证，相关原理将在 Lab 5 介绍，此处不做要求）
+    - 使得你的实现能够通过如下测试：
 
         ```rust
         #[test]

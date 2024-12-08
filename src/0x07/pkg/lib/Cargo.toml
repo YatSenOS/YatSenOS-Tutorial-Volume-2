@@ -4,9 +4,9 @@ version = "0.7.0"
 edition = "2021"
 
 [dependencies]
-syscall_def = { package = "ysos_syscall", path = "../syscall" }
-chrono = { version = "0.4", default-features = false }
-linked_list_allocator = { version = "0.10", optional = true }
+syscall_def = { workspace = true }
+chrono = { workspace = true }
+linked_list_allocator = { workspace = true, optional = true }
 
 [features]
 default = ["kernel_alloc"]

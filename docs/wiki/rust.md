@@ -10,30 +10,30 @@ Rust 语言的基础语法可以参考 [Rust圣经](https://course.rs/) 或者 [
 
 其他可参考的学习资料：
 
--   [Rust 之旅（交互式课程）](https://tourofrust.com/00_zh-cn.html)
--   [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
--   [Rust Cookbook](https://rust-lang-nursery.github.io/rust-cookbook/)
--   [清华的 Rust 课程](https://lab.cs.tsinghua.edu.cn/rust/)
+- [Rust 之旅（交互式课程）](https://tourofrust.com/00_zh-cn.html)
+- [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
+- [Rust Cookbook](https://rust-lang-nursery.github.io/rust-cookbook/)
+- [清华的 Rust 课程](https://lab.cs.tsinghua.edu.cn/rust/)
 
 值得注意的是，本实验内容并不要求你对 Rust 语言有深入的了解，只需要你能够 **理解并使用** Rust 语言的以下内容：
 
--   **基本语法**
+- **基本语法**
 
     变量绑定、常量、表达式、基本类型、条件语句、模式匹配、函数
 
--   **所有权与结构化数据**
+- **所有权与结构化数据**
 
     所有权、移动语义、借用与可变引用、结构体、元组结构体、单位元结构体、枚举
 
--   **标准库**
+- **标准库**
 
     `String`、`Vec<T>`、`Result<T, E>`、`Option<T>`、错误处理、单元测试
 
--   **泛型、特型与生命周期**
+- **泛型、特型与生命周期**
 
     泛型、特型、标准库提供的常用特性、生命周期入门
 
--   **项目管理与常用库**
+- **项目管理与常用库**
 
     Cargo 项目结构、命名规范、智能指针
 

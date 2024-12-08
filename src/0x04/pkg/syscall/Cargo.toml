@@ -4,4 +4,4 @@ version = "0.4.0"
 edition = "2021"
 
 [dependencies]
-num_enum = { version = "0.7", default-features = false }
+num_enum = { workspace = true }
