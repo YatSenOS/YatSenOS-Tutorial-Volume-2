@@ -6,18 +6,19 @@
   font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
   border-collapse: collapse;
+  --inst-border: 0.06rem solid var(--md-default-fg-color);
 }
 .inst-node {
   text-align: center;
   padding: 0.2em;
-  border: 0.04rem solid var(--md-default-fg-color);
+  border: var(--inst-border);
 }
 .inst-node-little,
 .fl-table-node {
   text-align: center;
   font-size: 0.7rem;
   padding: 0.15em;
-  border: 0.04rem solid var(--md-default-fg-color);
+  border: var(--inst-border);
 }
 .inst-numnode {
   font-size: 0.5rem;

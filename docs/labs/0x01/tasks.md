@@ -186,14 +186,14 @@ unsafe {
 
     !!! note "使用 `.gdbinit` 方便你的调试过程"
 
-          以下是一个 `.gdbinit` 的例子，你可以将其放置在你的工作目录下，这样每次进入 GDB 调试环境时，它都会自动加载。请注意部分指令是 `gef` 所提供的，详情请见调试文档。
+        以下是一个 `.gdbinit` 的例子，你可以将其放置在你的工作目录下，这样每次进入 GDB 调试环境时，它都会自动加载。请注意部分指令是 `gef` 所提供的，详情请见调试文档。
 
-          ```bash
-          file esp/KERNEL.ELF
-          gef-remote localhost 1234
-          tmux-setup
-          b ysos_kernel::init
-          ```
+        ```bash
+        file esp/KERNEL.ELF
+        gef-remote localhost 1234
+        tmux-setup
+        b ysos_kernel::init
+        ```
 
 - 使用 `c` 命令继续执行，你将会看到 QEMU 窗口中的输出，同时 GDB 将会在断点处停下。
 - 查看断点处的汇编和符号是否正确，使用 `vmmap` 和 `readelf` 等指令查看内核的加载情况。

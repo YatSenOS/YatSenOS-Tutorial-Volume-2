@@ -56,7 +56,7 @@
   show link: underline
   set math.vec(delim: "[")
   set math.mat(delim: "[")
-  show par: set block(spacing: line_height)
+  set par(spacing: line_height)
 
   doc
 }

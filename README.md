@@ -6,9 +6,9 @@
 
 ## 实验反馈
 
--   交流实验中遇到的困难：[![Discussions](https://img.shields.io/github/discussions/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/discussions)
--   提出实验设计的问题：[![Issues](https://img.shields.io/github/issues/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/issues)
--   改善这个实验：[![Issues-pr](https://img.shields.io/github/issues-pr/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/pulls)
+- 交流实验中遇到的困难：[![Discussions](https://img.shields.io/github/discussions/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/discussions)
+- 提出实验设计的问题：[![Issues](https://img.shields.io/github/issues/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/issues)
+- 改善这个实验：[![Issues-pr](https://img.shields.io/github/issues-pr/YatSenOS/YatSenOS-Tutorial-Volume-2)](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/pulls)
 
 ## 常见问题解答
 

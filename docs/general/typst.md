@@ -4,6 +4,8 @@
 
 关于 typst 的一些细节可以参考 [typst doc](https://typst.app/docs/)，同时，推荐使用模板来撰写格式更加更为统一的实验报告，可以参考[模板](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/template)，后文给出了一个可能的使用方法。
 
+!!! tip "相关原始 [Typst 模板](https://github.com/SYSUMSC/GZ-Typst-Templates)目前由中山大学互联网与开源技术协会维护。"
+
 ## 使用示例
 
 !!! note "假设你已经成功安装 typst，并已经加入到系统路径"
