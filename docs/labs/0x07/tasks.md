@@ -903,3 +903,52 @@ assert!(ret == heap_end, "Failed to allocate heap");
         _思考：文件内容什么时候会被写入到磁盘？_
 
     - 综合考虑有关内存、文件、I/O 等方面的知识，讨论为什么 `mmap` 系统调用在现代操作系统中越来越受欢迎，它具有哪些优势？
+
+## 加分项
+
+1. 😋 尝试借助 `brk` 为用户态堆实现自动扩容：
+
+    - `LockedHeap` 支持 `extend` 方法，可以在堆区不足时扩容大小，但是需要用户程序分配好所需的空间；
+    - 自定义数据结构 `BrkAllocator`，并为其实现 `GlobalAlloc` trait：
+
+        ```rust
+        #[global_allocator]
+        static ALLOCATOR: BrkAllocator = BrkAllocator::empty();
+
+        struct BrkAllocator {
+            allocator: LockedHeap,
+        }
+
+        pub fn init() {
+            ALLOCATOR.init();
+        }
+
+        impl BrkAllocator {
+            pub const fn empty() -> Self {
+                Self {
+                    allocator: LockedHeap::empty(),
+                }
+            }
+
+            pub fn init(&self) {
+                // FIXME: init heap to initial size with `brk` system call
+            }
+
+            pub unsafe fn extend(&self /* maybe add params you need */) -> bool {
+                // FIXME: extend heap size with `brk` system call
+                //        return false if failed or reach the max size (8 MiB suggested)
+            }
+        }
+
+        unsafe impl GlobalAlloc for BrkAllocator {
+            unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+                let mut ptr = self.allocator.alloc(layout);
+                // FIXME: if alloc failed, ptr is null
+                // FIXME: try to extend heap size, then alloc again
+                ptr
+            }
+            unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+                self.allocator.dealloc(ptr, layout)
+            }
+        }
+        ```
