@@ -84,7 +84,7 @@ wsl --install -d Ubuntu
 
 4. 按照仓库中的 `rust-toolchain` 文件，安装对应的 Rust 工具链。
 
-    !!! tip 第一次在拥有 `rust-toolchain.toml` 文件的目录下运行 `cargo` 命令时，Rustup 会自动安装对应的工具链。
+    !!! tip "第一次在拥有 `rust-toolchain.toml` 文件的目录下运行 `cargo` 命令时，Rustup 会自动安装对应的工具链。"
 
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
