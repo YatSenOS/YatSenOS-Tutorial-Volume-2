@@ -58,7 +58,7 @@ fn inc_counter() {
 }
 
 #[inline(never)]
-#[no_mangle]
+#[unsafe(no_mangle)]
 fn delay() {
     for _ in 0..0x100 {
         core::hint::spin_loop();

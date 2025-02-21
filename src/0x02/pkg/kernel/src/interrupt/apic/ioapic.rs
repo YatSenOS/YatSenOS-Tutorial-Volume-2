@@ -1,7 +1,6 @@
 /// The I/O APIC manages hardware interrupts for an SMP system.
 ///
 /// [Intel Doc](http://www.intel.com/design/chipsets/datashts/29056601.pdf)
-
 use bit_field::BitField;
 
 /// Default physical address of IO APIC
@@ -27,7 +26,6 @@ bitflags! {
     }
 }
 
-
 pub struct IoApic {
     reg: *mut u32,
     data: *mut u32,
@@ -49,21 +47,23 @@ impl IoApic {
         }
     }
 
-    unsafe fn read(&mut self, reg: u8) -> u32 {
-        self.reg.write_volatile(reg as u32);
-        self.data.read_volatile()
+    fn read(&mut self, reg: u8) -> u32 {
+        unsafe {
+            self.reg.write_volatile(reg as u32);
+            self.data.read_volatile()
+        }
     }
 
-    unsafe fn write(&mut self, reg: u8, data: u32) {
-        self.reg.write_volatile(reg as u32);
-        self.data.write_volatile(data);
+    fn write(&mut self, reg: u8, data: u32) {
+        unsafe {
+            self.reg.write_volatile(reg as u32);
+            self.data.write_volatile(data);
+        }
     }
 
     fn write_irq(&mut self, irq: u8, flags: RedirectionEntry, dest: u8) {
-        unsafe {
-            self.write(0x10 + 2 * irq, (32 + irq) as u32 | flags.bits());
-            self.write(0x10 + 2 * irq + 1, (dest as u32) << 24);
-        }
+        self.write(0x10 + 2 * irq, (32 + irq) as u32 | flags.bits());
+        self.write(0x10 + 2 * irq + 1, (dest as u32) << 24);
     }
 
     pub fn enable(&mut self, irq: u8, cpuid: u8) {
@@ -79,14 +79,14 @@ impl IoApic {
     }
 
     pub fn id(&mut self) -> u8 {
-        unsafe { self.read(0x00).get_bits(24..28) as u8 }
+        self.read(0x00).get_bits(24..28) as u8
     }
 
     pub fn version(&mut self) -> u8 {
-        unsafe { self.read(0x01).get_bits(0..8) as u8 }
+        self.read(0x01).get_bits(0..8) as u8
     }
 
     pub fn maxintr(&mut self) -> u8 {
-        unsafe { self.read(0x01).get_bits(16..24) as u8 }
+        self.read(0x01).get_bits(16..24) as u8
     }
 }

@@ -81,7 +81,5 @@ fn efi_main() -> Status {
     // align stack to 8 bytes
     let stacktop = config.kernel_stack_address + config.kernel_stack_size * 0x1000 - 8;
 
-    unsafe {
-        jump_to_entry(&bootinfo, stacktop);
-    }
+    jump_to_entry(&bootinfo, stacktop);
 }

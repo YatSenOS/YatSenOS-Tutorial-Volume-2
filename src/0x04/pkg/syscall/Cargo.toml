@@ -1,7 +1,6 @@
 [package]
 name = "ysos_syscall"
-version = "0.4.0"
-edition = "2021"
-
+version.workspace = true
+edition.workspace = true
 [dependencies]
 num_enum = { workspace = true }

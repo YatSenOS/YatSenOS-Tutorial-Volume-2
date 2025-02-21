@@ -8,6 +8,8 @@ Rust 语言的基础语法可以参考 [Rust圣经](https://course.rs/) 或者 [
 
 当熟悉 Rust 的语法与特性后，可以尝试去完成 [Rustlings](https://github.com/rust-lang/rustlings) 的练习，这些练习可以帮助你更好的理解 Rust 语言的特性。
 
+本实验中使用的语言版本为 2024 版本，发布于 2025 年 2 月 20 日。
+
 其他可参考的学习资料：
 
 - [Rust 之旅（交互式课程）](https://tourofrust.com/00_zh-cn.html)

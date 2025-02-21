@@ -4,7 +4,7 @@ use alloc::string::ToString;
 #[macro_export]
 macro_rules! entry {
     ($fn:ident) => {
-        #[export_name = "_start"]
+        #[unsafe(export_name = "_start")]
         pub extern "C" fn __impl_start() {
             lib::init(); // THIS LINE IS NEW IN LAB 7
             let ret = $fn();

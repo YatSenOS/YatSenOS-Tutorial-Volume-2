@@ -53,7 +53,7 @@ impl FrameDeallocator<Size4KiB> for BootInfoFrameAllocator {
     }
 }
 
-unsafe fn create_frame_iter(memory_map: &MemoryMap) -> BootInfoFrameIter {
+fn create_frame_iter(memory_map: &MemoryMap) -> BootInfoFrameIter {
     let iter = memory_map
         .clone()
         .into_iter()

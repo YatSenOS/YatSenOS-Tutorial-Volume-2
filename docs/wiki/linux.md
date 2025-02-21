@@ -82,16 +82,20 @@ wsl --install -d Ubuntu
 
     !!! tip "如果遇到了网络问题，请参考 [rsproxy.cn](https://rsproxy.cn/) 进行配置。"
 
+4. 按照仓库中的 `rust-toolchain` 文件，安装对应的 Rust 工具链。
+
+    !!! tip 第一次在拥有 `rust-toolchain.toml` 文件的目录下运行 `cargo` 命令时，Rustup 会自动安装对应的工具链。
+
 在安装完成后，请使用如下命令，确保你的相关软件包**不低于**如下标准：
 
 对于 Ubuntu 24.04：
 
 ```bash
 $ rustc --version
-rustc 1.84.1 (e71f9a9a9 2025-01-27)
+rustc 1.85.0 (4d91de4e4 2025-02-17)
 
 $ rustc +nightly --version
-rustc 1.86.0-nightly (124cc9219 2025-02-09)
+rustc 1.87.0-nightly (f04bbc60f 2025-02-20)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.4)
@@ -107,10 +111,10 @@ GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
 
 ```bash
 $ rustc --version
-rustc 1.84.1 (e71f9a9a9 2025-01-27)
+rustc 1.85.0 (4d91de4e4 2025-02-17)
 
 $ rustc +nightly --version
-rustc 1.86.0-nightly (124cc9219 2025-02-09)
+rustc 1.87.0-nightly (f04bbc60f 2025-02-20)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)

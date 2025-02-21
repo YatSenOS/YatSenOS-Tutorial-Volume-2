@@ -7,6 +7,10 @@ members = [
 ]
 exclude = ["pkg/app/config", "pkg/app/.cargo"]
 
+[workspace.package]
+version = "0.2.0"
+edition = "2024"
+
 [profile.release-with-debug]
 inherits = "release"
 debug = true
@@ -20,14 +24,13 @@ spin = "0.9"
 x86 = "0.52"
 x86_64 = "0.15"
 log = "0.4"
-spin = "0.9"
 bit_field = "0.10"
 bitflags = "2.3"
 libm = "0.2"
 xmas-elf = "0.9"
 linked_list_allocator = "0.10"
 arrayvec = { version = "0.7", default-features = false }
-uefi = { version = "0.33", default-features = false }
+uefi = { version = "0.34", default-features = false }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
 

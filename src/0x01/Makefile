@@ -75,6 +75,7 @@ $(ESP)/KERNEL.ELF: target/x86_64-unknown-none/$(PROFILE)/ysos_kernel
 	@mkdir -p $(@D)
 	cp $< $@
 
+
 target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi: pkg/boot
 	cd pkg/boot && cargo build $(BUILD_ARGS)
 

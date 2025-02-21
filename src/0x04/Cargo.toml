@@ -10,6 +10,10 @@ members = [
 ]
 exclude = ["pkg/app/config", "pkg/app/.cargo"]
 
+[workspace.package]
+version = "0.4.0"
+edition = "2024"
+
 [profile.release-with-debug]
 inherits = "release"
 debug = true
@@ -27,20 +31,20 @@ hex-literal = "0.4"
 libm = "0.2"
 linked_list_allocator = "0.10"
 log = "0.4"
-lru = "0.12"
+lru = "0.13"
 paste = "1.0"
 pc-keyboard = "0.8"
-rand_hc = "0.3"
+rand_hc = "0.4"
 spin = "0.9"
 volatile = "0.6"
 x86 = "0.52"
 x86_64 = "0.15"
 xmas-elf = "0.9"
-uefi = { version = "0.33", default-features = false }
+uefi = { version = "0.34", default-features = false }
 chrono = { version = "0.4", default-features = false }
 arrayvec = { version = "0.7", default-features = false }
 num_enum = { version = "0.7", default-features = false }
-rand = { version = "0.8", default-features = false }
+rand = { version = "0.9", default-features = false }
 roaring = { version = "0.10", default-features = false }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 micromath = { version = "2.0", features = ["num-traits"] }

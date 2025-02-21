@@ -696,8 +696,8 @@ pub fn init(boot_info: &'static BootInfo) {
     info!("Stack grow test done.");
 }
 
-#[no_mangle]
 #[inline(never)]
+#[unsafe(no_mangle)]
 pub fn grow_stack() {
     const STACK_SIZE: usize = 1024 * 4;
     const STEP: usize = 64;

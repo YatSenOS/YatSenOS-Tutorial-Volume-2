@@ -4,7 +4,7 @@ use crate::errln;
 #[macro_export]
 macro_rules! entry {
     ($fn:ident) => {
-        #[export_name = "_start"]
+        #[unsafe(export_name = "_start")]
         pub extern "C" fn __impl_start() {
             let ret = $fn();
             // FIXME: after syscall, add lib::sys_exit(ret);
