@@ -508,7 +508,7 @@ println!("{}", record.args());
 
 ## 思考题
 
-1.  在 `pkg/kernel` 的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，这是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
+1.  在根目录的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，而它会被内核引用，禁用默认 feature 是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
 
 2.  在 `pkg/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
 
