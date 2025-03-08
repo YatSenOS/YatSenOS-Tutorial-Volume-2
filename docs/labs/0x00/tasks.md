@@ -388,6 +388,8 @@ BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
 
 ## 加分项
 
+!!! tip "本次实验的加分项均为 **在现有操作系统 std 环境下的 Rust 独立二进制**"
+
 1. 😋 基于控制行颜色的 Rust 编程题目，参考 `log` crate 的文档，为不同的日志级别输出不同的颜色效果，并进行测试输出。
 
 2. 🤔 基于第一个 Rust 编程题目，实现一个简单的 shell 程序：
