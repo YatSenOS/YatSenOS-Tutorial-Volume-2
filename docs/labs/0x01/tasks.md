@@ -48,7 +48,6 @@
   "disable-redzone": true,
   "features": "-mmx,-sse,+soft-float",
   "rustc-abi": "x86-softfloat",
-  "panic-strategy": "abort",
   "pre-link-args": {
     "ld.lld": ["-Tpkg/kernel/config/kernel.ld", "-export-dynamic"]
   }
