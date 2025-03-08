@@ -52,7 +52,7 @@ static mut ENTRY: usize = 0;
 /// # Safety
 ///
 /// This function is unsafe because the caller must ensure that the kernel entry point is valid.
-pub unsafe fn jump_to_entry(bootinfo: *const BootInfo, stacktop: u64) -> ! {
+pub(crate) fn jump_to_entry(bootinfo: *const BootInfo, stacktop: u64) -> ! {
     unsafe {
         assert!(ENTRY != 0, "ENTRY is not set");
         asm!("mov rsp, {}; call {}", in(reg) stacktop, in(reg) ENTRY, in("rdi") bootinfo);
@@ -66,7 +66,7 @@ pub unsafe fn jump_to_entry(bootinfo: *const BootInfo, stacktop: u64) -> ! {
 ///
 /// This function is unsafe because the caller must ensure that the kernel entry point is valid.
 #[inline(always)]
-pub unsafe fn set_entry(entry: usize) {
+pub(crate) fn set_entry(entry: usize) {
     unsafe {
         ENTRY = entry;
     }
