@@ -17,12 +17,16 @@ impl XApic {
     }
 
     unsafe fn read(&self, reg: u32) -> u32 {
-        read_volatile((self.addr + reg as u64) as *const u32)
+        unsafe {
+            read_volatile((self.addr + reg as u64) as *const u32)
+        }
     }
 
     unsafe fn write(&mut self, reg: u32, value: u32) {
-        write_volatile((self.addr + reg as u64) as *mut u32, value);
-        self.read(0x20);
+        unsafe {
+            write_volatile((self.addr + reg as u64) as *mut u32, value);
+            self.read(0x20);
+        }
     }
 }
 

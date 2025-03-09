@@ -29,7 +29,9 @@ pub mod memory;
 pub mod interrupt;
 
 pub use alloc::format;
+
 use boot::BootInfo;
+use uefi::{Status, runtime::ResetType};
 
 pub fn init(boot_info: &'static BootInfo) {
     unsafe {
