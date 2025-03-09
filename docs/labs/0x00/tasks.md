@@ -291,7 +291,7 @@ targets = [ "x86_64-unknown-uefi" ]
 
     ```json
     {
-        "rust-analyzer.cargo.target": "x86_64-unknown-none"
+        "rust-analyzer.cargo.target": "x86_64-unknown-uefi"
     }
     ```
 

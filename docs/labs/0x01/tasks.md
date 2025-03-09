@@ -219,16 +219,6 @@ unsafe {
 
 ## UART 与日志输出
 
-!!! tip "rust-analyzer 总是提示有重复 `panic_handler` 的错误？"
-
-    通过 VSCode 配置项：`rust-analyzer.cargo.target` 来指定目标平台，避免 rust-analyzer 猜测你的目标架构为 `uefi`：
-
-    ```json
-    {
-        "rust-analyzer.cargo.target": "x86_64-unknown-none"
-    }
-    ```
-
 ### 串口驱动
 
 在 [UART 串口通信](../../wiki/uart.md) 部分中介绍了 UART 的基本原理，以及相关的基础知识。在这一部分实验中，你将会实现一个简单的串口驱动，并将其用于内核的日志输出。
