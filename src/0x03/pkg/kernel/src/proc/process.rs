@@ -118,7 +118,7 @@ impl ProcessInner {
     }
 
     pub fn clone_page_table(&self) -> PageTableContext {
-        self.page_table.as_ref().unwrap().clone_level_4()
+        self.proc_vm.as_ref().unwrap()
     }
 
     pub fn is_ready(&self) -> bool {
