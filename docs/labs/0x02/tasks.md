@@ -506,7 +506,7 @@ pub fn kernel_main(boot_info: &'static boot::BootInfo) -> ! {
         }
     }
 
-    ysos::shutdown(boot_info);
+    ysos::shutdown();
 }
 ```
 
