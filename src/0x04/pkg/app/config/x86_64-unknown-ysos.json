@@ -9,7 +9,6 @@
   "executables": true,
   "linker-flavor": "ld.lld",
   "linker": "rust-lld",
-  "panic-strategy": "abort",
   "disable-redzone": true,
   "features": "-mmx,-sse,+soft-float",
   "rustc-abi": "x86-softfloat",
@@ -18,4 +17,3 @@
     "ld.lld": ["-Tpkg/app/config/app.ld"]
   }
 }
-```
