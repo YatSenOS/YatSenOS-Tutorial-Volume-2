@@ -61,3 +61,31 @@ fn wait(pid: ProcessId) {
         }
     }
 }
+
+const SHORT_UNITS: [&str; 4] = ["B", "K", "M", "G"];
+const UNITS: [&str; 4] = ["B", "KiB", "MiB", "GiB"];
+
+pub fn humanized_size(size: u64) -> (f32, &'static str) {
+    humanized_size_impl(size, false)
+}
+
+pub fn humanized_size_short(size: u64) -> (f32, &'static str) {
+    humanized_size_impl(size, true)
+}
+
+#[inline]
+pub fn humanized_size_impl(size: u64, short: bool) -> (f32, &'static str) {
+    let bytes = size as f32;
+
+    let units = if short { &SHORT_UNITS } else { &UNITS };
+
+    let mut unit = 0;
+    let mut bytes = bytes;
+
+    while bytes >= 1024f32 && unit < units.len() {
+        bytes /= 1024f32;
+        unit += 1;
+    }
+
+    (bytes, units[unit])
+}
