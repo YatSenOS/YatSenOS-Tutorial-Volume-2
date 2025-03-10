@@ -44,13 +44,14 @@ impl Process {
     pub fn new(
         name: String,
         parent: Option<Weak<Process>>,
-        page_table: PageTableContext,
+        proc_vm: Option<ProcessVm>,
         proc_data: Option<ProcessData>,
     ) -> Arc<Self> {
         let name = name.to_ascii_lowercase();
 
         // create context
         let pid = ProcessId::new();
+        let proc_vm = proc_vm.unwrap_or_else(|| ProcessVm::new(PageTableContext::new()));
 
         let inner = ProcessInner {
             name,
@@ -60,7 +61,7 @@ impl Process {
             ticks_passed: 0,
             exit_code: None,
             children: Vec::new(),
-            page_table: Some(page_table),
+            proc_vm: Some(proc_vm),
             proc_data: Some(proc_data.unwrap_or_default()),
         };
 
@@ -117,7 +118,7 @@ impl ProcessInner {
     }
 
     pub fn clone_page_table(&self) -> PageTableContext {
-        self.page_table.as_ref().unwrap().clone_level_4()
+        self.proc_vm.as_ref().unwrap()
     }
 
     pub fn is_ready(&self) -> bool {
