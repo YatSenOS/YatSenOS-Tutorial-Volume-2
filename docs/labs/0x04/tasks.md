@@ -741,7 +741,7 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
     x86_64::instructions::interrupts::without_interrupts(|| {
         let manager = get_process_manager();
         // FIXME: implement this for ProcessManager
-        manager.kill_self(ret);
+        manager.kill_current(ret);
         manager.switch_next(context);
     })
 }
@@ -752,8 +752,8 @@ pub fn exit(ret: isize, context: &mut ProcessContext) {
     退出的操作并不只用于当前进程，也可以作用于其他进程，因此可以通过如下方式将它们统一：
 
     ```rust
-    pub fn kill_self(&self, ret: isize) {
-        self.kill(processor::current_pid(), ret);
+    pub fn kill_current(&self, ret: isize) {
+        self.kill(processor::get_pid(), ret);
     }
 
     pub fn kill(&self, pid: ProcessId, ret: isize) {

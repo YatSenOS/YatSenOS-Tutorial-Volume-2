@@ -419,7 +419,7 @@ pub fn wait_pid(pid: ProcessId, context: &mut ProcessContext) {
 pub fn wait_pid(&self, pid: ProcessId) {
     let mut wait_queue = self.wait_queue.lock();
     // FIXME: push the current process to the wait queue
-    //        `processor::current_pid()` is waiting for `pid`
+    //        `processor::get_pid()` is waiting for `pid`
 }
 ```
 
@@ -726,7 +726,7 @@ pub struct ProcessData {
 pub fn sem_wait(key: u32, context: &mut ProcessContext) {
     x86_64::instructions::interrupts::without_interrupts(|| {
         let manager = get_process_manager();
-        let pid = processor::current_pid();
+        let pid = processor::get_pid();
         let ret = manager.current().write().sem_wait(key, pid);
         match ret {
             SemaphoreResult::Ok => context.set_rax(0),
