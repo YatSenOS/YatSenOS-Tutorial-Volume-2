@@ -45,22 +45,22 @@ impl Fat16Impl {
 }
 
 impl FileSystem for Fat16 {
-    fn read_dir(&self, path: &str) -> Result<Box<dyn Iterator<Item = Metadata> + Send>> {
+    fn read_dir(&self, path: &str) -> FsResult<Box<dyn Iterator<Item = Metadata> + Send>> {
         // FIXME: read dir and return an iterator for all entries
         todo!()
     }
 
-    fn open_file(&self, path: &str) -> Result<FileHandle> {
+    fn open_file(&self, path: &str) -> FsResult<FileHandle> {
         // FIXME: open file and return a file handle
         todo!()
     }
 
-    fn metadata(&self, path: &str) -> Result<Metadata> {
+    fn metadata(&self, path: &str) -> FsResult<Metadata> {
         // FIXME: read metadata of the file / dir
         todo!()
     }
 
-    fn exists(&self, path: &str) -> Result<bool> {
+    fn exists(&self, path: &str) -> FsResult<bool> {
         // FIXME: check if the file / dir exists
         todo!()
     }

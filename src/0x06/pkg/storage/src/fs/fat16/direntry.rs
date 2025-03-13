@@ -52,7 +52,7 @@ impl DirEntry {
     /// For Standard 8.3 format
     ///
     /// reference: https://osdev.org/FAT#Standard_8.3_format
-    pub fn parse(data: &[u8]) -> Result<DirEntry> {
+    pub fn parse(data: &[u8]) -> FsResult<DirEntry> {
         let filename = ShortFileName::new(&data[..11]);
 
         // FIXME: parse the rest of the fields
@@ -120,7 +120,7 @@ impl ShortFileName {
     }
 
     /// Parse a short file name from a string
-    pub fn parse(name: &str) -> Result<ShortFileName> {
+    pub fn parse(name: &str) -> FsResult<ShortFileName> {
         // FIXME: implement the parse function
         //      use `FilenameError` and into `FsError`
         //      use different error types for following conditions:

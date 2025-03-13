@@ -32,7 +32,7 @@ impl File {
 }
 
 impl Read for File {
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> FsResult<usize> {
         // FIXME: read file content from disk
         //      CAUTION: file length / buffer size / offset
         //
@@ -47,18 +47,18 @@ impl Read for File {
 
 // NOTE: `Seek` trait is not required for this lab
 impl Seek for File {
-    fn seek(&mut self, pos: SeekFrom) -> Result<usize> {
+    fn seek(&mut self, pos: SeekFrom) -> FsResult<usize> {
         unimplemented!()
     }
 }
 
 // NOTE: `Write` trait is not required for this lab
 impl Write for File {
-    fn write(&mut self, _buf: &[u8]) -> Result<usize> {
+    fn write(&mut self, _buf: &[u8]) -> FsResult<usize> {
         unimplemented!()
     }
 
-    fn flush(&mut self) -> Result<()> {
+    fn flush(&mut self) -> FsResult {
         unimplemented!()
     }
 }

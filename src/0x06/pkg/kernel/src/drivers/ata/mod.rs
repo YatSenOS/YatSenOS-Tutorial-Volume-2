@@ -78,19 +78,19 @@ impl core::fmt::Display for AtaDrive {
 use storage::{Block512, BlockDevice};
 
 impl BlockDevice<Block512> for AtaDrive {
-    fn block_count(&self) -> storage::Result<usize> {
+    fn block_count(&self) -> storage::FsResult<usize> {
         // FIXME: return the block count
         todo!()
     }
 
-    fn read_block(&self, offset: usize, block: &mut Block512) -> storage::Result<()> {
+    fn read_block(&self, offset: usize, block: &mut Block512) -> storage::FsResult {
         // FIXME: read the block
         //      - use `BUSES` and `self` to get bus
         //      - use `read_pio` to get data
         todo!()
     }
 
-    fn write_block(&self, offset: usize, block: &Block512) -> storage::Result<()> {
+    fn write_block(&self, offset: usize, block: &Block512) -> storage::FsResult {
         // FIXME: write the block
         //      - use `BUSES` and `self` to get bus
         //      - use `write_pio` to write data

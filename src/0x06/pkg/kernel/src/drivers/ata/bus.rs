@@ -131,7 +131,7 @@ impl AtaBus {
     /// Writes the given command
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO
-    fn write_command(&mut self, drive: u8, block: u32, cmd: AtaCommand) -> storage::Result<()> {
+    fn write_command(&mut self, drive: u8, block: u32, cmd: AtaCommand) -> storage::FsResult {
         let bytes = block.to_le_bytes(); // a trick to convert u32 to [u8; 4]
         unsafe {
             // just 1 sector for current implementation
@@ -164,7 +164,7 @@ impl AtaBus {
     /// Identifies the drive at the given `drive` number (0 or 1).
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#IDENTIFY_command
-    pub(super) fn identify_drive(&mut self, drive: u8) -> storage::Result<AtaDeviceType> {
+    pub(super) fn identify_drive(&mut self, drive: u8) -> storage::FsResult<AtaDeviceType> {
         info!("Identifying drive {}", drive);
 
         // FIXME: use `AtaCommand::IdentifyDevice` to identify the drive
@@ -194,7 +194,7 @@ impl AtaBus {
         drive: u8,
         block: u32,
         buf: &mut [u8],
-    ) -> storage::Result<()> {
+    ) -> storage::FsResult {
         self.write_command(drive, block, AtaCommand::ReadPio)?;
 
         // FIXME: read the data from the data port into the buffer
@@ -215,7 +215,7 @@ impl AtaBus {
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO
     /// reference: https://wiki.osdev.org/IDE#Read.2FWrite_From_ATA_Drive
-    pub(super) fn write_pio(&mut self, drive: u8, block: u32, buf: &[u8]) -> storage::Result<()> {
+    pub(super) fn write_pio(&mut self, drive: u8, block: u32, buf: &[u8]) -> storage::FsResult {
         self.write_command(drive, block, AtaCommand::WritePio)?;
 
         // FIXME: write the data from the buffer into the data port

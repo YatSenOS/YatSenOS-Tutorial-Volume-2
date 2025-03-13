@@ -22,22 +22,22 @@ impl Mount {
 
 impl FileSystem for Mount {
     #[inline]
-    fn read_dir(&self, path: &str) -> Result<Box<dyn Iterator<Item = Metadata> + Send>> {
+    fn read_dir(&self, path: &str) -> FsResult<Box<dyn Iterator<Item = Metadata> + Send>> {
         self.fs.read_dir(self.trim_mount_point(path))
     }
 
     #[inline]
-    fn open_file(&self, path: &str) -> Result<FileHandle> {
+    fn open_file(&self, path: &str) -> FsResult<FileHandle> {
         self.fs.open_file(self.trim_mount_point(path))
     }
 
     #[inline]
-    fn metadata(&self, path: &str) -> Result<Metadata> {
+    fn metadata(&self, path: &str) -> FsResult<Metadata> {
         self.fs.metadata(self.trim_mount_point(path))
     }
 
     #[inline]
-    fn exists(&self, path: &str) -> Result<bool> {
+    fn exists(&self, path: &str) -> FsResult<bool> {
         self.fs.exists(self.trim_mount_point(path))
     }
 }
