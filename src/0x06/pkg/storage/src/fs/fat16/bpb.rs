@@ -92,11 +92,11 @@ mod tests {
         65 73 73 20 61 6E 79 20 6B 65 79 20 74 6F 20 74
         72 79 20 61 67 61 69 6E 20 2E 2E 2E 20 0D 0A 00"
         );
-
-        const PADDING: &[u8] = concat_bytes!([0x00; 318], [0x55, 0xAA]);
-
-        let mut bpb_data = DATA.to_vec();
-        bpb_data.extend_from_slice(PADDING);
+        
+        let mut bpb_data = Vec::with_capacity(512);
+        bpb_data.extend_from_slice(&DATA);
+        bpb_data.resize(510, 0u8);
+        bpb_data.extend_from_slice(&[0x55, 0xAA]);
 
         let bpb = Fat16Bpb::new(&bpb_data).unwrap();
 
@@ -135,10 +135,10 @@ mod tests {
         56 56 46 41 54 20 46 41 54 31 36 20 20 20 00 00"
         );
 
-        const PADDING: &[u8] = concat_bytes!([0x00; 446], [0x55, 0xAA]);
-
-        let mut bpb_data = DATA.to_vec();
-        bpb_data.extend_from_slice(PADDING);
+        let mut bpb_data = Vec::with_capacity(512);
+        bpb_data.extend_from_slice(&DATA);
+        bpb_data.resize(510, 0u8);
+        bpb_data.extend_from_slice(&[0x55, 0xAA]);
 
         let bpb = Fat16Bpb::new(&bpb_data).unwrap();
 
