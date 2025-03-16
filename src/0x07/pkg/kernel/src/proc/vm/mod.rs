@@ -71,6 +71,12 @@ impl ProcessVm {
     //     self
     // }
 
+    pub fn init_kernel_vm(mut self) -> Self {
+        // TODO: record kernel code usage
+        self.stack = Stack::kstack();
+        self
+    }
+
     pub fn brk(&self, addr: Option<VirtAddr>) -> Option<VirtAddr> {
         self.heap.brk(
             addr,
