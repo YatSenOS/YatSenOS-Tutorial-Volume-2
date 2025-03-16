@@ -13,6 +13,7 @@ macro_rules! entry {
     };
 }
 
+
 #[cfg_attr(not(test), panic_handler)]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     let location = if let Some(location) = info.location() {
@@ -25,12 +26,12 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     } else {
         "Unknown location".to_string()
     };
-    let msg = if let Some(msg) = info.message() {
-        alloc::format!("{}", msg)
-    } else {
-        "No more message...".to_string()
-    };
-    errln!("\n\n\rERROR: panicked at {}\n\n\r{}", location, msg);
+
+    errln!(
+        "\n\n\rERROR: panicked at {}\n\n\r{}",
+        location,
+        info.message()
+    );
 
     crate::sys_exit(1);
 }
