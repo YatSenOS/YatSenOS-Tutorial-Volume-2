@@ -88,9 +88,7 @@ pub fn load_elf(
     page_table: &mut impl Mapper<Size4KiB>,
     frame_allocator: &mut impl FrameAllocator<Size4KiB>,
 ) -> Result<(), MapToError<Size4KiB>> {
-    let file_buf = elf.input.as_ptr();
-
-    info!("Loading ELF file... @ {:#x}", file_buf as u64);
+    trace!("Loading ELF file...{:?}", elf.input.as_ptr());
 
     for segment in elf.program_iter() {
         if segment.get_type().unwrap() != program::Type::Load {
@@ -98,7 +96,7 @@ pub fn load_elf(
         }
 
         load_segment(
-            file_buf,
+            elf,
             physical_offset,
             &segment,
             page_table,
@@ -113,7 +111,7 @@ pub fn load_elf(
 ///
 /// load segment to new frame and set page table
 fn load_segment(
-    file_buf: *const u8,
+    elf: &ElfFile,
     physical_offset: u64,
     segment: &program::ProgramHeader,
     page_table: &mut impl Mapper<Size4KiB>,
@@ -137,7 +135,7 @@ fn load_segment(
     let end_page = Page::containing_address(virt_start_addr + file_size - 1u64);
     let pages = Page::range_inclusive(start_page, end_page);
 
-    let data = unsafe { file_buf.add(file_offset as usize) };
+    let data = unsafe { elf.input.as_ptr().add(file_offset as usize) };
 
     for (idx, page) in pages.enumerate() {
         let frame = frame_allocator
