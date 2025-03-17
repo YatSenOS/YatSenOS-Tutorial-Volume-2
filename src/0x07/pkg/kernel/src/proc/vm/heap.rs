@@ -64,7 +64,7 @@ impl Heap {
 
         // FIXME: update the end address
 
-        Some(new_end)
+        new_end
     }
 
     pub(super) fn clean_up(
