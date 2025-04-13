@@ -20,14 +20,14 @@ debug = false
 
 [workspace.dependencies]
 paste = "1.0"
-spin = "0.9"
+spin = "0.10"
 x86 = "0.52"
 x86_64 = "0.15"
 log = "0.4"
 bit_field = "0.10"
 bitflags = "2.3"
 libm = "0.2"
-xmas-elf = "0.9"
+xmas-elf = "0.910"
 linked_list_allocator = "0.10"
 arrayvec = { version = "0.7", default-features = false }
 uefi = { version = "0.34", default-features = false }
