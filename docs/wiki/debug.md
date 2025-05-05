@@ -100,7 +100,7 @@ GDB 在启动时会默认调用该脚本，你可以在其中设置GDB的默认�
 ```bash
 file esp/KERNEL.ELF
 gef config context.layout "-legend regs -stack code -args source -threads -trace extra memory"
-gef-remote localhost 1234
+gef-remote --qemu-user --qemu-binary esp/KERNEL.ELF localhost 1234
 tmux-setup
 b ysos_kernel::init
 ```
