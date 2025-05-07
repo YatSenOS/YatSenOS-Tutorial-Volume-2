@@ -79,20 +79,18 @@
 macro_rules! as_handler {
     ($fn: ident) => {
         paste::item! {
-            #[naked]
+            #[unsafe(naked)]
             pub extern "x86-interrupt" fn [<$fn _handler>](_sf: InterruptStackFrame) {
-                unsafe {
-                    core::arch::naked_asm!("
-                    push rbp
-                    // ...
-                    push r15
-                    call {}
-                    pop r15
-                    // ...
-                    pop rbp
-                    iretq",
-                    sym $fn);
-                }
+                core::arch::naked_asm!("
+                push rbp
+                // ...
+                push r15
+                call {}
+                pop r15
+                // ...
+                pop rbp
+                iretq",
+                sym $fn);
             }
         }
     };
