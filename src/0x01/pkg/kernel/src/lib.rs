@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(naked_functions)]
 #![feature(abi_x86_interrupt)]
 #![feature(type_alias_impl_trait)]
 
