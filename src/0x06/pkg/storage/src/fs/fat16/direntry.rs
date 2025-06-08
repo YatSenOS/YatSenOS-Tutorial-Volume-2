@@ -57,7 +57,7 @@ impl DirEntry {
 
         // FIXME: parse the rest of the fields
         //      - ensure you can pass the test
-        //      - you may need `prase_datetime` function
+        //      - you may need `parse_datetime` function
 
         Ok(DirEntry {
             filename,
@@ -75,7 +75,7 @@ impl DirEntry {
     }
 }
 
-fn prase_datetime(time: u32) -> FsTime {
+fn parse_datetime(time: u32) -> FsTime {
     // FIXME: parse the year, month, day, hour, min, sec from time
 
     if let Single(time) = Utc.with_ymd_and_hms(year, month, day, hour, min, sec) {
