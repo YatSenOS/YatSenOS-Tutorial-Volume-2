@@ -96,7 +96,7 @@ root/
 
 ### FAT 卷结构
 
-第二章主要介绍了 FAT 格式卷的结构，除了上文中提到的用来存储下一个簇信息的 FAT 区域 (FAT Region) 以及存储文件数据的区域 (File and Directory Data Region) ，还包括了一个保留区 (Reserved Region) 和一个根目录区 (Root Directory Region) 。
+第二章主要介绍了 FAT 格式卷的结构，除了上文中提到的用来存储下一个簇信息的 FAT 区域 (FAT Region) 以及存储文件数据的区域 (File and Directory Data Region) ，还包括了一个保留区 (Reserved Region) 和一个根目录区 (Root Directory Region, 仅在 FAT12/16 中使用) 。
 
 一个 FAT 格式的卷结构大概长得就像下面这样
 
