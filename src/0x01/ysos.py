@@ -47,7 +47,7 @@ def debug(step: str, content: str):
 
 
 def get_apps():
-    app_path = os.path.join(os.getcwd(), 'pkg', 'app')
+    app_path = os.path.join(os.getcwd(), 'crates', 'app')
 
     if not os.path.exists(app_path):
         return []
@@ -122,7 +122,7 @@ def build():
         raise Exception('cargo not found in PATH')
 
     # build uefi boot loader
-    bootloader = os.path.join(os.getcwd(), 'pkg', 'boot')
+    bootloader = os.path.join(os.getcwd(), 'crates', 'boot')
     info('Building', 'bootloader...')
     execute_command([cargo_exe, 'build', '--release'], bootloader)
     compile_output = os.path.join(
@@ -131,12 +131,12 @@ def build():
 
     # copy kernel config
     config_path = os.path.join(
-        os.getcwd(), 'pkg', 'kernel', 'config', 'boot.conf')
+        os.getcwd(), 'crates', 'kernel', 'config', 'boot.conf')
     if os.path.exists(config_path):
         copy_to_esp(config_path, os.path.join('EFI', 'BOOT', 'boot.conf'))
 
     # build kernel
-    kernel = os.path.join(os.getcwd(), 'pkg', 'kernel')
+    kernel = os.path.join(os.getcwd(), 'crates', 'kernel')
     info('Building', 'kernel...')
     profile = '--release' if args.profile == 'release' else '--profile=release-with-debug'
     execute_command([cargo_exe, 'build', profile], kernel)
@@ -148,7 +148,7 @@ def build():
     # build apps
     apps = get_apps()
     for app in apps:
-        app_path = os.path.join(os.getcwd(), 'pkg', 'app', app)
+        app_path = os.path.join(os.getcwd(), 'crates', 'app', app)
 
         # read Cargo.toml to get the package name
         with open(os.path.join(app_path, 'Cargo.toml'), 'r') as f:
@@ -173,13 +173,13 @@ def clippy():
     info('Running', 'cargo fmt on root...')
     execute_command([cargo_exe, '+nightly', 'fmt', '--all'])
 
-    kernel = os.path.join(os.getcwd(), 'pkg', 'kernel')
+    kernel = os.path.join(os.getcwd(), 'crates', 'kernel')
     info('Running', 'clippy on kernel...')
     execute_command([cargo_exe, 'clippy'], kernel)
 
     apps = get_apps()
     for app in apps:
-        app_path = os.path.join(os.getcwd(), 'pkg', 'app', app)
+        app_path = os.path.join(os.getcwd(), 'crates', 'app', app)
         info('Running', f'clippy on app {app}...')
         execute_command([cargo_exe, 'clippy'], app_path)
 

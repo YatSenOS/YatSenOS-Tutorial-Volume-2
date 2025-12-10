@@ -16,7 +16,7 @@
 
 !!! note "请阅读 [ELF 文件格式](../../wiki/elf.md) 部分，了解什么是 ELF 文件。"
 
-为了达到这一目的，需要对 Rust 的编译目标、链接配置进行一些修改，这部分内容已经为大家准备好，你可以在 [实验 0x01 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x01/pkg/kernel/config) 中看到进行这些配置的方式。
+为了达到这一目的，需要对 Rust 的编译目标、链接配置进行一些修改，这部分内容已经为大家准备好，你可以在 [实验 0x01 参考代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x01/crates/kernel/config) 中看到进行这些配置的方式。
 
 !!! tip "如何使用本次参考代码"
 
@@ -28,9 +28,9 @@
 
     请注意本次实验中的 `Makefile` 和 `ysos.py` 均有更新，并注意保留 `assets/OVMF.fd` 文件。
 
-    同时，自本次实验开始，采用工作区依赖的方式进行依赖管理，在根目录下的 `Cargo.toml` 中定义整个项目所需的依赖，并在 `pkg` 目录下的 `Cargo.toml` 中使用 `workspace = true` 的方式引用他们（详见参考代码）。
+    同时，自本次实验开始，采用工作区依赖的方式进行依赖管理，在根目录下的 `Cargo.toml` 中定义整个项目所需的依赖，并在 `crates` 目录下的 `Cargo.toml` 中使用 `workspace = true` 的方式引用他们（详见参考代码）。
 
-在 `pkg/kernel/config` 中，引用了 `config/x86_64-unknown-none.json` 的编译目标配置，该配置文件如下所示：
+在 `crates/kernel/config` 中，引用了 `config/x86_64-unknown-none.json` 的编译目标配置，该配置文件如下所示：
 
 ```json
 {
@@ -49,14 +49,14 @@
   "features": "-mmx,-sse,+soft-float",
   "rustc-abi": "x86-softfloat",
   "pre-link-args": {
-    "ld.lld": ["-Tpkg/kernel/config/kernel.ld", "-export-dynamic"]
+    "ld.lld": ["-Tcrates/kernel/config/kernel.ld", "-export-dynamic"]
   }
 }
 ```
 
 这个配置文件描述了 `cargo` 和 `rustc` 应该如何编译内核，这里指定了端序、指针长度、架构、链接器、链接脚本、目标架构等信息。具体细节留作读者自行探索。
 
-`"-Tpkg/kernel/config/kernel.ld"` 指定了链接脚本的位置，该链接脚本描述了内核的链接方式，其基本内容如下所示：
+`"-Tcrates/kernel/config/kernel.ld"` 指定了链接脚本的位置，该链接脚本描述了内核的链接方式，其基本内容如下所示：
 
 ```ld
 ENTRY(_start)
@@ -80,7 +80,7 @@ SECTIONS {
 
 !!! question "实验任务"
 
-    在 `pkg/kernel` 目录下运行 `cargo build --release`，之后找到编译产物，并使用 `readelf` 命令查看其基本信息，回答以下问题：
+    在 `crates/kernel` 目录下运行 `cargo build --release`，之后找到编译产物，并使用 `readelf` 命令查看其基本信息，回答以下问题：
 
     - 请查看编译产物的架构相关信息，与配置文件中的描述是否一致？
     - 找出内核的入口点，它是被如何控制的？结合源码、链接、加载的过程，谈谈你的理解。
@@ -90,7 +90,7 @@ SECTIONS {
 
 经过上述的配置，内核将会被编译为一个 ELF 文件，下一步需要在 UEFI 程序中加载这个文件、准备好内核的运行环境，最后跳转到内核进行执行。这一过程中，这个 UEFI 程序所扮演的角色就是 bootloader。
 
-实验在 `pkg/boot` 中提供了一些基本的功能实现：
+实验在 `crates/boot` 中提供了一些基本的功能实现：
 
 - `allocator.rs`：为 `uefi` crate 中的 `UEFIFrameAllocator` 实现 `x86_64` crate 所定义的 `FrameAllocator<Size4KiB>` trait，以便在页面分配、页表映射时使用。
 - `config.rs`：提供了一个读取并解析 `boot.conf` 的基本实现，可以使用它来自定义 bootloader 的行为、启动参数等等。
@@ -98,20 +98,20 @@ SECTIONS {
 - `lib.rs`：这部分内容定义了 bootloader 将要传递给内核的信息、内核的入口点、跳转到内核的实现等等。定义在 `lib.rs` 中是为了能够在内核实现中引用这些数据结构，确保内核与 bootloader 的数据结构一致。
 - `main.rs`：这里是 bootloader 的入口点，你可以在这里编写你的 bootloader 代码。
 
-同时在 `pkg/elf` 中实验提供了加载 ELF 文件的相关代码，其中也有需要你自己实现的部分。
+同时在 `crates/elf` 中实验提供了加载 ELF 文件的相关代码，其中也有需要你自己实现的部分。
 
 这一个 package 将被 `boot` 和 `kernel` 共同引用，并用于加载内核和用户程序的 ELF 文件。你可以参考 `Cargo.toml` 来了解这一部分的依赖关系。
 
 !!! warning "请留意代码中标注有 `FIXME:` 的部分，这些部分需要你自己实现。"
 
-此部分的核心代码任务被放置在 `pkg/boot/src/main.rs` 中，你需要按照下列步骤完成这一部分的实现。
+此部分的核心代码任务被放置在 `crates/boot/src/main.rs` 中，你需要按照下列步骤完成这一部分的实现。
 
 ### 加载相关文件
 
 1. 加载配置文件：加载配置文件，解析其中的内核栈大小、内核栈地址等内容。
 2. 加载内核 ELF：根据配置文件中的信息，加载内核 ELF 文件到内存中，并将其加载为 `ElfFile` 以便进行后续的操作。
 
-为了方便你的实现，在 `pkg/boot/src/fs.rs` 中，提供了一些函数可供调用，对于一个正常的文件读取流程，你可以参考如下代码：
+为了方便你的实现，在 `crates/boot/src/fs.rs` 中，提供了一些函数可供调用，对于一个正常的文件读取流程，你可以参考如下代码：
 
 ```rust
 let mut file = open_file(file_path);
@@ -156,13 +156,13 @@ unsafe {
 
 ### 映射内核文件
 
-在成功加载内核，并禁用根页表写保护后，需要将内核的代码段、数据段、BSS 段等映射到虚拟地址空间中。你可以参考和使用 `pkg/elf/src/lib.rs` 中的 `load_elf` 函数来帮助你完成。
+在成功加载内核，并禁用根页表写保护后，需要将内核的代码段、数据段、BSS 段等映射到虚拟地址空间中。你可以参考和使用 `crates/elf/src/lib.rs` 中的 `load_elf` 函数来帮助你完成。
 
 !!! tip "一些提示"
 
     - `physical_memory_offset` 在配置结构体中，它描述了物理地址进行线性映射的偏移量，你可能会使用到。
     - 你可以使用 `&mut UEFIFrameAllocator` 表达式作为参数传递帧分配器。
-    - `pkg/elf/src/lib.rs` 中的 `load_segment` 函数需要你进行补全。**请认真学习实验文档所提供的有关分页内存权限管理、内核 ELF 文件格式的内容，以便你能够完成这一部分的实现。**
+    - `crates/elf/src/lib.rs` 中的 `load_segment` 函数需要你进行补全。**请认真学习实验文档所提供的有关分页内存权限管理、内核 ELF 文件格式的内容，以便你能够完成这一部分的实现。**
     - 阅读配置文件定义中有关内核栈的内容，利用相关参数来初始化内核栈。
     - 别忘了将你修改过的控制寄存器恢复原样。
 
@@ -223,9 +223,9 @@ unsafe {
 
 在 [UART 串口通信](../../wiki/uart.md) 部分中介绍了 UART 的基本原理，以及相关的基础知识。在这一部分实验中，你将会实现一个简单的串口驱动，并将其用于内核的日志输出。
 
-由于这是第一次进行驱动的编写，你可以在 `pkg/kernel/src/drivers` 目录下看到一个基本的代码框架，你需要完成其中的 `uart16550` 驱动。
+由于这是第一次进行驱动的编写，你可以在 `crates/kernel/src/drivers` 目录下看到一个基本的代码框架，你需要完成其中的 `uart16550` 驱动。
 
-在 `pkg/kernel/src/drivers/serial.rs` 中存放了串口初始化的相关代码，你所实现的 `SerialPort` 结构体将会在这里被调用：
+在 `crates/kernel/src/drivers/serial.rs` 中存放了串口初始化的相关代码，你所实现的 `SerialPort` 结构体将会在这里被调用：
 
 ```rust
 use super::uart16550::SerialPort;
@@ -269,7 +269,7 @@ guard_access_fn!(pub get_serial(SERIAL: SerialPort));
 
 在 Rust 中对全局变量的写入是一个 unsafe 操作，因为这是**线程不安全的**，如果直接使用全局静态变量，编译器会进行报错。但是对于 **“串口设备”** 这一类 **静态的全局对象** 我们确实需要进行一些数据存储，为了内存安全，就会不可避免的引入了**互斥锁**来进行保护。
 
-!!! question "在 `pkg/boot/lib.rs` 中的 `ENTRY` 是如何被处理的？"
+!!! question "在 `crates/boot/lib.rs` 中的 `ENTRY` 是如何被处理的？"
 
 在内核框架中，我们提供了两个宏来帮助你实现这一功能：
 
@@ -278,7 +278,7 @@ once_mutex!(pub SERIAL: SerialPort);
 guard_access_fn!(pub get_serial(SERIAL: SerialPort));
 ```
 
-!!! note "你可以在 `pkg/kernel/src/utils/macros.rs` 中找到这些宏的定义。"
+!!! note "你可以在 `crates/kernel/src/utils/macros.rs` 中找到这些宏的定义。"
 
 这两段代码将会被展开为：
 
@@ -445,7 +445,7 @@ char read_serial() {
 
 #### 串口驱动的测试
 
-在 `pkg/kernel/src/utils/macros.rs` 中，你可以找到 `print!` 和 `println!` 宏面向串口输出的实现：
+在 `crates/kernel/src/utils/macros.rs` 中，你可以找到 `print!` 和 `println!` 宏面向串口输出的实现：
 
 ```rust
 #[macro_export]
@@ -481,7 +481,7 @@ pub fn print_internal(args: Arguments) {
 
 为了获取更好的日志管理，我们将使用 `log` crate 来进行日志输出，并将其输出接入到前文所实现的串口驱动中。
 
-你可以在 `pkg/kernel/src/utils/logger.rs` 中找到日志输出的相关代码，你需要完成其中的 `init` 函数和 `log` 函数。
+你可以在 `crates/kernel/src/utils/logger.rs` 中找到日志输出的相关代码，你需要完成其中的 `init` 函数和 `log` 函数。
 
 > `Logger` 是一个 Zero Sized Types (ZSTs)，在编译之后不会占用任何空间，它更像是一种类型标记，方便我们进行更灵活的操作。
 
@@ -507,9 +507,9 @@ println!("{}", record.args());
 
 ## 思考题
 
-1.  在根目录的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，而它会被内核引用，禁用默认 feature 是为了避免什么问题？请结合 `pkg/boot` 的 `Cargo.toml` 谈谈你的理解。
+1.  在根目录的 `Cargo.toml` 中，指定了依赖中 `boot` 包为 `default-features = false`，而它会被内核引用，禁用默认 feature 是为了避免什么问题？请结合 `crates/boot` 的 `Cargo.toml` 谈谈你的理解。
 
-2.  在 `pkg/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
+2.  在 `crates/boot/src/main.rs` 中参考相关代码，聊聊 `max_phys_addr` 是如何计算的，为什么要这么做？
 
 3.  串口驱动是在进入内核后启用的，那么在进入内核之前，显示的内容是如何输出的？
 

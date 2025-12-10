@@ -20,7 +20,7 @@
 
     合并后的代码并不能直接运行，你需要基于合并后的代码、按照文档进行修改补充，才能逐步实现本次实验的功能。
 
-在 `pkg/kernel/src/memory` 文件夹中，增量代码补充包含了如下的模块：
+在 `crates/kernel/src/memory` 文件夹中，增量代码补充包含了如下的模块：
 
 - `address.rs`：定义了物理地址到虚拟地址的转换函数，这一模块接受启动结构体提供的物理地址偏移，从而对物理地址进行转换。此部分内容在 lab 1 中已经有所涉及，你可以参考[完整的物理地址映射](https://os.phil-opp.com/paging-implementation/#map-the-complete-physical-memory)进行深入了解。
 - `frames.rs`：利用 bootloader 传入的内存布局进行物理内存帧分配，实现 x86_64 的 `FrameAllocator` trait。**本次实验中不会涉及，后续实验中会用到。**
@@ -29,7 +29,7 @@
 
 !!! note "动态内存分配算法在这里不做要求，本次实验直接使用现有的库赋予内核堆分配能力。"
 
-在 `pkg/kernel/src/interrupt` 文件夹中，增量代码补充包含了如下的模块：
+在 `crates/kernel/src/interrupt` 文件夹中，增量代码补充包含了如下的模块：
 
 - `apic`：有关 XAPIC、IOAPIC 和 LAPIC 的定义和实现。
 - `consts.rs`：有关于中断向量、IRQ 的常量定义。

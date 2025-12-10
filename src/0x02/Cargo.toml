@@ -1,40 +1,38 @@
 [workspace]
+exclude  = ["crates/app/.cargo", "crates/app/config"]
+members  = ["crates/boot", "crates/elf", "crates/kernel"]
 resolver = "2"
-members = [
-    "pkg/elf",
-    "pkg/boot",
-    "pkg/kernel"
-]
-exclude = ["pkg/app/config", "pkg/app/.cargo"]
 
 [workspace.package]
-version = "0.2.0"
 edition = "2024"
+version = "0.2.0"
 
 [profile.release-with-debug]
+debug    = true
 inherits = "release"
-debug = true
 
 [profile.release-with-debug.package."*"]
 debug = false
 
 [workspace.dependencies]
+arrayvec = { version = "0.7", default-features = false }
+bit_field = "0.10"
+bitflags = "2.10"
+crossbeam-queue = { version = "0.3", default-features = false, features = [
+  "alloc",
+] }
+lazy_static = { version = "1.4", features = ["spin_no_std"] }
+libm = "0.2"
+linked_list_allocator = "0.10"
+log = "0.4"
 paste = "1.0"
 spin = "0.10"
+uefi = { version = "0.36", default-features = false }
 x86 = "0.52"
 x86_64 = "0.15"
-log = "0.4"
-bit_field = "0.10"
-bitflags = "2.3"
-libm = "0.2"
-xmas-elf = "0.910"
-linked_list_allocator = "0.10"
-arrayvec = { version = "0.7", default-features = false }
-uefi = { version = "0.34", default-features = false }
-lazy_static = { version = "1.4", features = ["spin_no_std"] }
-crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
+xmas-elf = "0.10"
 
 # Local dependencies
 
-elf = { path = "pkg/elf", package = "ysos_elf" }
-boot = { path = "pkg/boot", default-features = false, package = "ysos_boot" }
+boot = { path = "crates/boot", default-features = false, package = "ysos_boot" }
+elf  = { path = "crates/elf", package = "ysos_elf" }

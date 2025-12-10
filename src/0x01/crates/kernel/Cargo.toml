@@ -1,0 +1,16 @@
+[package]
+edition.workspace = true
+name              = "ysos_kernel"
+version.workspace = true
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitflags = { workspace = true }
+boot     = { workspace = true }
+libm     = { workspace = true }
+log      = { workspace = true }
+paste    = { workspace = true }
+spin     = { workspace = true }
+uefi     = { workspace = true }
+x86      = { workspace = true }
+x86_64   = { workspace = true }

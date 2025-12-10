@@ -216,9 +216,9 @@
     Cargo.toml
     Makefile
     assets/OVMF.fd
-    pkg/boot/.cargo/config
-    pkg/boot/Cargo.toml
-    pkg/boot/src/main.rs
+    crates/boot/.cargo/config
+    crates/boot/Cargo.toml
+    crates/boot/src/main.rs
     rust-toolchain.toml
     ysos.py
     ```
@@ -324,7 +324,7 @@ targets = [ "x86_64-unknown-uefi" ]
 
 !!! note "获取详细信息，参考 [Rust 语言基础](../../wiki/rust.md#善用-docsrs)"
 
-在 `pkg/boot/src/main.rs` 中，完善如下的代码，修改注释部分，使用你的学号进行输出：
+在 `crates/boot/src/main.rs` 中，完善如下的代码，修改注释部分，使用你的学号进行输出：
 
 ```rust
 #![no_std]
@@ -364,8 +364,8 @@ fn efi_main() -> Status {
 BdsDxe: failed to load Boot0001 "UEFI QEMU DVD-ROM QM00003 " from ...: Not Found
 BdsDxe: loading Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
 BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
-[ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
-[ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
+[ INFO]: crates/boot/src/main.rs@017: Hello World from UEFI bootloader!
+[ INFO]: crates/boot/src/main.rs@017: Hello World from UEFI bootloader!
 ```
 
 !!! note "与上述同理，这里 UEFI 尝试从磁盘启动，并成功加载运行刚刚编译出的引导程序。"

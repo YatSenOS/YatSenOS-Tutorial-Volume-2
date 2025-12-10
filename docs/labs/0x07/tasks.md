@@ -18,9 +18,9 @@
 
     合并后的代码并不能直接运行，你需要基于合并后的代码、按照文档进行修改补充，才能逐步实现本次实验的功能。
 
-    需要注意，本次实验对内存分配器的实现从 `pkg/lib/src/allocator.rs` 文件变为 `pkg/lib/src/allocator` 文件夹，其中包含你需要实现的部分。请在合并代码后**手动删除 `pkg/lib/src/allocator.rs` 文件**，以保证编译能够正常进行。
+    需要注意，本次实验对内存分配器的实现从 `crates/lib/src/allocator.rs` 文件变为 `crates/lib/src/allocator` 文件夹，其中包含你需要实现的部分。请在合并代码后**手动删除 `crates/lib/src/allocator.rs` 文件**，以保证编译能够正常进行。
 
-本次实验代码量较小，给出的代码集中于 `pkg/kernel/src/proc/vm` 目录下。
+本次实验代码量较小，给出的代码集中于 `crates/kernel/src/proc/vm` 目录下。
 
 - `heap.rs`：添加了 `Heap` 结构体，用于管理堆内存。
 - `mod.rs`：除栈外，添加了堆内存、ELF 文件映射的初始化和清理函数。
@@ -33,7 +33,7 @@
 
 在 Lab 4 的加分项中，提到了尝试实现帧分配器的内存回收。在本次实验中将进一步完善这一功能。
 
-在进行帧分配器初始化的过程中，内核从 bootloader 获取到了一个 `MemoryMap` 数组，其中包含了所有可用的物理内存区域，并且内核使用 `into_iter()` 将这一数据结构的所有权交给了一个迭代器，你可以在 `pkg/kernel/src/memory/frames.rs` 中了解到相关类型和实现。
+在进行帧分配器初始化的过程中，内核从 bootloader 获取到了一个 `MemoryMap` 数组，其中包含了所有可用的物理内存区域，并且内核使用 `into_iter()` 将这一数据结构的所有权交给了一个迭代器，你可以在 `crates/kernel/src/memory/frames.rs` 中了解到相关类型和实现。
 
 迭代器是懒惰的，只有在需要时才会进行计算，因此在进行逐帧分配时，并没有额外的内存开销。但是，当需要进行内存回收时，就需要额外的数据结构来记录已经分配的帧，以便进行再次分配。
 
@@ -302,9 +302,9 @@ fn load_segment(
 }
 ```
 
-之后，在 `pkg/kernel/src/proc/vm` 中完善 `ProcessVm` 的 `load_elf_code` 函数，在加载 ELF 文件时记录内存占用。
+之后，在 `crates/kernel/src/proc/vm` 中完善 `ProcessVm` 的 `load_elf_code` 函数，在加载 ELF 文件时记录内存占用。
 
-为了便于测试和观察，在 `pkg/kernel/src/proc/manager.rs` 的 `print_process_list` 和 `Process` 的 `fmt` 实现中，添加打印内存占用的功能。
+为了便于测试和观察，在 `crates/kernel/src/proc/manager.rs` 的 `print_process_list` 和 `Process` 的 `fmt` 实现中，添加打印内存占用的功能。
 
 ```rust
 impl ProcessManager {
@@ -453,7 +453,7 @@ impl Stack {
     pub fn clean_up(
         &mut self,
         // following types are defined in
-        //   `pkg/kernel/src/proc/vm/mod.rs`
+        //   `crates/kernel/src/proc/vm/mod.rs`
         mapper: MapperRef,
         dealloc: FrameAllocatorRef,
     ) -> Result<(), UnmapError> {
@@ -471,7 +471,7 @@ impl Stack {
 }
 ```
 
-接下来重点关注 `ProcessVm` 的相关实现，位于 `pkg/kernel/src/proc/vm/mod.rs` 中，首先为它添加 `clean_up` 函数：
+接下来重点关注 `ProcessVm` 的相关实现，位于 `crates/kernel/src/proc/vm/mod.rs` 中，首先为它添加 `clean_up` 函数：
 
 ```rust
 impl ProcessVm {
@@ -556,7 +556,7 @@ self.proc_vm.take();
 
 类似于用户进程的加载过程，可以通过在内核加载时记录内存占用来实现内核的初步内存统计，即在 bootloader 中实现这一功能。
 
-首先，在 `pkg/boot/src/lib.rs` 中，定义一个 `KernelPages` 类型，用于传递内核的内存占用信息，并将其添加到 `BootInfo` 结构体的定义中：
+首先，在 `crates/boot/src/lib.rs` 中，定义一个 `KernelPages` 类型，用于传递内核的内存占用信息，并将其添加到 `BootInfo` 结构体的定义中：
 
 ```rust
 pub type KernelPages = ArrayVec<PageRangeInclusive, 8>;
@@ -569,7 +569,7 @@ pub struct BootInfo {
 }
 ```
 
-并在 `pkg/boot/src/main.rs` 中，将 `load_elf` 函数返回的内存占用信息传递至 `BootInfo` 结构体中：
+并在 `crates/boot/src/main.rs` 中，将 `load_elf` 函数返回的内存占用信息传递至 `BootInfo` 结构体中：
 
 ??? note "使用了其他函数加载内核？"
 
@@ -653,7 +653,7 @@ let (stack_start, stack_size) = if config.kernel_stack_auto_grow > 0 {
 };
 ```
 
-与用户态栈类似，你可以在 `pkg/kernel/src/proc/vm/stack.rs` 中将这些信息定义为常量，并在 `Stack` 的 `kstack` 函数中使用这些常量来初始化内核栈区：
+与用户态栈类似，你可以在 `crates/kernel/src/proc/vm/stack.rs` 中将这些信息定义为常量，并在 `Stack` 的 `kstack` 函数中使用这些常量来初始化内核栈区：
 
 ```rust
 // [bot..0xffffff0100000000..top..0xffffff01ffffffff]
@@ -685,7 +685,7 @@ pub const KSTACK_INIT_TOP: u64 = KSTACK_MAX - 8;
 info!("Page fault on kernel at {:#x}", addr);
 ```
 
-最后，为了测试你的栈扩容成果，可以用如下代码在 `pkg/kernel/src/lib.rs` 中进行测试：
+最后，为了测试你的栈扩容成果，可以用如下代码在 `crates/kernel/src/lib.rs` 中进行测试：
 
 ```rust
 pub fn init(boot_info: &'static BootInfo) {
@@ -741,7 +741,7 @@ pub fn grow_stack() {
 
     但是在本实验中，为了简化内存管理的实现，仍然使用 `brk` 系统调用来调整用户程序的堆区大小，进而为后续可能的实验提供基础。
 
-首先，参考给出代码中的 `pkg/kernel/src/proc/vm/heap.rs`：
+首先，参考给出代码中的 `crates/kernel/src/proc/vm/heap.rs`：
 
 ```rust
 // user process runtime heap
@@ -794,7 +794,7 @@ pub fn sys_brk(addr: Option<usize>) -> Option<usize> {
 在内核中，`brk` 系统调用的处理函数如下：将用户传入的参数转换为内核的 `Option<VirtAddr>` 类型进行传递，并使用相同类型作为返回值。
 
 ```rust
-// in `pkg/kernel/src/syscall/service.rs`
+// in `crates/kernel/src/syscall/service.rs`
 pub fn sys_brk(args: &SyscallArgs) -> usize {
     let new_heap_end = if args.arg0 == 0 {
         None
@@ -807,7 +807,7 @@ pub fn sys_brk(args: &SyscallArgs) -> usize {
     }
 }
 
-// in `pkg/kernel/src/proc/mod.rs`
+// in `crates/kernel/src/proc/mod.rs`
 pub fn brk(addr: Option<VirtAddr>) -> Option<VirtAddr> {
     x86_64::instructions::interrupts::without_interrupts(|| {
         // NOTE: `brk` does not need to get write lock
@@ -816,7 +816,7 @@ pub fn brk(addr: Option<VirtAddr>) -> Option<VirtAddr> {
 }
 ```
 
-最终，你需要在 `pkg/kernel/src/proc/vm/heap.rs` 中为 `Heap` 结构体实现 `brk` 函数：
+最终，你需要在 `crates/kernel/src/proc/vm/heap.rs` 中为 `Heap` 结构体实现 `brk` 函数：
 
 - 如果参数为 `None`，则表示用户程序希望获取当前的堆区结束地址，即返回 `end` 的值；
 - 如果参数不为 `None`，则检查用户传入的目标地址是否合法，即是否在 `[HEAP_START, HEAP_END]` 区间内，如果不合法，直接返回 `None`。
@@ -848,7 +848,7 @@ assert!(ret == heap_end, "Failed to allocate heap");
 
 1. 新建一个用户程序，参考上述代码，尝试在其中使用 `brk` 系统调用来调整堆区的大小，并进行写入和读取操作；
 
-2. 若上述操作没有问题，则可以在 `lib` 中实现可选的第二个内存分配器（代码已在 `pkg/lib/src/allocator/brk.rs` 给出）；
+2. 若上述操作没有问题，则可以在 `lib` 中实现可选的第二个内存分配器（代码已在 `crates/lib/src/allocator/brk.rs` 给出）；
 
     内存分配器的自主实现不是本次实验的内容，因此这里直接使用 `linked_list_allocator` 进行代劳。
 
@@ -865,7 +865,7 @@ assert!(ret == heap_end, "Failed to allocate heap");
     + features = ["brk_alloc"]
     ```
 
-4. 在你测试通过后，可以修改 `pkg/lib/Cargo.toml`，将其作为用户程序默认的内存分配器：
+4. 在你测试通过后，可以修改 `crates/lib/Cargo.toml`，将其作为用户程序默认的内存分配器：
 
     ```diff
     [features]
