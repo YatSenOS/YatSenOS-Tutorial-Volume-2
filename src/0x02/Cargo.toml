@@ -1,3 +1,5 @@
+cargo-features = ["profile-rustflags"]
+
 [workspace]
 exclude  = ["crates/app/.cargo", "crates/app/config"]
 members  = ["crates/boot", "crates/elf", "crates/kernel"]

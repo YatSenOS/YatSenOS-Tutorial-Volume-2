@@ -1,3 +1,5 @@
+cargo-features = ["profile-rustflags"]
+
 [workspace]
 members  = ["crates/boot"]
 resolver = "2"
