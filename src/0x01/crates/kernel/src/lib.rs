@@ -2,6 +2,7 @@
 #![feature(abi_x86_interrupt)]
 #![feature(type_alias_impl_trait)]
 
+extern crate alloc;
 #[macro_use]
 extern crate log;
 extern crate libm;
@@ -11,6 +12,8 @@ pub mod utils;
 pub use utils::*;
 
 mod drivers;
+
+pub use alloc::format;
 
 use boot::BootInfo;
 use uefi::{runtime::ResetType, Status};

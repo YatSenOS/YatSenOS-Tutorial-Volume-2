@@ -503,7 +503,7 @@ println!("{}", record.args());
 
 在 `src/utils/macros.rs` 中，你可以选择按照自己的预期修改 `panic_handler` 的实现。
 
-!!! note "`PanicInfo` 实现了 `Debug` trait，在最简的情况下，你可以使用 `{:#?}` 来输出它。例如当你想要在系统崩溃的时候获取更多信息来帮助排查问题，你可以在这里输出内核的调用栈等。"
+!!! note "`PanicInfo` 实现了 `Debug` trait，在最简的情况下，你可以使用 `{:#?}` 来输出它。为了方便调试，这里已经实现了输出内核程序本身完整的调用栈(Kernel Call Stack)。"
 
 ## 思考题
 
