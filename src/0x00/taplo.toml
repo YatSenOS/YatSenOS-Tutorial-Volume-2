@@ -1,4 +1,9 @@
-include = ["Cargo.toml", "crates/**/Cargo.toml", "rustfmt.toml", "rust-toolchain.toml"]
+include = [
+  "Cargo.toml",
+  "crates/**/Cargo.toml",
+  "rust-toolchain.toml",
+  "rustfmt.toml",
+]
 
 [formatting]
 align_comments      = true

@@ -48,6 +48,7 @@
     - 如果代码格式不确定或写法不明确，记得常用 `cargo fmt` 和 `cargo clippy`。
     - 在你不熟悉新语言的时候，我们非常推荐你借助 LLM 进行学习。
     - 在满足题目描述的情况下，如有需要，**参数类型和返回值类型可以自行选择和修改**。
+    - 你还可以通过配置文件 `rustfmt.toml` 和 `taplo.toml` 自定义你的代码 `*.rs` 和配置文件 `*.toml` 如何格式化，[实验 0x00 代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)已经给出了这样 2 个配置文件供参考。
 
 1.  使用 Rust 编写一个程序，完成以下任务：
 
