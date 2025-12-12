@@ -2,7 +2,7 @@ cargo-features = ["profile-rustflags"]
 
 [workspace]
 members  = ["crates/boot"]
-resolver = "2"
+resolver = "3"
 
 [profile.release-with-debug]
 debug    = true
