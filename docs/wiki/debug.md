@@ -79,15 +79,6 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 
 9. `bt`：查看函数调用栈。
 
-    在本项目中，查看完整的函数调用栈需要显式启用 `force-frame-pointers` 编译参数，这通过在每一个 workspace 下的 `.cargo/config.toml` 中配置：
-
-    ```toml
-    [profile.release-with-debug.build-override]
-    rustflags = ["-C", "force-frame-pointers=yes"]
-    ```
-
-    这将在 debug 模式下编译时强制启用帧指针（frame-pointers）。
-
 10. `x/<n>x <addr>`：查看内存中的数据，从 `<addr>` 开始，连续查看 `<n>` 个字节。
 
     - 若要查看内存中的前 16 个字节：`x/16x <addr>`。简写为 `x`。

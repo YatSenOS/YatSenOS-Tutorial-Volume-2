@@ -1,9 +1,6 @@
 [build]
 target = "x86_64-unknown-uefi"
 
-[profile.release-with-debug.build-override]
-rustflags = ["-C", "force-frame-pointers=yes"]
-
 [unstable]
 build-std          = ["alloc", "compiler_builtins", "core"]
 build-std-features = ["compiler-builtins-mem"]
