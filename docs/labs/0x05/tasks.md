@@ -890,14 +890,14 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     以 `ChaCha20Rng` 伪随机数生成器为例，使用相关方法获取随机数：
 
     ```rust
-    use rand::prelude::*;
+    use rand_chacha::rand_core::{SeedableRng, RngCore};
     use rand_chacha::ChaCha20Rng;
 
     fn main() {
         // ...
         let time = lib::sys_time();
         let mut rng = ChaCha20Rng::seed_from_u64(time.timestamp() as u64);
-        println!("Random number: {}", rng.gen::<u64>());
+        println!("Random number: {}", rng.next_u64());
         // ...
     }
     ```
