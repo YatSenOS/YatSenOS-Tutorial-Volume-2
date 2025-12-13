@@ -1,22 +1,22 @@
 [workspace]
-resolver = "2"
+exclude = ["crates/app/.cargo", "crates/app/config"]
 members = [
-    "pkg/elf",
-    "pkg/boot",
-    "pkg/kernel",
-    "pkg/syscall",
-    "pkg/lib",
-    "pkg/app/*"
+  "crates/app/*",
+  "crates/boot",
+  "crates/elf",
+  "crates/kernel",
+  "crates/lib",
+  "crates/syscall",
 ]
-exclude = ["pkg/app/config", "pkg/app/.cargo"]
+resolver = "3"
 
 [workspace.package]
-version = "0.4.0"
 edition = "2024"
+version = "0.4.0"
 
 [profile.release-with-debug]
+debug    = true
 inherits = "release"
-debug = true
 
 [profile.release-with-debug.package."*"]
 debug = false
@@ -25,35 +25,40 @@ debug = false
 # NOTE: Remove or add dependencies here if you need
 #       This list is copied from final project
 
-bit_field = "0.10"
-bitflags = "2.6"
-hex-literal = "1.0"
-libm = "0.2"
+arrayvec              = { version = "0.7", default-features = false }
+bit_field             = "0.10"
+bitflags              = "2.10"
+chrono                = { version = "0.4", default-features = false }
+hex-literal           = "1.0"
+lazy_static           = { version = "1.4", features = ["spin_no_std"] }
+libm                  = "0.2"
 linked_list_allocator = "0.10"
-log = "0.4"
-lru = "0.14"
-paste = "1.0"
-pc-keyboard = "0.8"
-rand_hc = "0.4"
-spin = "0.10"
-volatile = "0.6"
-x86 = "0.52"
-x86_64 = "0.15"
-xmas-elf = "0.10"
-uefi = { version = "0.34", default-features = false }
-chrono = { version = "0.4", default-features = false }
-arrayvec = { version = "0.7", default-features = false }
-num_enum = { version = "0.7", default-features = false }
-rand = { version = "0.9", default-features = false }
-roaring = { version = "0.10", default-features = false }
-lazy_static = { version = "1.4", features = ["spin_no_std"] }
-micromath = { version = "2.0", features = ["num-traits"] }
-futures-util = { version = "0.3", default-features = false, features = ["alloc"] }
-crossbeam-queue = { version = "0.3", default-features = false, features = ["alloc"] }
+log                   = "0.4"
+lru                   = "0.16"
+micromath             = { version = "2.0", features = ["num-traits"] }
+num_enum              = { version = "0.7", default-features = false }
+paste                 = "1.0"
+pc-keyboard           = "0.8"
+rand                  = { version = "0.9", default-features = false }
+rand_hc               = "0.4"
+roaring               = { version = "0.11", default-features = false }
+spin                  = "0.10"
+uefi                  = { version = "0.36", default-features = false }
+volatile              = "0.6"
+x86                   = "0.52"
+x86_64                = "0.15"
+xmas-elf              = "0.10"
 
 # Local dependencies
 
-lib = { path = "pkg/lib", package = "yslib" }
-elf = { path = "pkg/elf", package = "ysos_elf" }
-syscall_def = { path = "pkg/syscall", package = "ysos_syscall" }
-boot = { path = "pkg/boot", default-features = false, package = "ysos_boot" }
+boot        = { path = "crates/boot", default-features = false, package = "ysos_boot" }
+elf         = { path = "crates/elf", package = "ysos_elf" }
+lib         = { path = "crates/lib", package = "yslib" }
+syscall_def = { path = "crates/syscall", package = "ysos_syscall" }
+
+crossbeam-queue = { version = "0.3", default-features = false, features = [
+  "alloc",
+] }
+futures-util = { version = "0.3", default-features = false, features = [
+  "alloc",
+] }

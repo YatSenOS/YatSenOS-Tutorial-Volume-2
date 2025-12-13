@@ -26,13 +26,13 @@
     2. 部分代码的使用**需要自行补全 `lib.rs` 和 `mod.rs` 等文件**，你也可以**添加、修改任何所需函数**。
     3. 功能在逐步实现的过程中，部分未使用代码可以进行注释以通过编译检查。
 
-在 `pkg/app` 中，定义提供了一些用户程序，这些程序将会在编译后提供给内核加载运行。
+在 `crates/app` 中，定义提供了一些用户程序，这些程序将会在编译后提供给内核加载运行。
 
-在 `pkg/syscall` 中，提供系统调用号和调用约束的定义，将会在内核和用户库中使用，在下文中会详细介绍。
+在 `crates/syscall` 中，提供系统调用号和调用约束的定义，将会在内核和用户库中使用，在下文中会详细介绍。
 
-在 `pkg/lib` 中，定义了用户态库并提供了一些基础实现，相关内容在下文中会详细介绍。
+在 `crates/lib` 中，定义了用户态库并提供了一些基础实现，相关内容在下文中会详细介绍。
 
-在 `pkg/kernel` 中，添加了如下一些模块：
+在 `crates/kernel` 中，添加了如下一些模块：
 
 - `interrupt/syscall`：定义系统调用及其服务的实现。
 - `memory/user`：用户堆内存分配的实现，会被用在系统调用的处理中，将用户态的内存分配委托给内核。
@@ -46,9 +46,9 @@
 
 对于不同的运行环境，即使指令集相同，一个可执行的程序仍然有一定的差异。
 
-与内核的编译类似，在 `pkg/app/config` 中，定义了用户程序的编译目标，并定义了相关的 LD 链接脚本。
+与内核的编译类似，在 `crates/app/config` 中，定义了用户程序的编译目标，并定义了相关的 LD 链接脚本。
 
-在 `Cargo.toml` 中，使用通配符引用了 `pkg/app` 中的所有用户程序。相关的编译过程在先前给出的编译脚本中均已定义，可以直接编译。
+在 `Cargo.toml` 中，使用通配符引用了 `crates/app` 中的所有用户程序。相关的编译过程在先前给出的编译脚本中均已定义，可以直接编译。
 
 通常而言，用户程序并不直接自行处理系统调用，而是由用户态库提供的函数进行调用。
 
@@ -56,7 +56,7 @@
 
 为了让用户态程序更好地与 YSOS 进行交互，处理程序的生命周期，便于编写用户程序等，需要提供用户态库，以便用户程序调用。
 
-用户态库被定义在 `pkg/lib` 中，在用户程序中，编辑 `Cargo.toml`，使用如下方式引用用户库：
+用户态库被定义在 `crates/lib` 中，在用户程序中，编辑 `Cargo.toml`，使用如下方式引用用户库：
 
 ```rust
 [dependencies]
@@ -133,9 +133,9 @@ macro_rules! entry {
 
     这就是 lab 1 中 `Config` 含有 `load_apps` 的原因。
 
-    本次实验你应当在 `pkg/kernel/config/boot.conf` 中，将 `load_apps` 设置为 `true`。
+    本次实验你应当在 `crates/kernel/config/boot.conf` 中，将 `load_apps` 设置为 `true`。
 
-为了存储用户程序的相关信息，在 `pkg\boot\src\lib.rs` 中，定义一个 `App` 结构体，并添加“已加载的用户程序”字段到 `BootInfo` 结构体中：
+为了存储用户程序的相关信息，在 `crates\boot\src\lib.rs` 中，定义一个 `App` 结构体，并添加“已加载的用户程序”字段到 `BootInfo` 结构体中：
 
 ```rust
 use arrayvec::{ArrayString, ArrayVec};
@@ -164,7 +164,7 @@ pub struct BootInfo {
     - 尝试定义 `AppListRef` 类型，用于存储 `loaded_apps.as_ref()` 的返回值类型，可以只关心 `'static` 生命周期。
     - 抛弃 `App` 类型的生命周期，直接声明 `ElfFile<'static>`。
 
-之后，在 `pkg/boot/src/fs.rs` 中，创建函数 `load_apps` 用于加载用户程序，并参考 `fs.rs` 中的其他函数，处理文件系统相关逻辑，补全代码：
+之后，在 `crates/boot/src/fs.rs` 中，创建函数 `load_apps` 用于加载用户程序，并参考 `fs.rs` 中的其他函数，处理文件系统相关逻辑，补全代码：
 
 ```rust
 /// Load apps into memory, when no fs implemented in kernel
@@ -477,7 +477,7 @@ pub fn dispatcher(context: &mut ProcessContext) {
 }
 ```
 
-为了能在用户库（调用系统调用侧）和内核态（处理系统调用侧）之间达成系统调用号的一致性，在 `pkg/syscall` 中定义了一个 `Syscall` 枚举，用于存储系统调用号。
+为了能在用户库（调用系统调用侧）和内核态（处理系统调用侧）之间达成系统调用号的一致性，在 `crates/syscall` 中定义了一个 `Syscall` 枚举，用于存储系统调用号。
 
 ```rust
 #[repr(usize)]

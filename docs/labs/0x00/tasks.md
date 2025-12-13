@@ -48,6 +48,7 @@
     - 如果代码格式不确定或写法不明确，记得常用 `cargo fmt` 和 `cargo clippy`。
     - 在你不熟悉新语言的时候，我们非常推荐你借助 LLM 进行学习。
     - 在满足题目描述的情况下，如有需要，**参数类型和返回值类型可以自行选择和修改**。
+    - 你还可以通过配置文件 `rustfmt.toml` 和 `taplo.toml` 自定义你的代码 `*.rs` 和配置文件 `*.toml` 如何格式化，[实验 0x00 代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)已经给出了这样 2 个配置文件供参考。
 
 1.  使用 Rust 编写一个程序，完成以下任务：
 
@@ -216,9 +217,9 @@
     Cargo.toml
     Makefile
     assets/OVMF.fd
-    pkg/boot/.cargo/config
-    pkg/boot/Cargo.toml
-    pkg/boot/src/main.rs
+    crates/boot/.cargo/config
+    crates/boot/Cargo.toml
+    crates/boot/src/main.rs
     rust-toolchain.toml
     ysos.py
     ```
@@ -324,7 +325,7 @@ targets = [ "x86_64-unknown-uefi" ]
 
 !!! note "获取详细信息，参考 [Rust 语言基础](../../wiki/rust.md#善用-docsrs)"
 
-在 `pkg/boot/src/main.rs` 中，完善如下的代码，修改注释部分，使用你的学号进行输出：
+在 `crates/boot/src/main.rs` 中，完善如下的代码，修改注释部分，使用你的学号进行输出：
 
 ```rust
 #![no_std]
@@ -364,8 +365,8 @@ fn efi_main() -> Status {
 BdsDxe: failed to load Boot0001 "UEFI QEMU DVD-ROM QM00003 " from ...: Not Found
 BdsDxe: loading Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
 BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
-[ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
-[ INFO]: pkg/boot/src/main.rs@017: Hello World from UEFI bootloader!
+[ INFO]: crates/boot/src/main.rs@017: Hello World from UEFI bootloader!
+[ INFO]: crates/boot/src/main.rs@017: Hello World from UEFI bootloader!
 ```
 
 !!! note "与上述同理，这里 UEFI 尝试从磁盘启动，并成功加载运行刚刚编译出的引导程序。"

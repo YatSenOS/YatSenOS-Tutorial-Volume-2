@@ -106,7 +106,7 @@ def build():
         raise Exception('cargo not found in PATH')
 
     # build uefi boot loader
-    bootloader = os.path.join(os.getcwd(), 'pkg', 'boot')
+    bootloader = os.path.join(os.getcwd(), 'crates', 'boot')
     info('Building', 'bootloader...')
     execute_command([cargo_exe, 'build', '--release'], bootloader)
     compile_output = os.path.join(os.getcwd(), 'target',

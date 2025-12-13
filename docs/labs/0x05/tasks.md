@@ -28,7 +28,7 @@ YSOS 的 `fork` 系统调用设计如下描述：
 
 为了实现父子进程的资源共享，在先前的实验中，已经做了一些准备工作：
 
-比如 `pkg/kernel/src/proc/paging.rs` 中，`PageTableContext` 中的 `Cr3RegValue` 被 `Arc` 保护了起来；在 `pkg/kernel/src/proc/data.rs` 中，也存在 `Arc` 包装的共享数据的内容。
+比如 `crates/kernel/src/proc/paging.rs` 中，`PageTableContext` 中的 `Cr3RegValue` 被 `Arc` 保护了起来；在 `crates/kernel/src/proc/data.rs` 中，也存在 `Arc` 包装的共享数据的内容。
 
 ??? note "忘了 `Arc` 是什么？"
 
@@ -359,7 +359,7 @@ entry!(main);
 
 ### 等待队列
 
-在 `pkg/kernel/src/proc/manager.rs` 中，修改 `ProcessManager` 并添加等待队列：
+在 `crates/kernel/src/proc/manager.rs` 中，修改 `ProcessManager` 并添加等待队列：
 
 ```rust
 pub struct ProcessManager {
@@ -395,7 +395,7 @@ pub fn block(&self, pid: ProcessId) {
     }
     ```
 
-在 `pkg/kernel/src/proc/mod.rs` 中，修改 `wait_pid` 系统调用的实现，添加 `ProcessContext` 参数来确保可以进行可能的切换上下文操作（意味着当前进程被阻塞，需要切换到下一个进程）：
+在 `crates/kernel/src/proc/mod.rs` 中，修改 `wait_pid` 系统调用的实现，添加 `ProcessContext` 参数来确保可以进行可能的切换上下文操作（意味着当前进程被阻塞，需要切换到下一个进程）：
 
 ```rust
 pub fn wait_pid(pid: ProcessId, context: &mut ProcessContext) {
@@ -606,7 +606,7 @@ lock inc qword [obj.main::COUNTER::h2889e4585a2a2d30]
 
 自旋锁 `SpinLock` 是一种简单的锁机制，它通过不断地检查锁的状态来实现线程的阻塞，直到获取到锁为止。
 
-在 `pkg/lib/src/sync.rs` 中，关注 `SpinLock` 的实现：
+在 `crates/lib/src/sync.rs` 中，关注 `SpinLock` 的实现：
 
 ```rust
 pub struct SpinLock {
@@ -667,7 +667,7 @@ Syscall::Sem => sys_sem(&args, context),
 
 其中 `op` 为操作码，`key` 为信号量的键值，`val` 为信号量的值，`ret` 为返回值。根据先前的约定，`op` 被放置在 `rdi` 寄存器中，`key` 和 `val` 分别被放置在 `rsi` 和 `rdx` 寄存器中，可以通过 `args.arg0`、`args.arg1` 和 `args.arg2` 来进行访问。
 
-信号量相关内容在 `pkg/kernel/src/proc/sync.rs` 中进行实现：
+信号量相关内容在 `crates/kernel/src/proc/sync.rs` 中进行实现：
 
 “资源” 被抽象为一个 `usize` 整数，它**并不需要使用 `AtomicUsize`**，为了存储等待的进程，需要在此整数外额外使用一个 `Vec` 来存储等待的进程。它们二者将会被一个自旋锁实现的互斥锁（在内核中直接使用 `spin::Mutex`）保护。
 
@@ -763,7 +763,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 !!! tip "完善用户库"
 
-    完善 `pkg/lib/src/sync.rs` 中有关信号量的操作，使用不同的 `op` 参数来进行信号量的用户态函数的分配，系统调用宏需要将参数转换为 `usize` 类型，可以参考如下声明：
+    完善 `crates/lib/src/sync.rs` 中有关信号量的操作，使用不同的 `op` 参数来进行信号量的用户态函数的分配，系统调用宏需要将参数转换为 `usize` 类型，可以参考如下声明：
 
     ```rust
     #[inline(always)]
@@ -778,7 +778,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 #### 多线程计数器
 
-在所给代码的 `pkg/app/counter` 中实现了一个多线程计数器，多个线程对一个共享的计数器进行累加操作，最终输出计数器的值。
+在所给代码的 `crates/app/counter` 中实现了一个多线程计数器，多个线程对一个共享的计数器进行累加操作，最终输出计数器的值。
 
 为了提供足够大的可能性来触发竞态条件，该程序使用了一些手段来刻意构造一个临界区，这部分代码不应被修改。
 
@@ -809,7 +809,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 #### 消息队列
 
-创建一个用户程序 `pkg/app/mq`，结合使用信号量，实现一个消息队列：
+创建一个用户程序 `crates/app/mq`，结合使用信号量，实现一个消息队列：
 
 - 父进程使用 fork 创建额外的 16 个进程，其中一半为生产者，一半为消费者。
 
@@ -850,7 +850,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 一个哲学家一次只能拿起一根筷子。显然，他不能从其他哲学家手里拿走筷子。当一个饥饿的哲学家同时拥有两根筷子时，他就能吃。在吃完后，他会放下两根筷子，并开始思考。
 
-创建一个用户程序 `pkg/app/dinner`，使用课上学到的知识，实现并解决哲学家就餐问题：
+创建一个用户程序 `crates/app/dinner`，使用课上学到的知识，实现并解决哲学家就餐问题：
 
 - 创建一个程序，模拟五个哲学家的行为。
 
@@ -875,7 +875,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
     ```toml
     [dependencies]
-    rand = { version = "0.8", default-features = false }
+    rand = { version = "0.9", default-features = false }
     rand_chacha = { version = "0.3", default-features = false }
     ```
 
@@ -890,14 +890,14 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     以 `ChaCha20Rng` 伪随机数生成器为例，使用相关方法获取随机数：
 
     ```rust
-    use rand::prelude::*;
+    use rand_chacha::rand_core::{SeedableRng, RngCore};
     use rand_chacha::ChaCha20Rng;
 
     fn main() {
         // ...
         let time = lib::sys_time();
         let mut rng = ChaCha20Rng::seed_from_u64(time.timestamp() as u64);
-        println!("Random number: {}", rng.gen::<u64>());
+        println!("Random number: {}", rng.next_u64());
         // ...
     }
     ```
@@ -914,7 +914,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 
 !!! note "声明一系列的信号量"
 
-    在 `pkg/lib/src/sync.rs` 中，提供了 `semaphore_array` 宏，可以用于快速声明一系列信号量：
+    在 `crates/lib/src/sync.rs` 中，提供了 `semaphore_array` 宏，可以用于快速声明一系列信号量：
 
     ```rust
     static CHOPSTICK: [Semaphore; 5] = semaphore_array![0, 1, 2, 3, 4];

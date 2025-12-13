@@ -1,0 +1,8 @@
+[target.x86_64-unknown-none]
+rustflags = ["-C", "force-frame-pointers=yes"]
+
+[target.x86_64-unknown-uefi]
+rustflags = ["-C", "force-frame-pointers=yes"]
+
+[target.x86_64-unknown-ysos]
+rustflags = ["-C", "force-frame-pointers=yes"]

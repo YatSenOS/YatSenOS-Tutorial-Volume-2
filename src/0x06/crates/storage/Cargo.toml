@@ -1,0 +1,13 @@
+[package]
+edition.workspace = true
+name              = "ysos_storage"
+version.workspace = true
+
+[dependencies]
+bitflags    = { workspace = true }
+chrono      = { workspace = true, features = ["alloc"] }
+hex-literal = { workspace = true }
+log         = { workspace = true }
+num_enum    = { workspace = true }
+paste       = { workspace = true }
+spin        = { workspace = true }

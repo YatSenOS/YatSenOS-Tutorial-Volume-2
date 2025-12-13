@@ -22,9 +22,9 @@
 
 ![](../assets/storage.png)
 
-在所给出的代码中，主要需要补全的内容存放在 `pkg/kernel/src/drivers/ata/bus.rs` 和 `pkg/storage/src/fs/fat16/impls.rs` 中，对应任务为 ATA 磁盘驱动和 FAT 16 文件系统。
+在所给出的代码中，主要需要补全的内容存放在 `crates/kernel/src/drivers/ata/bus.rs` 和 `crates/storage/src/fs/fat16/impls.rs` 中，对应任务为 ATA 磁盘驱动和 FAT 16 文件系统。
 
-在 `pkg/storage/src/common` 中，提供了众多有关存储的底层结构：
+在 `crates/storage/src/common` 中，提供了众多有关存储的底层结构：
 
 - `block.rs`: 提供了数据块的抽象，用于存储数据，内部为指定大小的 `u8` 数组。
 - `device.rs`: 目前只提供了块设备的抽象，提供分块读取数据的接口。
@@ -38,13 +38,13 @@
 - `filehandle.rs`: 定义了文件句柄，它持有一个实现了 `FileIO` trait 的字段，并维护了文件的元数据。
 - `mount.rs`: 定义了挂载点，它持有一个实现了 `Filesystem` trait 的字段，并维护了一个固定的挂载点路径，它会将挂载点路径下的文件操作请求转发给内部的文件系统。
 
-在 `pkg/storage/src/partition/mod.rs` 中，定义了 `Partition` 结构体，和 `PartitionTable` trait，用于统一块设备的分区表行为。
+在 `crates/storage/src/partition/mod.rs` 中，定义了 `Partition` 结构体，和 `PartitionTable` trait，用于统一块设备的分区表行为。
 
 在其他目录下，是需要同学们实现的 MBR 分区表和 FAT 16 文件系统。
 
-在 `pkg/kernel/src/drivers/ata` 中，定义了 ATA 磁盘驱动的相关结构体和接口。
+在 `crates/kernel/src/drivers/ata` 中，定义了 ATA 磁盘驱动的相关结构体和接口。
 
-在 `pkg/kernel/src/drivers/filesystem` 中，定义了根文件系统的挂载和初始化等操作。
+在 `crates/kernel/src/drivers/filesystem` 中，定义了根文件系统的挂载和初始化等操作。
 
 !!! warning "实验说明"
 
@@ -102,7 +102,7 @@ impl MbrPartition {
 
     为了能够单独运行 `mbr` 模块的测试，你可以先注释掉 `lib.rs` 中对其他模块的引用，并处理在 `partition` 中相关需要补全的代码。
 
-    如果想要在测试时看到测试输出，可以使用 `cargo test -- --nocapture` 运行测试，需要注意的是，你应当在 `pkg/storage` 目录下执行，或使用 `--package ysos_storage` 参数指定包名。
+    如果想要在测试时看到测试输出，可以使用 `cargo test -- --nocapture` 运行测试，需要注意的是，你应当在 `crates/storage` 目录下执行，或使用 `--package ysos_storage` 参数指定包名。
 
 ## 磁盘驱动
 
@@ -218,7 +218,7 @@ storage = { package = "ysos_storage", path = "../storage" }
 
     本教程后续内容将重点关注代码层面的实现内容，不再解释相关的专有名词。
 
-在 `pkg/storage/src/fs/fat16/mod.rs` 中，定义了 `Fat16Impl` 结构体，它是 FAT16 文件系统的主要抽象。
+在 `crates/storage/src/fs/fat16/mod.rs` 中，定义了 `Fat16Impl` 结构体，它是 FAT16 文件系统的主要抽象。
 
 而实现 `FileSystem` trait 的 `Fat16` 结构体则持有一个 `handle: Arc<Fat16Impl>`，这样设计的原因是为了将文件系统的信息可以共享给 `File` 结构体，从而给予 `File` 查询 FAT 表、读写块设备的能力。
 
@@ -386,7 +386,7 @@ pub enum Resource {
 
 ## 思考题
 
-1. 为什么在 `pkg/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？
+1. 为什么在 `crates/storage/lib.rs` 中声明了 `#![cfg_attr(not(test), no_std)]`，它有什么作用？哪些因素导致了 `kernel` 中进行单元测试是一个相对困难的事情？
 
 2. 留意 `MbrTable` 的类型声明，为什么需要泛型参数 `T` 满足 `BlockDevice<B> + Clone`？为什么需要 `PhantomData<B>` 作为 `MbrTable` 的成员？在 `PartitionTable` trait 中，为什么需要 `Self: Sized` 约束？
 

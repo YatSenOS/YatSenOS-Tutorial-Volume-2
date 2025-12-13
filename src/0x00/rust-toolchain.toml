@@ -1,5 +1,5 @@
 [toolchain]
-channel = "nightly"
-profile = "minimal"
-components = [ "rust-src", "rustfmt", "clippy" ]
-targets = [ "x86_64-unknown-uefi" ]
+channel    = "nightly"
+components = ["clippy", "rust-src", "rustfmt"]
+profile    = "minimal"
+targets    = ["x86_64-unknown-uefi"]

@@ -49,6 +49,7 @@ no_comments: true
 - 使用 `rustfmt`，`cargo fmt --all` 命令来格式化代码；
 - 使用 `clippy`，`cargo clippy` 来检查代码风格。
 - 使用 [typos](https://github.com/crate-ci/typos) 检查拼写错误，可以使用 `cargo install typos-cli` 安装。
+- 使用 `taplo`，`taplo fmt` 来格式化 toml 配置文件。`taplo.toml`
 
 !!! note "请注意，由于项目 target 不尽相同，`clippy` 需要在每一个 `package` 下使用。"
 

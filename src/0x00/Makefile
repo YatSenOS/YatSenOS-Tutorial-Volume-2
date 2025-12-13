@@ -56,5 +56,5 @@ $(ESP)/EFI/BOOT/BOOTX64.EFI: target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi
 	@mkdir -p $(@D)
 	cp $< $@
 
-target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi: pkg/boot
-	cd pkg/boot && cargo build $(BUILD_ARGS)
+target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi: crates/boot
+	cd crates/boot && cargo build $(BUILD_ARGS)

@@ -1,12 +1,10 @@
 [workspace]
-resolver = "2"
-members = [
-    "pkg/boot",
-]
+members  = ["crates/boot"]
+resolver = "3"
 
 [profile.release-with-debug]
+debug    = true
 inherits = "release"
-debug = true
 
 [profile.release-with-debug.package."*"]
 debug = false

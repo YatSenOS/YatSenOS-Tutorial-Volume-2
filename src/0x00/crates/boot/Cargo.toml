@@ -1,0 +1,18 @@
+[package]
+edition = "2024"
+name    = "ysos_boot"
+version = "0.0.1"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log  = "0.4"
+uefi = { version = "0.36", default-features = false }
+
+[features]
+boot = [
+  "uefi/alloc",
+  "uefi/global_allocator",
+  "uefi/logger",
+  "uefi/panic_handler",
+]
+default = ["boot"]

@@ -1,7 +1,0 @@
-[package]
-name = "yslib"
-version.workspace = true
-edition.workspace = true
-
-[dependencies]
-syscall_def = { workspace = true }
