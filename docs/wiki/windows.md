@@ -51,7 +51,6 @@ rust 提供了两种 windows 上的工具链：`msvc` 和 `gnu`，详细信息�
 - `msvc`：使用 Visual Studio 的 C++ 编译器，需要安装 Visual Studio。
 
     在安装 Visual Studio 时，需要选择如下组件：
-
     - `MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)`
     - `Windows 11 SDK`
 

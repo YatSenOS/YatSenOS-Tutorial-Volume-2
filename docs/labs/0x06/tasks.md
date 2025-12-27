@@ -342,7 +342,6 @@ pub enum Resource {
 1. procfs
 
     在 `/proc` 中，你可以找到一系列的文件和文件夹，探索他们并回答如下问题：
-
     - 解释 `/proc` 下的数字目录代表什么，其内部存在什么内容？
     - `/proc/cpuinfo` 和 `/proc/meminfo` 存储了哪些信息？
     - `/proc/loadavg` 和 `/proc/uptime` 存储了哪些信息？
@@ -354,7 +353,6 @@ pub enum Resource {
 2. devfs
 
     Linux 将设备也作为“文件”，默认挂载于 `/dev` 目录下，探索他们并回答如下问题：
-
     - `/dev/null`、`/dev/zero`、`/dev/random` 和 `/dev/urandom` 分别有什么作用？
     - 尝试运行 `head /dev/kmsg` 并观察输出，结合搜索引擎，解释这一文件的作用。
     - `/dev/sdX` 和 `/dev/sdX1` （X 为一个字母，1 为数字）是什么？有什么区别？如果你正在使用的 Linux 系统中不存在这样的文件，请找到功能类似的文件，并解释。
@@ -365,7 +363,6 @@ pub enum Resource {
 3. tmpfs
 
     在 Linux 中 `/dev/shm`、`/run` 或者 `/var/run` 目录下，存储了一个特殊的文件系统，它是一个内存文件系统，探索它并回答如下问题：
-
     - 列出这些目录，尝试找到扩展名为 `pid` 的文件。应用程序如何利用它们确保**某个程序只运行一个实例**？
     - 列出这些目录，尝试找到扩展名为 `lock` 的文件。应用程序如何利用它们确保**某个资源只被一个程序访问**？
     - 列出这些目录，尝试找到扩展名为 `sock` 或 `socket` 的文件。应用程序如何利用它们实现**进程间通信**？
@@ -393,15 +390,12 @@ pub enum Resource {
 3. `AtaDrive` 为了实现 `MbrTable`，如何保证了自身可以实现 `Clone`？对于分离 `AtaBus` 和 `AtaDrive` 的实现，你认为这样的设计有什么好处？
 
 4. 结合本次实验中的抽象和代码框架，简单解释和讨论如下写法的异同：
-
     1. 函数声明：
-
         - `fn f<T: Foo>(f: T) -> usize`
         - `fn f(f: impl Foo) -> usize`
         - `fn f(f: &dyn Foo) -> usize`
 
     2. 结构体声明：
-
         - `struct S<T: Foo> { f: T }`
         - `struct S { f: Box<dyn Foo> }`
 
@@ -412,7 +406,6 @@ pub enum Resource {
 ## 加分项
 
 1. 😋 你的操作系统拥有了直接读取文件系统的能力，不妨将加载用户态应用的工作从 bootloader 手中接过：
-
     - 重新修改 `spawn` 函数的实现，接受一个文件路径。
     - 使用 `read_all` 加载对应的文件。
     - 将文件内容传入 `elf_spawn`。

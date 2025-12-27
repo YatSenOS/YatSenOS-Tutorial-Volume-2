@@ -167,7 +167,6 @@ impl Stack {
 关于具体的代码实现，参考如下的提示和说明：
 
 1.  将功能的具体实现委托至下一级进行，保持代码语义的简洁。
-
     - 系统调用静态函数，并将其委托给 `ProcessManager::fork`。
     - `ProcessManager::fork` 将具体实现委托给当前进程的 `Process::fork`。
     - `Process::fork` 将具体实现委托给 `ProcessInner::fork`。
@@ -859,7 +858,6 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 - 使用互斥锁来保护每个筷子，确保同一时间只有一个哲学家可以拿起一根筷子。
 
 - 使用等待操作调整哲学家的思考和就餐时间，以增加并发性和实际性。
-
     - 如果你实现了 `sys_time` 系统调用（Lab 4），可以使用它来构造 `sleep` 操作。
     - 如果你并没有实现它，可以参考多线程计数器中的 `delay` 函数进行实现。
 
@@ -943,7 +941,6 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
 ## 加分项
 
 1.  🤔 尝试实现如下用户程序任务，完成用户程序 `fish`：
-
     - 创建三个子进程，让它们分别能输出且只能输出 `>`，`<` 和 `_`。
     - 使用学到的方法对这些子进程进行同步，使得打印出的序列总是 `<><_` 和 `><>_` 的组合。
 
@@ -956,7 +953,6 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     RAII（Resource Acquisition Is Initialization）是一种资源获取即初始化的技术，它通过在对象的构造函数中获取资源，然后在析构函数中释放资源的方法，来保证资源的正确释放。
 
     对于 Rust，也即实现 `MutexGuard` 类似的结构，它在构造时获取锁，然后在此结构体被移出作用域时释放锁。
-
     - 在 `acquire` 时候返回 `MutexGuard` 对象。
     - 移除 `release` 函数，使用 `MutexGuard` 的 `Drop` trait 来释放锁。
 

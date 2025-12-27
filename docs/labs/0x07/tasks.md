@@ -894,7 +894,6 @@ assert!(ret == heap_end, "Failed to allocate heap");
     _提示：内核实现缺页中断的处理时，依赖于哪些子系统？报错是什么？什么子系统可能会导致对应的问题？_
 
 4. 尝试查找资料，了解 `mmap`、`munmap` 和 `mprotect` 系统调用的功能和用法，回答下列问题：
-
     - `mmap` 的主要功能是什么？它可以实现哪些常见的内存管理操作？
 
     - `munmap` 的主要功能是什么？什么时候需要使用 `munmap`？
@@ -909,7 +908,6 @@ assert!(ret == heap_end, "Failed to allocate heap");
 ## 加分项
 
 1. 😋 尝试借助 `brk` 为用户态堆实现自动扩容：
-
     - `LockedHeap` 支持 `extend` 方法，可以在堆区不足时扩容大小，但是需要用户程序分配好所需的空间；
     - 自定义数据结构 `BrkAllocator`，并为其实现 `GlobalAlloc` trait：
 

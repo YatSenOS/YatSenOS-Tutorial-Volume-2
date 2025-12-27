@@ -138,7 +138,6 @@ typedef __s64	Elf64_Sxword;
     ```
 
 - `e_type` 描述 ELF 的类型，包括：
-
     - `ET_NONE` 没有类型也是类型
     - `ET_REL` Relocatable file
     - `ET_EXEC` Executable file

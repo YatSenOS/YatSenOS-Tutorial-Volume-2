@@ -31,7 +31,6 @@ APIC 的初始化过程基本包括以下几个步骤：
 - 操作 SPIV（Spurious Interrupt Vector Register, 0xF0）寄存器，启用 APIC 并设置 Spurious IRQ Vector。
 
 - 设置计时器相关寄存器：
-
     - TDCR(0x3E0): Divide Configuration Register，设置分频系数。
     - TICR(0x380): Initial Count Register，设置初始计数值。
     - LVT Timer(0x320): Local Vector Table Timer，设置中断向量号和触发模式。
@@ -45,7 +44,6 @@ APIC 的初始化过程基本包括以下几个步骤：
 - 向 EOI 寄存器写入 0 以确认任何挂起的中断。
 
 - 设置 ICR 寄存器：
-
     - Destination Shorthand(bit 18-19): 设置为 2，始终将中断发送给所有 APIC
     - Delivery Mode(bit 8-10): 设置为 5，INIT De-assert 模式所需
     - Level(bit 14): 设置为 0，INIT De-assert 所需

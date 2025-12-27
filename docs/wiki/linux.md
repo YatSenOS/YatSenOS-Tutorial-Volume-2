@@ -28,7 +28,7 @@ wsl --install -d Ubuntu
 
 ### 使用其他虚拟机软件
 
-如果你不想使用 WSL2，也可以使用其他虚拟机软件，如 VMware Workstation、VirtualBox 等，安装 Ubuntu 22.04，相关安装教程请自行搜索。
+如果你不想使用 WSL2，也可以使用其他虚拟机软件，如 VMware Workstation、VirtualBox 等，安装 Ubuntu 的最新发行版，相关安装教程请自行搜索。
 
 !!! warning "使用须知"
 
@@ -92,10 +92,10 @@ wsl --install -d Ubuntu
 
 ```bash
 $ rustc --version
-rustc 1.85.0 (4d91de4e4 2025-02-17)
+rustc 1.92.0 (ded5c06cf 2025-12-08)
 
 $ rustc +nightly --version
-rustc 1.87.0-nightly (f04bbc60f 2025-02-20)
+rustc 1.94.0-nightly (1107bbac4 2025-12-26)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.4)
@@ -111,10 +111,10 @@ GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
 
 ```bash
 $ rustc --version
-rustc 1.85.0 (4d91de4e4 2025-02-17)
+rustc 1.92.0 (ded5c06cf 2025-12-08)
 
 $ rustc +nightly --version
-rustc 1.87.0-nightly (f04bbc60f 2025-02-20)
+rustc 1.94.0-nightly (1107bbac4 2025-12-26)
 
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.15)

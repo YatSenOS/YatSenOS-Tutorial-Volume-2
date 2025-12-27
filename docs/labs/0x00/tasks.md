@@ -14,9 +14,9 @@
 
 我们推荐在以下环境进行实验：
 
-- Ubuntu 22.04 LTS (jammy) on WSL 2 **(推荐 Windows 用户选择)**
+- Ubuntu 24.04 LTS (Noble) on WSL 2 **(推荐 Windows 用户选择)**
 - Windows 10/11 **(Windows 原生备选，GDB 相关功能无法使用)**
-- Ubuntu 22.04 LTS (jammy)
+- Ubuntu 24.04 LTS (Noble)
 - macOS with Apple Silicon
 
 以上环境经过我们的测试和验证，可以正常进行实验。对于其他常用的 Linux 发行版，通常也可以正常进行实验，但我们不提供技术支持。
@@ -51,7 +51,6 @@
     - 你还可以通过配置文件 `rustfmt.toml` 和 `taplo.toml` 自定义你的代码 `*.rs` 和配置文件 `*.toml` 如何格式化，[实验 0x00 代码](https://github.com/YatSenOS/YatSenOS-Tutorial-Volume-2/tree/main/src/0x00/)已经给出了这样 2 个配置文件供参考。
 
 1.  使用 Rust 编写一个程序，完成以下任务：
-
     1. 创建一个函数 `count_down(seconds: u64)`
 
         该函数接收一个 u64 类型的参数，表示倒计时的秒数。
@@ -75,7 +74,6 @@
         !!! tip "尝试将 `std::io::Result` 转换为 `std::Result`，你可能需要 `map_err` 等函数。"
 
     4. 在 `main` 函数中，按照如下顺序调用上述函数：
-
         - 首先调用 `count_down(5)` 函数进行倒计时
         - 然后调用 `read_and_print("/etc/hosts")` 函数尝试读取并输出文件内容
         - 最后使用 `std::io` 获取几个用户输入的路径，并调用 `file_size` 函数尝试获取文件大小，并处理可能的错误。
@@ -85,7 +83,6 @@
     注意：在处理文件操作时，需要使用到 Rust 的文件处理相关库，如 `std::fs` 和 `std::io`。在处理错误时，需要使用到 Rust 的错误处理机制，如 `expect` 和 `unwrap` 等。
 
 2.  实现一个进行字节数转换的函数，并格式化输出：
-
     1.  实现函数 `humanized_size(size: u64) -> (f64, &'static str)` 将字节数转换为人类可读的大小和单位
 
         使用 1024 进制，并使用二进制前缀（B, KiB, MiB, GiB）作为单位
@@ -129,7 +126,6 @@
     输出一些带有颜色的字符串，并尝试直接使用 `print!` 宏输出一到两个相同的效果。
 
     尝试输出如下格式和内容：
-
     - `INFO: Hello, world!`，其中 `INFO:` 为绿色，后续内容为白色
     - `WARNING: I'm a teapot!`，颜色为黄色，加粗，并为 `WARNING` 添加下划线
     - `ERROR: KERNEL PANIC!!!`，颜色为红色，加粗，并尝试让这一行在控制行窗口居中
@@ -140,7 +136,6 @@
 4.  使用 `enum` 对类型实现同一化
 
     实现一个名为 `Shape` 的枚举，并为它实现 `pub fn area(&self) -> f64` 方法，用于计算不同形状的面积。
-
     - 你可能需要使用模式匹配来达到相应的功能
     - 请实现 `Rectangle` 和 `Circle` 两种 `Shape`，并使得 `area` 函数能够正确计算它们的面积
     - 使得你的实现能够通过如下测试：
@@ -164,7 +159,6 @@
 5.  实现一个元组结构体 `UniqueId(u16)`
 
     使得每次调用 `UniqueId::new()` 时总会得到一个新的不重复的 `UniqueId`。
-
     - 你可以在函数体中定义 `static` 变量来存储一些全局状态
     - 你可以尝试使用 `std::sync::atomic::AtomicU16` 来确保多线程下的正确性（无需进行验证，相关原理将在 Lab 5 介绍，此处不做要求）
     - 使得你的实现能够通过如下测试：
@@ -394,7 +388,6 @@ BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
 1. 😋 基于控制行颜色的 Rust 编程题目，参考 `log` crate 的文档，为不同的日志级别输出不同的颜色效果，并进行测试输出。
 
 2. 🤔 基于第一个 Rust 编程题目，实现一个简单的 shell 程序：
-
     - 实现 `cd` 命令，可以切换当前工作目录（可以不用检查路径是否存在）
     - 实现 `ls` 命令，尝试列出当前工作目录下的文件和文件夹，以及有关的信息（如文件大小、创建时间等）
     - 实现 `cat` 命令，输出某个文件的内容
@@ -402,7 +395,6 @@ BdsDxe: starting Boot0002 "UEFI QEMU HARDDISK QM00001 " from ...
     !!! question "路径的切换是很容易出现问题的操作，你的程序能正常处理 `cd ../../././../a/b/c/../.././d/` 吗？"
 
 3. 🤔 尝试使用线程模型，基于 `UniqueId` 的任务：
-
     - 尝试证明 `static mut` 变量在多线程下的不安全（可能获得相同的 `UniqueId`）
     - 尝试验证 `AtomicU16` 来实现 `UniqueId` 时的正确性
 

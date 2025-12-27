@@ -60,7 +60,6 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
 1. `file <path-to-binary>`：加载调试的二进制文件，如加载 `ysos` 内核二进制: `file esp/KERNEL.ELF`
 
 2. 远程连接：QEMU 提供了 GDB 服务器暴露远程调试接口。可以通过 GDB 连接到对应服务器，进而调试 QEMU 中运行的内核。
-
     - QEMU 设置：请参考[QEMU Wiki](./qemu.md)中对`-s`参数的解释。
     - GDB 设置： `target remote <ip>:<port>`：连接到远程调试服务器，如连接到 QEMU 的 GDB 服务器：`target remote localhost:1234`
     - 使用 gef 时进行远程调试：`gef-remote <ip> <port>`：连接到远程调试服务器，如：`gef-remote localhost 1234`
@@ -89,7 +88,6 @@ Finished release-with-debug [optimized + debuginfo] target(s) in 0.04s
     这将在编译 `<Our Build Target>` 时强制启用帧指针（frame-pointers）。
 
 10. `x/<n>x <addr>`：查看内存中的数据，从 `<addr>` 开始，连续查看 `<n>` 个字节。
-
     - 若要查看内存中的前 16 个字节：`x/16x <addr>`。简写为 `x`。
     - 若要查看 $rdi$ 寄存器指向的内存中的前 16 个字节，可以使用 `x/16x $rdi`。
     - 若要查看内存中对应的 20 条汇编指令，可以使用 `x/20i <addr>`：
