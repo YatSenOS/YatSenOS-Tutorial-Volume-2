@@ -182,7 +182,7 @@ unsafe {
 最后，你需要检验是否成功加载了内核：
 
 - 使用 `make build DBG_INFO=true` 或 `python ysos.py build -p debug` 编译内核，确保编译时开启了调试信息。
-- 使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。
+- 使用 `make debug` 或 `python ysos.py launch -d` 启动 QEMU 并进入调试模式，这时候 QEMU 将会等待 GDB 的连接。使用 Kylin OS 这样的系统作为开发环境时，可能会遇到 QEMU 报错 `Unknown protocol 'fat'`，请使用 python 脚本运行和调试内核，并在执行脚本的指令中添加参数 `--vvfat_disabled`，例如：`python ysos.py launch -d --vvfat_disabled`，详情请参考 [QEMU 使用参考](../../wiki/qemu.md)。
 - 在另一个终端中，使用 `gdb -q` 命令进入 GDB 调试环境。
 
     !!! note "使用 `.gdbinit` 方便你的调试过程"

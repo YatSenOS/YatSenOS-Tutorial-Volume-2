@@ -93,10 +93,10 @@ target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi: crates/boot
 	cd crates/boot && cargo build $(BUILD_ARGS)
 
 target/x86_64-unknown-none/$(PROFILE)/ysos_kernel: crates/kernel
-	cd crates/kernel && cargo build $(PROFILE_ARGS)
+	cd crates/kernel && cargo build $(PROFILE_ARGS) -Z json-target-spec
 
 target/x86_64-unknown-ysos/$(MODE):
 	@for app in $(APPS); do \
 		echo "Building $$app"; \
-		cd $(APP_PATH)/$$app && cargo build $(BUILD_ARGS) || exit; \
+		cd $(APP_PATH)/$$app && cargo build $(BUILD_ARGS) -Z json-target-spec || exit; \
 	done

@@ -11,6 +11,6 @@
 /site
 
 ### Rust ###
-**/esp
+**/esp*
 **/target
 **/Cargo.lock

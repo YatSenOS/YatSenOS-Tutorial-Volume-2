@@ -80,4 +80,4 @@ target/x86_64-unknown-uefi/$(MODE)/ysos_boot.efi: crates/boot
 	cd crates/boot && cargo build $(BUILD_ARGS)
 
 target/x86_64-unknown-none/$(PROFILE)/ysos_kernel: crates/kernel
-	cd crates/kernel && cargo build $(PROFILE_ARGS)
+	cd crates/kernel && cargo build $(PROFILE_ARGS) -Z json-target-spec
