@@ -1,4 +1,3 @@
-use alloc::string::ToString;
 use core::{arch::asm, fmt::*};
 
 use x86_64::instructions::interrupts;
@@ -74,20 +73,9 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     // force unlock serial for panic output
     unsafe { SERIAL.get().unwrap().force_unlock() };
 
-    let location = if let Some(location) = info.location() {
-        alloc::format!(
-            "{}:{}:{}",
-            location.file(),
-            location.line(),
-            location.column()
-        )
-    } else {
-        "Unknown location".to_string()
-    };
-
     error!(
         "\n\n\rERROR: panicked at {}\n\n\r{}\n",
-        location,
+        info.location().unwrap_or(&core::panic::Location::caller()),
         info.message()
     );
 
