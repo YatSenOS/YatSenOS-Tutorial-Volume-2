@@ -68,7 +68,7 @@ fn efi_main() -> Status {
     // 6. Exit boot and jump to ELF entry
     info!("Exiting boot services...");
 
-    let mmap = unsafe { uefi::boot::exit_boot_services(MemoryType::LOADER_DATA) };
+    let mmap = unsafe { uefi::boot::exit_boot_services(None) };
     // NOTE: alloc & log are no longer available
 
     // construct BootInfo
