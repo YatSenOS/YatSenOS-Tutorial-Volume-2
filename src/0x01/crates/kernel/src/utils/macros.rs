@@ -1,4 +1,4 @@
-use core::{arch::asm, fmt::*};
+use core::{arch::asm, fmt::*, panic::Location};
 
 use x86_64::instructions::interrupts;
 
@@ -73,9 +73,20 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     // force unlock serial for panic output
     unsafe { SERIAL.get().unwrap().force_unlock() };
 
+    struct PanicLocation<'a>(Option<&'a Location<'a>>);
+
+    impl Display for PanicLocation<'_> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+            match self.0 {
+                Some(loc) => Display::fmt(loc, f),
+                None => f.write_str("unknown location"),
+            }
+        }
+    }
+
     error!(
         "\n\n\rERROR: panicked at {}\n\n\r{}\n",
-        info.location().unwrap_or(&core::panic::Location::caller()),
+        PanicLocation(info.location()),
         info.message()
     );
 
