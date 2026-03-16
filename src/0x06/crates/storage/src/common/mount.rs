@@ -2,7 +2,8 @@ use super::*;
 
 /// Mount a file system to a specific path
 ///
-/// NOTE: strip the mount point from the path before calling the underlying file system
+/// NOTE: strip the mount point from the path before calling the underlying file
+/// system
 pub struct Mount {
     pub fs: Box<dyn FileSystem>,
     pub mount_point: Box<str>,

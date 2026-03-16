@@ -1,9 +1,12 @@
-use crate::proc::PageTableContext;
 use linked_list_allocator::LockedHeap;
-use x86_64::structures::paging::{
-    mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
+use x86_64::{
+    VirtAddr,
+    structures::paging::{
+        FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB, mapper::MapToError,
+    },
 };
-use x86_64::VirtAddr;
+
+use crate::proc::PageTableContext;
 
 pub const USER_HEAP_START: usize = 0x4000_0000_0000;
 pub const USER_HEAP_SIZE: usize = 1024 * 1024; // 1 MiB

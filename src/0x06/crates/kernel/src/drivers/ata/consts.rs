@@ -72,23 +72,26 @@ pub(super) enum AtaCommand {
     IdentifyDevice = 0xEC,
 }
 
-/// The possible types of drive devices that can be attached to an IDE controller via ATA.
+/// The possible types of drive devices that can be attached to an IDE
+/// controller via ATA.
 pub(super) enum AtaDeviceType {
     /// A parallel ATA (PATA) drive, like a hard drive.
     /// This is the type previously known as just "ATA" before SATA existed.
     ///
-    /// **which is the only type of drive that is supported by the current implementation.**
+    /// **which is the only type of drive that is supported by the current
+    /// implementation.**
     Pata(Box<[u16; 256]>),
     /// A parallel ATA (PATA) drive that uses the packet interface,
     /// like an optical CD-ROM drive.
     PataPi,
-    /// A serial ATA (SATA) drive that is operating in legacy IDE emulation mode,
-    /// **not the standard AHCI interface for SATA**.
-    /// Some systems refer to this as a `SEMB` (SATA Enclosure Management Bridge) device,
-    /// which may or may not be attached through a port multiplier.
+    /// A serial ATA (SATA) drive that is operating in legacy IDE emulation
+    /// mode, **not the standard AHCI interface for SATA**.
+    /// Some systems refer to this as a `SEMB` (SATA Enclosure Management
+    /// Bridge) device, which may or may not be attached through a port
+    /// multiplier.
     Sata,
-    /// A serial ATA (SATA) drive that that is operating in legacy IDE emulation mode
-    /// and uses the packet interface.
+    /// A serial ATA (SATA) drive that that is operating in legacy IDE emulation
+    /// mode and uses the packet interface.
     SataPi,
     /// The device type is unknown.
     None,

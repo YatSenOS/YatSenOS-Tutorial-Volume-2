@@ -1,8 +1,12 @@
-use super::LocalApic;
+use core::{
+    fmt::{Debug, Error, Formatter},
+    ptr::{read_volatile, write_volatile},
+};
+
 use bit_field::BitField;
-use core::fmt::{Debug, Error, Formatter};
-use core::ptr::{read_volatile, write_volatile};
 use x86::cpuid::CpuId;
+
+use super::LocalApic;
 
 /// Default physical address of xAPIC
 pub const LAPIC_ADDR: u64 = 0xFEE00000;
@@ -17,9 +21,7 @@ impl XApic {
     }
 
     unsafe fn read(&self, reg: u32) -> u32 {
-        unsafe {
-            read_volatile((self.addr + reg as u64) as *const u32)
-        }
+        unsafe { read_volatile((self.addr + reg as u64) as *const u32) }
     }
 
     unsafe fn write(&mut self, reg: u32, value: u32) {
@@ -49,11 +51,13 @@ impl LocalApic for XApic {
 
             // FIXME: Map error interrupt to IRQ_ERROR.
 
-            // FIXME: Clear error status register (requires back-to-back writes).
+            // FIXME: Clear error status register (requires back-to-back
+            // writes).
 
             // FIXME: Ack any outstanding interrupts.
 
-            // FIXME: Send an Init Level De-Assert to synchronise arbitration ID's.
+            // FIXME: Send an Init Level De-Assert to synchronise arbitration
+            // ID's.
 
             // FIXME: Enable interrupts on the APIC (but not on the processor).
         }

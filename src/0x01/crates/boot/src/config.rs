@@ -9,7 +9,8 @@ pub struct Config<'a> {
     pub kernel_stack_auto_grow: u64,
     /// The size of the kernel stack, given in number of 4KiB pages
     pub kernel_stack_size: u64,
-    /// The offset into the virtual address space where the physical memory is mapped
+    /// The offset into the virtual address space where the physical memory is
+    /// mapped
     pub physical_memory_offset: u64,
     /// The path of kernel ELF
     pub kernel_path: &'a str,

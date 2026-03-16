@@ -6,18 +6,17 @@ mod pid;
 mod process;
 mod processor;
 
-use manager::*;
-use process::*;
-use crate::memory::PAGE_SIZE;
-
 use alloc::string::String;
-pub use context::ProcessContext;
-pub use paging::PageTableContext;
-pub use data::ProcessData;
-pub use pid::ProcessId;
 
-use x86_64::structures::idt::PageFaultErrorCode;
-use x86_64::VirtAddr;
+pub use context::ProcessContext;
+pub use data::ProcessData;
+use manager::*;
+pub use paging::PageTableContext;
+pub use pid::ProcessId;
+use process::*;
+use x86_64::{VirtAddr, structures::idt::PageFaultErrorCode};
+
+use crate::memory::PAGE_SIZE;
 pub const KERNEL_PID: ProcessId = ProcessId(1);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

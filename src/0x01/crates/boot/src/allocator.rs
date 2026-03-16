@@ -1,5 +1,5 @@
 use uefi::boot::{AllocateType, MemoryType};
-use x86_64::{structures::paging::*, PhysAddr};
+use x86_64::{PhysAddr, structures::paging::*};
 
 /// Use `BootServices::allocate_pages()` as frame allocator
 pub struct UEFIFrameAllocator;

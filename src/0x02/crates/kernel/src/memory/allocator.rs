@@ -1,6 +1,7 @@
+use core::ptr::addr_of_mut;
+
 use linked_list_allocator::LockedHeap;
 use x86_64::VirtAddr;
-use core::ptr::addr_of_mut;
 
 pub const HEAP_SIZE: usize = 8 * 1024 * 1024; // 8 MiB
 
@@ -17,7 +18,9 @@ pub fn init() {
     let heap_end = heap_start + HEAP_SIZE as u64;
 
     unsafe {
-        ALLOCATOR.lock().init(addr_of_mut!(HEAP) as *mut u8, HEAP_SIZE);
+        ALLOCATOR
+            .lock()
+            .init(addr_of_mut!(HEAP) as *mut u8, HEAP_SIZE);
     }
 
     debug!(

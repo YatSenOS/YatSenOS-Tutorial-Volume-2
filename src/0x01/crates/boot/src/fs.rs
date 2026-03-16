@@ -1,7 +1,9 @@
 use core::ptr::NonNull;
-use uefi::boot::*;
-use uefi::proto::media::file::*;
-use uefi::proto::media::fs::SimpleFileSystem;
+
+use uefi::{
+    boot::*,
+    proto::media::{file::*, fs::SimpleFileSystem},
+};
 use xmas_elf::ElfFile;
 
 /// Open root directory

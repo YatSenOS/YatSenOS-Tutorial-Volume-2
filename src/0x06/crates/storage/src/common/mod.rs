@@ -10,8 +10,6 @@ mod io;
 mod metadata;
 mod mount;
 
-use super::*;
-
 pub use block::*;
 pub use device::*;
 pub use error::*;
@@ -20,5 +18,7 @@ pub use filesystem::*;
 pub use io::*;
 pub use metadata::*;
 pub use mount::*;
+
+use super::*;
 
 pub const PATH_SEPARATOR: char = '/';

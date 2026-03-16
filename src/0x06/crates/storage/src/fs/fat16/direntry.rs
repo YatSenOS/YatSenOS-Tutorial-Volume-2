@@ -2,12 +2,15 @@
 //!
 //! reference: <https://wiki.osdev.org/FAT#Directories_on_FAT12.2F16.2F32>
 
-use crate::*;
+use core::{
+    fmt::{Debug, Display},
+    ops::*,
+};
+
 use bitflags::bitflags;
-use chrono::LocalResult::Single;
-use chrono::{DateTime, TimeZone, Utc};
-use core::fmt::{Debug, Display};
-use core::ops::*;
+use chrono::{DateTime, LocalResult::Single, TimeZone, Utc};
+
+use crate::*;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct DirEntry {
@@ -131,8 +134,8 @@ impl ShortFileName {
         //      - period `.` means the start of the file extension
         //      - check if the period is misplaced (after 8 characters)
         //      - check if the filename contains invalid characters:
-        //        [0x00..=0x1F, 0x20, 0x22, 0x2A, 0x2B, 0x2C, 0x2F, 0x3A,
-        //        0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C]
+        //        [0x00..=0x1F, 0x20, 0x22, 0x2A, 0x2B, 0x2C, 0x2F, 0x3A, 0x3B,
+        //        0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C]
     }
 }
 
@@ -167,7 +170,8 @@ impl Cluster {
     /// Magic value indicating the cluster holding the root directory
     /// (which doesn't have a number in Fat16 as there's a reserved region).
     pub const ROOT_DIR: Cluster = Cluster(0xFFFF_FFFC);
-    /// Magic value indicating that the cluster is allocated and is the final cluster for the file
+    /// Magic value indicating that the cluster is allocated and is the final
+    /// cluster for the file
     pub const END_OF_FILE: Cluster = Cluster(0xFFFF_FFFF);
 }
 

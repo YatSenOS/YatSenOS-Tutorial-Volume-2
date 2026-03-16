@@ -10,7 +10,8 @@ impl Fat16Impl {
 
         trace!("Loading Fat16 Volume: {:#?}", bpb);
 
-        // HINT: FirstDataSector = BPB_ResvdSecCnt + (BPB_NumFATs * FATSz) + RootDirSectors;
+        // HINT: FirstDataSector = BPB_ResvdSecCnt + (BPB_NumFATs * FATSz) +
+        // RootDirSectors;
         let fat_start = bpb.reserved_sector_count() as usize;
         let root_dir_size = { /* FIXME: get the size of root dir from bpb */ };
         let first_root_dir_sector = { /* FIXME: calculate the first root dir sector */ };
@@ -30,7 +31,8 @@ impl Fat16Impl {
             Cluster::ROOT_DIR => self.first_root_dir_sector,
             Cluster(c) => {
                 // FIXME: calculate the first sector of the cluster
-                // HINT: FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
+                // HINT: FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) +
+                // FirstDataSector;
             }
         }
     }

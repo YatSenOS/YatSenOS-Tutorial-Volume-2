@@ -1,8 +1,7 @@
 use x86_64::{
-    structures::paging::{mapper::MapToError, page::*, Page},
     VirtAddr,
+    structures::paging::{Page, mapper::MapToError, page::*},
 };
-
 
 use super::{FrameAllocatorRef, MapperRef};
 

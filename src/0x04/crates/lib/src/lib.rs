@@ -15,9 +15,9 @@ pub extern crate alloc;
 
 mod syscall;
 
+pub use alloc::*;
 use core::fmt::*;
 
-pub use alloc::*;
 pub use io::*;
 pub use syscall::*;
 

@@ -1,5 +1,6 @@
-use crate::Syscall;
 use core::arch::asm;
+
+use crate::Syscall;
 
 #[doc(hidden)]
 #[inline(always)]

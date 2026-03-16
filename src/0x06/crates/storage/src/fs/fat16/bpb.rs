@@ -92,7 +92,7 @@ mod tests {
         65 73 73 20 61 6E 79 20 6B 65 79 20 74 6F 20 74
         72 79 20 61 67 61 69 6E 20 2E 2E 2E 20 0D 0A 00"
         );
-        
+
         let mut bpb_data = Vec::with_capacity(512);
         bpb_data.extend_from_slice(&DATA);
         bpb_data.resize(510, 0u8);

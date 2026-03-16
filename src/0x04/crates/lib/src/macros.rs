@@ -1,5 +1,4 @@
-use crate::alloc::string::ToString;
-use crate::errln;
+use crate::{alloc::string::ToString, errln};
 
 #[macro_export]
 macro_rules! entry {

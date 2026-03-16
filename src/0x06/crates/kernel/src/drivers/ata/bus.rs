@@ -4,9 +4,11 @@
 //! reference: https://wiki.osdev.org/ATA_PIO_Mode
 //! reference: https://github.com/theseus-os/Theseus/blob/HEAD/kernel/ata/src/lib.rs
 
-use super::consts::*;
 use alloc::boxed::Box;
+
 use x86_64::instructions::port::*;
+
+use super::consts::*;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -79,11 +81,12 @@ impl AtaBus {
         unsafe { self.lba_high.read() }
     }
 
-    /// Reads the `status` port and returns the value as an `AtaStatus` bitfield.
-    /// Because some buses operate (change wire values) very slowly,
-    /// this undergoes the standard procedure of reading the alternate status port
-    /// and discarding it 4 times before reading the real status port value.
-    /// Each read is a 100ns delay, so the total delay of 400ns is proper.
+    /// Reads the `status` port and returns the value as an `AtaStatus`
+    /// bitfield. Because some buses operate (change wire values) very
+    /// slowly, this undergoes the standard procedure of reading the
+    /// alternate status port and discarding it 4 times before reading the
+    /// real status port value. Each read is a 100ns delay, so the total
+    /// delay of 400ns is proper.
     #[inline]
     fn status(&mut self) -> AtaStatus {
         AtaStatus::from_bits_truncate(unsafe {
@@ -185,16 +188,12 @@ impl AtaBus {
         })
     }
 
-    /// Reads a block from the given drive and block number into the given buffer.
+    /// Reads a block from the given drive and block number into the given
+    /// buffer.
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO
     /// reference: https://wiki.osdev.org/IDE#Read.2FWrite_From_ATA_Drive
-    pub(super) fn read_pio(
-        &mut self,
-        drive: u8,
-        block: u32,
-        buf: &mut [u8],
-    ) -> storage::FsResult {
+    pub(super) fn read_pio(&mut self, drive: u8, block: u32, buf: &mut [u8]) -> storage::FsResult {
         self.write_command(drive, block, AtaCommand::ReadPio)?;
 
         // FIXME: read the data from the data port into the buffer
@@ -211,7 +210,8 @@ impl AtaBus {
         }
     }
 
-    /// Writes a block to the given drive and block number from the given buffer.
+    /// Writes a block to the given drive and block number from the given
+    /// buffer.
     ///
     /// reference: https://wiki.osdev.org/ATA_PIO_Mode#28_bit_PIO
     /// reference: https://wiki.osdev.org/IDE#Read.2FWrite_From_ATA_Drive

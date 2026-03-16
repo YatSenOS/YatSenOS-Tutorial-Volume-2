@@ -8,8 +8,8 @@
 //!
 //! Reference: [OSDev Wiki](https://wiki.osdev.org/APIC)
 
-pub use ioapic::{IoApic, IOAPIC_ADDR};
-pub use xapic::{XApic, LAPIC_ADDR};
+pub use ioapic::{IOAPIC_ADDR, IoApic};
+pub use xapic::{LAPIC_ADDR, XApic};
 
 mod ioapic;
 mod xapic;

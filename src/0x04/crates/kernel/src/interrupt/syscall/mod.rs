@@ -1,15 +1,16 @@
-use crate::{memory::gdt, proc::*};
 use alloc::format;
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 // NOTE: import `ysos_syscall` package as `syscall_def` in Cargo.toml
 use syscall_def::Syscall;
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+
+use crate::{memory::gdt, proc::*};
 
 mod service;
-use super::consts;
-
 // FIXME: write syscall service handler in `service.rs`
 use service::*;
+
+use super::consts;
 
 pub unsafe fn register_idt(idt: &mut InterruptDescriptorTable) {
     // FIXME: register syscall handler to IDT
@@ -46,24 +47,24 @@ pub fn dispatcher(context: &mut ProcessContext) {
 
     match args.syscall {
         // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
-        Syscall::Read => { /* FIXME: read from fd & return length */},
+        Syscall::Read => { /* FIXME: read from fd & return length */ }
         // fd: arg0 as u8, buf: &[u8] (ptr: arg1 as *const u8, len: arg2)
-        Syscall::Write => { /* FIXME: write to fd & return length */},
+        Syscall::Write => { /* FIXME: write to fd & return length */ }
 
         // None -> pid: u16
-        Syscall::GetPid => { /* FIXME: get current pid */ },
+        Syscall::GetPid => { /* FIXME: get current pid */ }
 
         // path: &str (ptr: arg0 as *const u8, len: arg1) -> pid: u16
-        Syscall::Spawn => { /* FIXME: spawn process from name */},
+        Syscall::Spawn => { /* FIXME: spawn process from name */ }
         // ret: arg0 as isize
-        Syscall::Exit => { /* FIXME: exit process with retcode */},
+        Syscall::Exit => { /* FIXME: exit process with retcode */ }
         // pid: arg0 as u16 -> status: isize
-        Syscall::WaitPid => { /* FIXME: check if the process is running or get retcode */},
+        Syscall::WaitPid => { /* FIXME: check if the process is running or get retcode */ }
 
         // None
-        Syscall::Stat => { /* FIXME: list processes */ },
+        Syscall::Stat => { /* FIXME: list processes */ }
         // None
-        Syscall::ListApp => { /* FIXME: list available apps */},
+        Syscall::ListApp => { /* FIXME: list available apps */ }
 
         // ----------------------------------------------------
         // NOTE: following syscall examples are implemented

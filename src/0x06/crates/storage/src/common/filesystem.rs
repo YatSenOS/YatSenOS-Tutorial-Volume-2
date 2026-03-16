@@ -1,7 +1,7 @@
 //! The filesystem trait definitions needed to implement new virtual filesystems
-use crate::*;
-
 use core::fmt::Debug;
+
+use crate::*;
 
 /// File system trait
 pub trait FileSystem: Debug + Sync + Send {
@@ -51,7 +51,8 @@ pub trait FileSystem: Debug + Sync + Send {
         Err(FsError::NotSupported)
     }
 
-    /// Moves the src directory to the destination path within the same filesystem
+    /// Moves the src directory to the destination path within the same
+    /// filesystem
     fn move_dir(&self, _src: &str, _dst: &str) -> FsResult {
         Err(FsError::NotSupported)
     }

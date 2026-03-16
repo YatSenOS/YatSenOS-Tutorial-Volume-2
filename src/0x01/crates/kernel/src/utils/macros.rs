@@ -1,7 +1,9 @@
 use alloc::string::ToString;
-use crate::drivers::serial::{SERIAL, get_serial};
 use core::{arch::asm, fmt::*};
+
 use x86_64::instructions::interrupts;
+
+use crate::drivers::serial::{SERIAL, get_serial};
 
 /// Use spin mutex to control variable access
 #[macro_export]
@@ -175,4 +177,3 @@ fn is_canonical(addr: usize) -> bool {
     let upper = addr >> 47;
     upper == 0 || upper == 0x1ffff
 }
-

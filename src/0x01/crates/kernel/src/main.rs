@@ -5,6 +5,7 @@
 extern crate log;
 
 use core::arch::asm;
+
 use ysos_kernel as ysos;
 
 boot::entry_point!(kernel_main);

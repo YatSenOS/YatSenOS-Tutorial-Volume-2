@@ -39,7 +39,8 @@ impl Read for File {
         //      - `self.offset` is the current offset in the file in bytes
         //      - use `self.handle` to read the blocks
         //      - use `self.entry` to get the file's cluster
-        //      - use `self.handle.cluster_to_sector` to convert cluster to sector
+        //      - use `self.handle.cluster_to_sector` to convert cluster to
+        //        sector
         //      - update `self.offset` after reading
         //      - update `self.cluster` with FAT if necessary
     }

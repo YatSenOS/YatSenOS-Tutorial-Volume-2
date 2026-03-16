@@ -1,7 +1,10 @@
 use alloc::boxed::Box;
+
 use boot::{MemoryMap, MemoryType};
-use x86_64::structures::paging::{FrameAllocator, FrameDeallocator, PhysFrame, Size4KiB};
-use x86_64::PhysAddr;
+use x86_64::{
+    PhysAddr,
+    structures::paging::{FrameAllocator, FrameDeallocator, PhysFrame, Size4KiB},
+};
 
 once_mutex!(pub FRAME_ALLOCATOR: BootInfoFrameAllocator);
 
@@ -11,7 +14,8 @@ guard_access_fn! {
 
 type BootInfoFrameIter = Box<dyn Iterator<Item = PhysFrame> + Send>;
 
-/// A FrameAllocator that returns usable frames from the bootloader's memory map.
+/// A FrameAllocator that returns usable frames from the bootloader's memory
+/// map.
 pub struct BootInfoFrameAllocator {
     size: usize,
     used: usize,
@@ -21,9 +25,9 @@ pub struct BootInfoFrameAllocator {
 impl BootInfoFrameAllocator {
     /// Create a FrameAllocator from the passed memory map.
     ///
-    /// This function is unsafe because the caller must guarantee that the passed
-    /// memory map is valid. The main requirement is that all frames that are marked
-    /// as `USABLE` in it are really unused.
+    /// This function is unsafe because the caller must guarantee that the
+    /// passed memory map is valid. The main requirement is that all frames
+    /// that are marked as `USABLE` in it are really unused.
     pub unsafe fn init(memory_map: &MemoryMap, size: usize) -> Self {
         BootInfoFrameAllocator {
             size,

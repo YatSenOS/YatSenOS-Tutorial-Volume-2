@@ -1,5 +1,6 @@
-use crate::*;
 use core::ops::Deref;
+
+use crate::*;
 
 pub trait BlockTrait =
     AsMut<[u8]> + AsRef<[u8]> + SizedBlock + Default + Send + Sync + Clone + 'static;

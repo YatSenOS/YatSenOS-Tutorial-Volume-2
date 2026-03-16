@@ -1,6 +1,9 @@
+use alloc::{
+    string::{String, ToString},
+    vec,
+};
+
 use crate::*;
-use alloc::string::{String, ToString};
-use alloc::vec;
 
 pub struct Stdin;
 pub struct Stdout;

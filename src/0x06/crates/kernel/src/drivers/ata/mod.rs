@@ -8,6 +8,7 @@ mod bus;
 mod consts;
 
 use alloc::{boxed::Box, string::String};
+
 use bus::AtaBus;
 use consts::AtaDeviceType;
 use spin::Mutex;

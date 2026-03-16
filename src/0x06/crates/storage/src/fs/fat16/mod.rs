@@ -4,12 +4,12 @@ pub mod direntry;
 pub mod file;
 pub mod impls;
 
-use crate::*;
+use bpb::Fat16Bpb;
 use directory::Directory;
 use direntry::*;
 use file::File;
 
-use bpb::Fat16Bpb;
+use crate::*;
 
 const BLOCK_SIZE: usize = 512;
 

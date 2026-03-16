@@ -1,6 +1,9 @@
+use core::{
+    fmt::Debug,
+    ops::{Deref, DerefMut},
+};
+
 use super::*;
-use core::fmt::Debug;
-use core::ops::{Deref, DerefMut};
 
 pub struct FileHandle {
     pub meta: Metadata,

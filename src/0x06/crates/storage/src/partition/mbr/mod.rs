@@ -4,8 +4,9 @@ mod entry;
 
 use core::marker::PhantomData;
 
-use crate::*;
 pub use entry::*;
+
+use crate::*;
 
 /// The MBR Table
 ///
@@ -13,7 +14,9 @@ pub use entry::*;
 /// MBR (Master Boot Record) is the *first sector* of the disk.
 /// The MBR contains information about the partitions.
 ///
-/// [ MBR | Partitions ] [ Partition 1 ] [ Partition 2 ] [ Partition 3 ] [ Partition 4 ]
+/// [ MBR | Partitions ]
+/// [ Partition 1 ] [ Partition 2 ]
+/// [ Partition 3 ] [ Partition 4 ]
 pub struct MbrTable<T, B>
 where
     T: BlockDevice<B> + Clone,

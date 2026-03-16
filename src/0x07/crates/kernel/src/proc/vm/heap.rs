@@ -1,9 +1,9 @@
+use alloc::sync::Arc;
 use core::sync::atomic::{AtomicU64, Ordering};
 
-use alloc::sync::Arc;
 use x86_64::{
-    structures::paging::{mapper::UnmapError, Page},
     VirtAddr,
+    structures::paging::{Page, mapper::UnmapError},
 };
 
 use super::{FrameAllocatorRef, MapperRef};

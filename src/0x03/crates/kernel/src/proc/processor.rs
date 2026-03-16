@@ -1,8 +1,9 @@
+use alloc::{string::String, vec::Vec};
 use core::sync::atomic::{AtomicU16, Ordering};
 
-use crate::proc::ProcessId;
-use alloc::{string::String, vec::Vec};
 use x86::cpuid::CpuId;
+
+use crate::proc::ProcessId;
 
 const MAX_CPU_COUNT: usize = 4;
 
@@ -67,10 +68,6 @@ impl Processor {
     #[inline]
     pub fn get_pid(&self) -> Option<ProcessId> {
         let pid = self.0.load(Ordering::Relaxed);
-        if pid == 0 {
-            None
-        } else {
-            Some(ProcessId(pid))
-        }
+        if pid == 0 { None } else { Some(ProcessId(pid)) }
     }
 }

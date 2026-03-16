@@ -1,9 +1,7 @@
 use core::alloc::Layout;
 
-use crate::proc::*;
-use crate::utils::*;
-
 use super::SyscallArgs;
+use crate::{proc::*, utils::*};
 
 pub fn spawn_process(args: &SyscallArgs) -> usize {
     // FIXME: get app name by args

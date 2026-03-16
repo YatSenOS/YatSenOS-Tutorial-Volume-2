@@ -1,7 +1,8 @@
 use alloc::format;
+
 use x86_64::{
-    structures::paging::{page::*, *},
     VirtAddr,
+    structures::paging::{page::*, *},
 };
 
 use crate::{humanized_size, memory::*};
@@ -9,7 +10,6 @@ use crate::{humanized_size, memory::*};
 pub mod stack;
 
 use self::stack::*;
-
 use super::{PageTableContext, ProcessId};
 
 type MapperRef<'a> = &'a mut OffsetPageTable<'static>;

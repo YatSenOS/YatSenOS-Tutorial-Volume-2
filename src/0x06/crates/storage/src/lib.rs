@@ -12,12 +12,8 @@ pub mod common;
 mod fs;
 mod partition;
 
+use alloc::{borrow::ToOwned, boxed::Box, string::String, sync::Arc, vec::Vec};
+
 pub use common::*;
 pub use fs::*;
 pub use partition::*;
-
-use alloc::borrow::ToOwned;
-use alloc::boxed::Box;
-use alloc::string::String;
-use alloc::sync::Arc;
-use alloc::vec::Vec;

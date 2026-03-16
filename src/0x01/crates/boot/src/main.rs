@@ -6,9 +6,9 @@
 extern crate log;
 extern crate alloc;
 
-use alloc::boxed::Box;
-use alloc::vec;
-use uefi::{entry, Status};
+use alloc::{boxed::Box, vec};
+
+use uefi::{Status, entry};
 use x86_64::registers::control::*;
 use ysos_boot::*;
 
@@ -63,7 +63,6 @@ fn efi_main() -> Status {
     // 5. Pass system table to kernel
     let ptr = uefi::table::system_table_raw().expect("Failed to get system table");
     let system_table = ptr.cast::<core::ffi::c_void>();
-
 
     // 6. Exit boot and jump to ELF entry
     info!("Exiting boot services...");

@@ -1,11 +1,10 @@
+use alloc::{sync::Weak, vec::Vec};
+
+use spin::*;
+use x86_64::structures::paging::{mapper::MapToError, page::PageRange, *};
+
 use super::*;
 use crate::memory::*;
-use alloc::sync::Weak;
-use alloc::vec::Vec;
-use spin::*;
-use x86_64::structures::paging::mapper::MapToError;
-use x86_64::structures::paging::page::PageRange;
-use x86_64::structures::paging::*;
 
 #[derive(Clone)]
 pub struct Process {
@@ -189,7 +188,6 @@ impl core::ops::DerefMut for ProcessInner {
             .expect("Process data empty. The process may be killed.")
     }
 }
-
 
 impl core::fmt::Debug for Process {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {

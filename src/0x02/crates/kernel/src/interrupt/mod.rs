@@ -6,6 +6,7 @@ mod exceptions;
 
 use apic::*;
 use x86_64::structures::idt::InterruptDescriptorTable;
+
 use crate::memory::physical_to_virtual;
 
 lazy_static! {

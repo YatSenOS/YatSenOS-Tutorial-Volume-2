@@ -1,16 +1,19 @@
 #![no_std]
 
-pub use uefi::boot::{MemoryAttribute, MemoryDescriptor, MemoryType};
-pub use uefi::data_types::chars::*;
-pub use uefi::data_types::*;
-pub use uefi::proto::console::gop::{GraphicsOutput, ModeInfo};
-pub use uefi::Status;
+use core::ptr::NonNull;
 
 use arrayvec::ArrayVec;
-use core::ptr::NonNull;
-use x86_64::registers::control::Cr3;
-use x86_64::structures::paging::{OffsetPageTable, PageTable};
-use x86_64::VirtAddr;
+pub use uefi::{
+    Status,
+    boot::{MemoryAttribute, MemoryDescriptor, MemoryType},
+    data_types::{chars::*, *},
+    proto::console::gop::{GraphicsOutput, ModeInfo},
+};
+use x86_64::{
+    VirtAddr,
+    registers::control::Cr3,
+    structures::paging::{OffsetPageTable, PageTable},
+};
 
 pub mod allocator;
 pub mod config;
@@ -22,12 +25,14 @@ pub use fs::*;
 #[macro_use]
 extern crate log;
 
-/// This structure represents the information that the bootloader passes to the kernel.
+/// This structure represents the information that the bootloader passes to the
+/// kernel.
 pub struct BootInfo {
     /// The memory map
     pub memory_map: ArrayVec<MemoryDescriptor, 256>,
 
-    /// The offset into the virtual address space where the physical memory is mapped.
+    /// The offset into the virtual address space where the physical memory is
+    /// mapped.
     pub physical_memory_offset: u64,
 
     /// The system table virtual address
@@ -49,7 +54,8 @@ static mut ENTRY: usize = 0;
 ///
 /// # Safety
 ///
-/// This function is unsafe because the caller must ensure that the kernel entry point is valid.
+/// This function is unsafe because the caller must ensure that the kernel entry
+/// point is valid.
 #[cfg(feature = "boot")]
 pub fn jump_to_entry(bootinfo: *const BootInfo, stacktop: u64) -> ! {
     unsafe {
@@ -63,7 +69,8 @@ pub fn jump_to_entry(bootinfo: *const BootInfo, stacktop: u64) -> ! {
 ///
 /// # Safety
 ///
-/// This function is unsafe because the caller must ensure that the kernel entry point is valid.
+/// This function is unsafe because the caller must ensure that the kernel entry
+/// point is valid.
 #[inline(always)]
 #[cfg(feature = "boot")]
 pub fn set_entry(entry: usize) {
@@ -77,9 +84,10 @@ pub fn set_entry(entry: usize) {
 ///
 /// The function must have the signature `fn(&'static BootInfo) -> !`.
 ///
-/// This macro just creates a function named `_start`, which the linker will use as the entry
-/// point. The advantage of using this macro instead of providing an own `_start` function is
-/// that the macro ensures that the function and argument types are correct.
+/// This macro just creates a function named `_start`, which the linker will use
+/// as the entry point. The advantage of using this macro instead of providing
+/// an own `_start` function is that the macro ensures that the function and
+/// argument types are correct.
 #[macro_export]
 macro_rules! entry_point {
     ($path:path) => {
