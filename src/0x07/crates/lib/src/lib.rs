@@ -1,5 +1,5 @@
 #![allow(dead_code, unused_imports)]
-#![feature(alloc_error_handler)]
+#![cfg_attr(not(test), feature(alloc_error_handler))]
 #![cfg_attr(not(test), no_std)]
 
 #[macro_use]
