@@ -10,7 +10,7 @@ use x86_64::structures::paging::*;
 #[derive(Clone)]
 pub struct Process {
     pid: ProcessId,
-    inner: Arc<RwLock<ProcessInner>>,
+    inner: RwLock<ProcessInner>,
 }
 
 pub struct ProcessInner {
@@ -70,7 +70,7 @@ impl Process {
         // create process struct
         Arc::new(Self {
             pid,
-            inner: Arc::new(RwLock::new(inner)),
+            inner: RwLock::new(inner),
         })
     }
 
@@ -165,7 +165,7 @@ impl ProcessInner {
 }
 
 impl core::ops::Deref for Process {
-    type Target = Arc<RwLock<ProcessInner>>;
+    type Target = RwLock<ProcessInner>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner

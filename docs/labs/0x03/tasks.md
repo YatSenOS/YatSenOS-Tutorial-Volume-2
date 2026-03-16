@@ -189,16 +189,22 @@ impl Processor {
 
 ```rust
 pub struct ProcessManager {
-    processes: RwLock<BTreeMap<ProcessId, Arc<Process>>>,
+    processes: RwLock<HashMap<ProcessId, Arc<Process>, ahash::RandomState>>,
     ready_queue: Mutex<VecDeque<ProcessId>>,
 }
 ```
 
 其中 `processes` 字段用于存储所有的进程，`ready_queue` 字段则用于存储就绪的进程队列。`ProcessManager` 结构体被设计为“不可变”的，也就是说，它由 `RwLock` 和 `Mutex` 来提供内部可变性。
 
+??? hint "`HashMap` 与 `ahash`"
+
+    在内核 `no_std` 环境下，可以使用 `hashbrown` 库提供的 `HashMap` 能力，它也是 Rust 标准库所使用的 HashMap 实现。
+
+    `ahash` 是一个专为 `HashMap` 设计的高性能哈希算法。在 `ProcessManager` 中，我们显式指定了 `ahash::RandomState` 作为哈希状态，以确保进程查找的高效性。
+
 就绪队列的操作（`push` 和 `pop`）是需要对 `VecDeque` 进行修改，所以是在 `Mutex` 的保护下进行的，并没有读写操作的区别。
 
-而进程列表只有 `insert` 操作需要对 `BTreeMap` 的可变引用，因此 `RwLock` 的保护下更加合适。
+而进程列表只有 `insert` 操作需要对 `HashMap` 的可变引用，因此 `RwLock` 的保护下更加合适。
 
 在 `ProcessManager` 的不可变约束下，就可以通过 `spin::Once` 来定义一个全局的 `ProcessManager`，并在 `init()` 函数中初始化它：
 
@@ -227,7 +233,7 @@ pub fn get_process_manager() -> &'static ProcessManager {
 
 ```rust
 pub fn new(init: Arc<Process>) -> Self {
-    let mut processes = BTreeMap::new();
+    let mut processes = HashMap::default();
     let ready_queue = VecDeque::new();
     let pid = init.pid();
 

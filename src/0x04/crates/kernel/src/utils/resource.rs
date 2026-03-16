@@ -1,4 +1,5 @@
 use alloc::string::String;
+use hashbrown::HashMap;
 
 #[derive(Debug, Clone)]
 pub enum StdIO {
@@ -9,13 +10,13 @@ pub enum StdIO {
 
 #[derive(Debug)]
 pub struct ResourceSet {
-    pub handles: BTreeMap<u8, Mutex<Resource>>,
+    pub(crate) handles: HashMap<u8, Mutex<Resource>, ahash::RandomState>,
 }
 
 impl Default for ResourceSet {
     fn default() -> Self {
         let mut res = Self {
-            handles: BTreeMap::new(),
+            handles: HashMap::default(),
         };
 
         res.open(Resource::Console(StdIO::Stdin));

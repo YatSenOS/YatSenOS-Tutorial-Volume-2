@@ -4,6 +4,7 @@ use crate::memory::{
     allocator::{ALLOCATOR, HEAP_SIZE},
     get_frame_alloc_for_sure, PAGE_SIZE,
 };
+use hashbrown::HashMap;
 use alloc::{collections::*, format};
 use spin::{Mutex, RwLock};
 
@@ -25,13 +26,13 @@ pub fn get_process_manager() -> &'static ProcessManager {
 }
 
 pub struct ProcessManager {
-    processes: RwLock<BTreeMap<ProcessId, Arc<Process>>>,
+    processes: RwLock<HashMap<ProcessId, Arc<Process>, ahash::RandomState>>,
     ready_queue: Mutex<VecDeque<ProcessId>>,
 }
 
 impl ProcessManager {
     pub fn new(init: Arc<Process>) -> Self {
-        let mut processes = BTreeMap::new();
+        let mut processes = HashMap::default();
         let ready_queue = VecDeque::new();
         let pid = init.pid();
 

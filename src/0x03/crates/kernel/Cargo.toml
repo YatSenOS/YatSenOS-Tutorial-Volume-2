@@ -5,10 +5,12 @@ version.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ahash                 = { workspace = true }
 bit_field             = { workspace = true }
 bitflags              = { workspace = true }
 boot                  = { workspace = true }
 crossbeam-queue       = { workspace = true }
+hashbrown             = { workspace = true }
 lazy_static           = { workspace = true }
 libm                  = { workspace = true }
 linked_list_allocator = { workspace = true }

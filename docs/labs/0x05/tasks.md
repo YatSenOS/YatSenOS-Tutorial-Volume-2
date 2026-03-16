@@ -363,11 +363,11 @@ entry!(main);
 ```rust
 pub struct ProcessManager {
     // ...
-    wait_queue: Mutex<BTreeMap<ProcessId, BTreeSet<ProcessId>>>,
+    wait_queue: Mutex<HashMap<ProcessId, BTreeSet<ProcessId>, ahash::RandomState>>,
 }
 ```
 
-其中，`BTreeMap` 的键值对应于被等待的进程 ID，`BTreeSet` 用于存储等待的进程 ID 的集合。
+其中，`HashMap` 的键值对应于被等待的进程 ID，`BTreeSet` 用于存储等待的进程 ID 的集合。
 
 ### 阻塞进程
 
@@ -422,12 +422,12 @@ pub fn wait_pid(&self, pid: ProcessId) {
 }
 ```
 
-!!! tip "使用 `BTreeMap` 的 `entry` 方法"
+!!! tip "使用 `HashMap` 的 `entry` 方法"
 
-    `BTreeMap` 的 `entry` 方法可以用于获取一个键对应的值的可变引用，并可以通过 `or_default` 或者 `or_insert` 来插入一个默认值。
+    `HashMap` 的 `entry` 方法可以用于获取一个键对应的值的可变引用，并可以通过 `or_default` 或者 `or_insert` 来插入一个默认值。
 
     ```rust
-    let mut map: BTreeMap<u32, BTreeSet<u32>> = BTreeMap::new();
+    let mut map: HashMap<u32, BTreeSet<u32>, ahash::RandomState> = HashMap::default();
     let entry = map.entry(42).or_default();
     entry.insert(2333);
     ```
@@ -697,7 +697,7 @@ pub enum SemaphoreResult {
 
 ```rust
 pub struct SemaphoreSet {
-    sems: BTreeMap<SemaphoreId, Mutex<Semaphore>>,
+    sems: HashMap<SemaphoreId, Mutex<Semaphore>, ahash::RandomState>
 }
 ```
 

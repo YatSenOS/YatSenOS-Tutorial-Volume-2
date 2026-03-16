@@ -1,29 +1,26 @@
-use alloc::{collections::BTreeMap, sync::Arc};
+use hashbrown::HashMap;
 use spin::RwLock;
-use x86_64::structures::paging::{
-    page::{PageRange, PageRangeInclusive},
-    Page,
-};
 
 use super::*;
+use crate::resource::ResourceSet;
 
 #[derive(Debug, Clone)]
 pub struct ProcessData {
     // shared data
-    pub(super) env: Arc<RwLock<BTreeMap<String, String>>>,
+    pub(super) env: Arc<RwLock<HashMap<String, String, ahash::RandomState>>>,
 }
 
 impl Default for ProcessData {
     fn default() -> Self {
-        Self {
-            env: Arc::new(RwLock::new(BTreeMap::new())),
-        }
+        Self::new()
     }
 }
 
 impl ProcessData {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            env: Arc::new(RwLock::new(HashMap::default())),
+        }
     }
 
     pub fn env(&self, key: &str) -> Option<String> {

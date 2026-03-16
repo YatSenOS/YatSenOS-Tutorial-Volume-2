@@ -1,8 +1,11 @@
-use super::ProcessId;
 use alloc::collections::*;
+
+use hashbrown::HashMap;
 use spin::Mutex;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+use super::ProcessId;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct SemaphoreId(u32);
 
 impl SemaphoreId {
@@ -58,9 +61,17 @@ impl Semaphore {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct SemaphoreSet {
-    sems: BTreeMap<SemaphoreId, Mutex<Semaphore>>,
+    sems: HashMap<SemaphoreId, Mutex<Semaphore>, ahash::RandomState>,
+}
+
+impl Default for SemaphoreSet {
+    fn default() -> Self {
+        Self {
+            sems: HashMap::with_hasher(ahash::RandomState::new()),
+        }
+    }
 }
 
 impl SemaphoreSet {

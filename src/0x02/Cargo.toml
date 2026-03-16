@@ -18,6 +18,7 @@ debug = false
 arrayvec              = { version = "0.7", default-features = false }
 bit_field             = "0.10"
 bitflags              = "2.10"
+hashbrown             = "0.16"
 lazy_static           = { version = "1.4", features = ["spin_no_std"] }
 libm                  = "0.2"
 linked_list_allocator = "0.10"

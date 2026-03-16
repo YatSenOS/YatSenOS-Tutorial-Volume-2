@@ -1,6 +1,6 @@
 use core::sync::atomic::{AtomicU16, Ordering};
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProcessId(pub u16);
 
 impl ProcessId {
