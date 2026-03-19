@@ -1,6 +1,6 @@
 use alloc::boxed::Box;
 
-use boot::{MemoryMap, MemoryType};
+use boot::{BootMemoryMap, MemoryType};
 use x86_64::{
     PhysAddr,
     structures::paging::{FrameAllocator, FrameDeallocator, PhysFrame, Size4KiB},
@@ -28,7 +28,7 @@ impl BootInfoFrameAllocator {
     /// This function is unsafe because the caller must guarantee that the
     /// passed memory map is valid. The main requirement is that all frames
     /// that are marked as `USABLE` in it are really unused.
-    pub unsafe fn init(memory_map: &MemoryMap, size: usize) -> Self {
+    pub unsafe fn init(memory_map: &BootMemoryMap, size: usize) -> Self {
         BootInfoFrameAllocator {
             size,
             frames: create_frame_iter(memory_map),
@@ -58,7 +58,7 @@ impl FrameDeallocator<Size4KiB> for BootInfoFrameAllocator {
     }
 }
 
-fn create_frame_iter(memory_map: &MemoryMap) -> BootInfoFrameIter {
+fn create_frame_iter(memory_map: &BootMemoryMap) -> BootInfoFrameIter {
     let iter = memory_map
         .clone()
         .into_iter()
