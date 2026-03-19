@@ -25,11 +25,13 @@ pub use fs::*;
 #[macro_use]
 extern crate log;
 
+pub type BootMemoryMap = ArrayVec<MemoryDescriptor, 256>;
+
 /// This structure represents the information that the bootloader passes to the
 /// kernel.
 pub struct BootInfo {
     /// The memory map
-    pub memory_map: ArrayVec<MemoryDescriptor, 256>,
+    pub memory_map: BootMemoryMap,
 
     /// The offset into the virtual address space where the physical memory is
     /// mapped.
