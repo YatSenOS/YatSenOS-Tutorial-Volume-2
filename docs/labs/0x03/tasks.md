@@ -437,6 +437,7 @@ pub const STACK_INIT_TOP: u64 = STACK_MAX - 8;
 2. 创建内核结构体
 
     调用 `Process::new` 函数，创建内核进程，它会返回一个 `Process` 的智能指针。
+    
     - 在上述的假设中，实验使用 `0` 表示无进程（正在运行），内核进程的 PID 应为 `1`。
     - 内核进程没有父进程，可以直接传入 `None`。
     - 内核进程的页表就是当前 `Cr3` 寄存器的内容，使用 `PageTableContext::new()` 加载。
