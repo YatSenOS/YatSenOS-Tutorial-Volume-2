@@ -963,6 +963,7 @@ pub fn sys_sem(args: &SyscallArgs, context: &mut ProcessContext) {
     RAII（Resource Acquisition Is Initialization）是一种资源获取即初始化的技术，它通过在对象的构造函数中获取资源，然后在析构函数中释放资源的方法，来保证资源的正确释放。
 
     对于 Rust，也即实现 `MutexGuard` 类似的结构，它在构造时获取锁，然后在此结构体被移出作用域时释放锁。
+    
     - 在 `acquire` 时候返回 `MutexGuard` 对象。
     - 移除 `release` 函数，使用 `MutexGuard` 的 `Drop` trait 来释放锁。
 
