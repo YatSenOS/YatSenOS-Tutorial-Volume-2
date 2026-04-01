@@ -31,9 +31,7 @@ fn efi_main() -> Status {
     // 2. Load ELF files
     let elf = { /* FIXME: Load kernel elf file */ };
 
-    unsafe {
-        set_entry(elf.header.pt2.entry_point() as usize);
-    }
+    set_entry(elf.header.pt2.entry_point() as usize);
 
     // 3. Load MemoryMap
     let mmap = uefi::boot::memory_map(MemoryType::LOADER_DATA).expect("Failed to get memory map");
