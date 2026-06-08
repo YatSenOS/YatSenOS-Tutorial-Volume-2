@@ -137,3 +137,68 @@ where
 2. 实现多核多队列模型，或尝试实现任一负载均衡算法（二选一）。
 
 ---
+
+### TCP/IP 网络协议栈
+
+在这个目标中，你需要实现基础的 TCP/IP 网络协议栈，包括 ARP、IPv4、ICMP、TCP、UDP 协议的支持，使得你的操作系统能够通过网络与宿主机、互联网交互。为了避免重复造轮子，我们使用 `virtio-drivers` 和 `smoltcp` 开发，它们分别是当前 Rust 社区最为成熟的面向嵌入式或裸机环境的 VirtIO 设备驱动和 TCP/IP 网络协议栈实现。
+
+??? note "VirtIO 虚拟网卡及其驱动"
+
+    VirtIO 是一套专为虚拟机环境设计的半虚拟化设备标准，目标是在虚拟机和宿主机之间提供高性能的 I/O 通道。QEMU 对 VirtIO 有原生支持。virtio-net 是 VirtIO 标准中的网卡设备，它连接到 PCI 总线上，是虚拟化实验环境中的首选网络设备。
+
+    编写 PCI 设备驱动是比较繁琐的工作，所幸 [rCore OS 社区](https://rcore-os.cn)已经为我们造好了大部分轮子：[virtio-drivers](https://github.com/rcore-os/virtio-drivers) 提供了面向裸机环境的丰富的 VirtIO 驱动支持，帮助我们简化了很多底层细节工作。
+
+首先修改脚本将启动 QEMU 的参数中的 `-net none` 改为如下，这将添加 VirtIO 网络设备到虚拟机 PCI 总线上，将宿主机 TCP 5555 端口转发到虚拟机的 5555 端口：
+
+```bash
+-netdev user,id=net0,hostfwd=tcp::5555-:5555,hostfwd=udp::5555-:5555 \
+-device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56  # 指定一个任意的 MAC
+```
+
+前面的实验外设都是通过串口连接的，你可以在 [PCI 总线](../../wiki/pci.md)中了解 PCI 总线通信的基础知识。在现代的 VirtIO 1.0+ 版本下，网卡的厂商标识（Vendor ID）为 `0x1AF4`，设备标识（Device ID）为 `0x1041`。
+
+??? note "VirtIO 网卡的 PCI 标识"
+
+    所有标准的 VirtIO 设备（包括网卡、块设备等）都共享同一个厂商标识 `0x1AF4`，代表 Qumranet / Red Hat。设备标识则根据 VirtIO 协议版本的不同分为两种情况：
+
+    - `0x1000`：对应传统模式(Legacy)。在老版本或兼容模式下，所有的 VirtIO 网卡都直接使用这个固定的设备标识。
+
+    - `0x1041`：对应现代模式(Modern,1.0+)。VirtIO 1.0 规范规定，现代模式的 PCI Device ID 计算公式为 `0x1040 + Virtio_Device_ID`。由于网卡的 VirtIO Subsystem ID 是 `1`，因此计算得出 `0x1040 + 1 = 0x1041`。
+
+#### 实现目标
+
+整体的实现思路分为如下目标：
+
+1. 创建新的数据结构 `YsosHal` 实现 `virtio-drivers::Hal` trait，包括连续物理内存（DMA）的分配与释放、MMIO 物理地址向虚拟地址的转换等功能，这是使用网卡驱动 `virtio_drivers::device::net::VirtIONet` 的前提。
+
+2. 创建新的数据结构 `VirtIONetDevice` 作为网卡设备的抽象。利用网卡驱动 `virtio_drivers::device::net::VirtIONet` 为 `VirtIONetDevice` 实现 `smoltcp::phy::Device` trait，这样就可以使用 `smoltcp` 提供的上层网络协议栈功能。
+
+4. 初始化内核的时候扫描 PCI 总线找到 virtio-net 设备，创建并使用 `VirtIONetDevice` 来创建 `smoltcp::iface::Interface` 作为网络接口。
+
+5. 创建新的数据结构 `Socket` 作为 `ysos::Resource` 的一个新的扩展资源类型，它将对应 `smoltcp::socket::Socket` 使得我们能够利用 `smoltcp` 提供上层的 ARP、IP、TCP/UDP 协议功能。
+
+    - 推荐用 `smoltcp::iface::SocketSet` 存储（单个网络设备的）全部套间字，`ysos::Resource` 仅存储一个引用，这样的好处是可以方便 `poll()` 的调用；
+
+    - 或者直接使用 `smoltcp::socket::Socket` 作为 `ysos::Resource::Socket`，在调用 `poll()` 的时候需要收集所有进程的资源表中的 Socket；
+
+6. `smoltcp` 是单线程协作式调度，`smoltcp::iface::Interface::poll()` 需要在单个线程中定期调用才能推进协议栈状态，所以需要在内核主循环或定时中断处理程序中轮询网络接口，对每一个网络接口调用 `poll()` 处理它们的全部套间字。
+
+7. 在内核态验证网络功能，尝试通过宿主机的 5555 端口和内核交互。
+
+#### 加分项
+
+1. 利用 `smoltcp` 支持更多的网络协议，例如 DHCP、IPv6、ICMPv6 等。
+2. 实现网络相关系统调用，包括 `Socket` 资源的创建、建立连接、发送数据、接收数据等。
+3. 利用上面所实现的系统调用，在用户态编写网络测试程序验证网络相关功能。
+
+#### 参考资料
+
+- [PCI 总线](../../wiki/pci.md)
+- [OSDev: Virtio](https://wiki.osdev.org/Virtio)
+- [VirtIO 规范（v1.4）](https://docs.oasis-open.org/virtio/virtio/v1.4/virtio-v1.4.html)
+- [rCore: virtio设备驱动程序](https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter9/2device-driver-2.html)
+- [virtio-drivers 文档](https://docs.rs/virtio-drivers)
+- [smoltcp 文档](https://docs.rs/smoltcp)
+- [Computer Networks: A Systems Approach](https://book.systemsapproach.org/)
+
+---

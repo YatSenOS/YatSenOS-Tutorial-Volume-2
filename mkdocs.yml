@@ -86,6 +86,7 @@ nav:
       - 文件系统概述: wiki/fs.md
       - ATA 硬盘简介: wiki/ata.md
       - FAT 文件系统: wiki/fat.md
+      - PCI 总线: wiki/pci.md
 
 markdown_extensions:
   - attr_list:
