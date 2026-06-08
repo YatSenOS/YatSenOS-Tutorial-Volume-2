@@ -175,11 +175,11 @@ where
 
 4. 初始化内核的时候扫描 PCI 总线找到 virtio-net 设备，创建并使用 `VirtIONetDevice` 来创建 `smoltcp::iface::Interface` 作为网络接口。
 
-5. 创建新的数据结构 `Socket` 作为 `ysos::Resource` 的一个新的扩展资源类型，它将对应 `smoltcp::socket::Socket` 使得我们能够利用 `smoltcp` 提供上层的 ARP、IP、TCP/UDP 协议功能。
+5. 创建新的数据结构 `Socket` 作为 `ysos_kernel::utils::resource` 所定义的 `Resource` 中的一个新的扩展资源类型，它将对应 `smoltcp::socket::Socket` 使得我们能够利用 `smoltcp` 提供上层的 ARP、IP、TCP/UDP 协议功能。
 
-    - 推荐用 `smoltcp::iface::SocketSet` 存储（单个网络设备的）全部套间字，`ysos::Resource` 仅存储一个引用，这样的好处是可以方便 `poll()` 的调用；
+    - 推荐用 `smoltcp::iface::SocketSet` 存储（单个网络设备的）全部套间字，`Resource` 仅存储一个引用，这样的好处是可以方便 `poll()` 的调用；
 
-    - 或者直接使用 `smoltcp::socket::Socket` 作为 `ysos::Resource::Socket`，在调用 `poll()` 的时候需要收集所有进程的资源表中的 Socket；
+    - 或者直接使用 `smoltcp::socket::Socket` 作为 `Socket`，在调用 `poll()` 的时候需要收集所有进程的资源表中的 Socket；
 
 6. `smoltcp` 是单线程协作式调度，`smoltcp::iface::Interface::poll()` 需要在单个线程中定期调用才能推进协议栈状态，所以需要在内核主循环或定时中断处理程序中轮询网络接口，对每一个网络接口调用 `poll()` 处理它们的全部套间字。
 
