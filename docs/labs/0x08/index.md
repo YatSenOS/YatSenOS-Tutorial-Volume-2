@@ -169,7 +169,7 @@ where
 
 整体的实现思路分为如下目标：
 
-1. 创建新的数据结构 `YsosHal` 实现 `virtio-drivers::Hal` trait，包括连续物理内存（DMA）的分配与释放、MMIO 物理地址向虚拟地址的转换等功能，这是使用网卡驱动 `virtio_drivers::device::net::VirtIONet` 的前提。
+1. 创建新的数据结构 `VirtioHal` 实现 `virtio-drivers::Hal` trait，包括连续物理内存（DMA）的分配与释放、MMIO 物理地址向虚拟地址的转换等功能，这是使用网卡驱动 `virtio_drivers::device::net::VirtIONet` 的前提。
 
 2. 创建新的数据结构 `VirtIONetDevice` 作为网卡设备的抽象。利用网卡驱动 `virtio_drivers::device::net::VirtIONet` 为 `VirtIONetDevice` 实现 `smoltcp::phy::Device` trait，这样就可以使用 `smoltcp` 提供的上层网络协议栈功能。
 
