@@ -17,15 +17,15 @@ debug = false
 [workspace.dependencies]
 arrayvec              = { version = "0.7", default-features = false }
 bit_field             = "0.10"
-bitflags              = "2.10"
+bitflags              = "2.13"
 hashbrown             = "0.16"
 lazy_static           = { version = "1.4", features = ["spin_no_std"] }
 libm                  = "0.2"
 linked_list_allocator = "0.10"
 log                   = "0.4"
 paste                 = "1.0"
-spin                  = "0.10"
-uefi                  = { version = "0.36", default-features = false }
+spin                  = "0.12"
+uefi                  = { version = "0.38", default-features = false }
 x86                   = "0.52"
 x86_64                = "0.15"
 xmas-elf              = "0.10"

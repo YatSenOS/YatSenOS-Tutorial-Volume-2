@@ -292,13 +292,13 @@ pub fn init_SERIAL(val_SERIAL: SerialPort) {
 
 #[inline(never)]
 #[allow(non_snake_case, dead_code)]
-pub fn get_serial<'a>() -> Option<spin::MutexGuard<'a, SerialPort>> {
+pub fn get_serial<'a>() -> Option<spin::MutexGuard<'a, SerialPort, spin::Spin>> {
     SERIAL.get().and_then(spin::Mutex::try_lock)
 }
 
 #[inline(never)]
 #[allow(non_snake_case, dead_code)]
-pub fn get_serial_for_sure<'a>() -> spin::MutexGuard<'a, SerialPort> {
+pub fn get_serial_for_sure<'a>() -> spin::MutexGuard<'a, SerialPort, spin::Spin> {
     SERIAL.get().and_then(spin::Mutex::try_lock)
         .expect("SERIAL has not been initialized or lockable")
 }

@@ -6,7 +6,7 @@ version = "0.0.1"
 
 [dependencies]
 log  = "0.4"
-uefi = { version = "0.36", default-features = false }
+uefi = { version = "0.38", default-features = false }
 
 [features]
 boot = [

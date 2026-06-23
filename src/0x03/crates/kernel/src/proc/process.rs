@@ -64,7 +64,7 @@ impl Process {
             proc_data: Some(proc_data.unwrap_or_default()),
         };
 
-        trace!("New process {}#{} created.", &inner.name, pid);
+        trace!("New process {}#{} created.", inner.name, pid);
 
         // create process struct
         Arc::new(Self {

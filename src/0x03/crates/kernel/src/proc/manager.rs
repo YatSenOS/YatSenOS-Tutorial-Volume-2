@@ -134,7 +134,7 @@ impl ProcessManager {
             return;
         }
 
-        trace!("Kill {:#?}", &proc);
+        trace!("Kill {:#?}", proc);
 
         proc.kill(ret);
     }
