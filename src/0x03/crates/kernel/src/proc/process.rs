@@ -6,7 +6,6 @@ use x86_64::structures::paging::{mapper::MapToError, page::PageRange, *};
 use super::*;
 use crate::memory::*;
 
-#[derive(Clone)]
 pub struct Process {
     pid: ProcessId,
     inner: RwLock<ProcessInner>,

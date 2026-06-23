@@ -5,7 +5,7 @@ use x86::cpuid::CpuId;
 
 use crate::proc::ProcessId;
 
-const MAX_CPU_COUNT: usize = 4;
+const MAX_CPU_COUNT: usize = 8;
 
 #[allow(clippy::declare_interior_mutable_const)]
 const EMPTY: Processor = Processor::new(); // means no process

@@ -340,7 +340,7 @@ pub fn spawn(
     // FIXME: mark process as ready
     drop(inner);
 
-    trace!("New {:#?}", &proc);
+    trace!("New {:#?}", proc);
 
     let pid = proc.pid();
     // FIXME: something like kernel thread
